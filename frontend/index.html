@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071d28" />
+    <meta
+      name="description"
+      content="Simulador didáctico de aerogenerador con servidor Modbus TCP"
+    />
+    <title>AeroLab · Modbus TCP</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <strong>AeroLab</strong>
+            <span>Modbus TCP</span>
+          </div>
+        </div>
+        <div class="connection" id="connection" data-connected="false">
+          <span class="connection-dot"></span>
+          <span id="connection-label">Conectando al simulador…</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="simulator-layout" aria-label="Simulador de aerogenerador">
+          <div class="viewport-panel">
+            <canvas id="render-canvas" aria-label="Vista tridimensional del aerogenerador"></canvas>
+            <div class="telemetry" aria-live="polite">
+              <article>
+                <span>Viento</span>
+                <strong id="wind-metric">—</strong>
+                <small>IR 0 · 30001</small>
+              </article>
+              <article>
+                <span>Rotor</span>
+                <strong id="rpm-metric">—</strong>
+                <small>IR 1 · 30002</small>
+              </article>
+              <article>
+                <span>Potencia</span>
+                <strong id="power-metric">—</strong>
+                <small>IR 3–4 · 30004</small>
+              </article>
+            </div>
+            <div class="scene-hint">Arrastra para orbitar · rueda para acercar</div>
+            <div class="state-pill" id="state-pill">INICIALIZANDO</div>
+          </div>
+
+          <aside class="control-panel" aria-label="Controles del aerogenerador">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Banco de pruebas</span>
+                <h1>Control de operación</h1>
+              </div>
+              <button class="icon-button" id="reset-button" type="button" aria-label="Reiniciar simulación">↻</button>
+            </div>
+
+            <div class="primary-actions">
+              <button class="action-button action-primary" id="run-button" type="button">Parar aerogenerador</button>
+              <button class="action-button" id="brake-button" type="button" aria-pressed="false">Aplicar freno</button>
+            </div>
+
+            <label class="switch-row" for="manual-mode">
+              <span>
+                <strong>Modo manual</strong>
+                <small>Coil 3 · 00004</small>
+              </span>
+              <input id="manual-mode" type="checkbox" role="switch" />
+            </label>
+
+            <div class="control-group">
+              <label for="wind-control">
+                <span>Velocidad del viento</span>
+                <output id="wind-output" for="wind-control">9,0 m/s</output>
+              </label>
+              <input id="wind-control" type="range" min="0" max="30" step="0.5" value="9" />
+              <div class="range-scale"><span>0</span><span>cut-in 3</span><span>cut-out 25</span><span>30</span></div>
+            </div>
+
+            <div class="control-group">
+              <label for="direction-control">
+                <span>Dirección del viento</span>
+                <output id="direction-output" for="direction-control">235°</output>
+              </label>
+              <input id="direction-control" type="range" min="0" max="359" step="1" value="235" />
+            </div>
+
+            <div class="control-grid">
+              <div class="control-group">
+                <label for="pitch-control">
+                  <span>Pitch</span>
+                  <output id="pitch-output" for="pitch-control">2,0°</output>
+                </label>
+                <input id="pitch-control" type="range" min="0" max="90" step="1" value="2" disabled />
+              </div>
+              <div class="control-group">
+                <label for="yaw-control">
+                  <span>Yaw</span>
+                  <output id="yaw-output" for="yaw-control">235°</output>
+                </label>
+                <input id="yaw-control" type="range" min="0" max="359" step="1" value="235" disabled />
+              </div>
+            </div>
+
+            <label class="select-group" for="fault-control">
+              <span>Inyección de avería · HR 5</span>
+              <select id="fault-control">
+                <option value="0">Sin avería</option>
+                <option value="1">Sobretemperatura de rodamiento</option>
+                <option value="2">Vibración elevada</option>
+                <option value="3">Pérdida de red</option>
+                <option value="4">Sobrevelocidad</option>
+              </select>
+            </label>
+
+            <div class="live-values">
+              <div><span>Pitch real</span><strong id="pitch-live">—</strong></div>
+              <div><span>Yaw nacelle</span><strong id="yaw-live">—</strong></div>
+              <div><span>Vibración</span><strong id="vibration-live">—</strong></div>
+              <div><span>Rodamiento</span><strong id="temperature-live">—</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="lab-panel" aria-label="Laboratorio Modbus TCP">
+          <div class="lab-header">
+            <div>
+              <span class="eyebrow">Laboratorio de comunicaciones</span>
+              <h2>Qué está ocurriendo en el bus</h2>
+            </div>
+            <div class="tabs" role="tablist" aria-label="Vistas del laboratorio">
+              <button type="button" role="tab" aria-selected="true" data-tab="registers">Mapa de registros</button>
+              <button type="button" role="tab" aria-selected="false" data-tab="frames">Tramas Modbus</button>
+            </div>
+          </div>
+
+          <div id="registers-tab" class="tab-content" role="tabpanel">
+            <div class="address-note">
+              <strong>Dirección doble:</strong> el offset PDU empieza en 0, mientras que la referencia didáctica empieza en 30001/40001.
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Tabla</th><th>Offset PDU</th><th>Referencia</th><th>Variable</th><th>Formato</th><th>Valor crudo</th></tr>
+                </thead>
+                <tbody id="register-table-body">
+                  <tr><td colspan="6" class="empty-cell">Cargando mapa de registros…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="frames-tab" class="tab-content" role="tabpanel" hidden>
+            <div class="frame-layout">
+              <div class="frame-list" id="frame-list">
+                <div class="empty-frame">Conecta un cliente al puerto 1502 para observar las transacciones.</div>
+              </div>
+              <div class="frame-inspector">
+                <div class="frame-meta">
+                  <span>Última trama</span>
+                  <strong id="frame-summary">Sin actividad</strong>
+                </div>
+                <code id="frame-hex">—</code>
+                <div class="mbap-grid" id="mbap-grid">
+                  <div><span>Transaction ID</span><strong>—</strong></div>
+                  <div><span>Protocol ID</span><strong>—</strong></div>
+                  <div><span>Length</span><strong>—</strong></div>
+                  <div><span>Unit ID</span><strong>—</strong></div>
+                  <div><span>Function</span><strong>—</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
