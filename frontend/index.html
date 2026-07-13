@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Simulador didáctico de un parque fotovoltaico con OPC UA" />
+    <title>SolarLab · Parque fotovoltaico OPC UA</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="SolarLab, inicio">
+          <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
+          <span><strong>SOLARLAB</strong><small>PARQUE FV · OPC UA</small></span>
+        </a>
+        <div class="connection" id="connection" data-connected="false">
+          <span class="status-dot"></span>
+          <div><strong id="connection-label">Conectando…</strong><small id="endpoint-label">OPC UA</small></div>
+          <button class="copy-button" id="copy-endpoint" title="Copiar endpoint" aria-label="Copiar endpoint OPC UA">COPIAR</button>
+        </div>
+        <nav aria-label="Secciones">
+          <a href="#simulador">Simulador</a><a href="#explorador">Explorador OPC UA</a><a href="#practicas">Prácticas</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="simulator" id="simulador">
+          <canvas id="render-canvas" aria-label="Vista 3D interactiva del parque fotovoltaico"></canvas>
+          <div class="scene-vignette"></div>
+          <div class="scene-heading">
+            <p>PLANTA DIDÁCTICA · 5 MWp</p>
+            <h1>El protocolo,<br><em>a plena luz.</em></h1>
+            <span>Arrastra para explorar · rueda para acercar · pulsa una zona para inspeccionarla</span>
+          </div>
+          <div class="live-metrics" aria-label="Variables principales">
+            <article><span>Potencia activa</span><strong id="power-metric">—</strong><small>kW</small><i class="spark"></i></article>
+            <article><span>Irradiancia</span><strong id="irradiance-metric">—</strong><small>W/m²</small></article>
+            <article><span>Energía</span><strong id="energy-metric">—</strong><small>kWh</small></article>
+            <article><span>PR</span><strong id="pr-metric">—</strong><small>%</small></article>
+          </div>
+          <aside class="control-deck" aria-label="Controles de simulación">
+            <div class="deck-title"><div><small>ESCENARIO</small><strong>Control ambiental</strong></div><span id="state-pill" data-state="running">EN MARCHA</span></div>
+            <label><span>Irradiancia <output id="irradiance-output">760 W/m²</output></span><input id="irradiance-control" type="range" min="0" max="1200" step="10" value="760"></label>
+            <label><span>Nubosidad <output id="cloud-output">18 %</output></span><input id="cloud-control" type="range" min="0" max="100" step="1" value="18"></label>
+            <label><span>Temperatura <output id="temperature-output">24 °C</output></span><input id="temperature-control" type="range" min="-10" max="50" step="1" value="24"></label>
+            <label><span>Suciedad <output id="soiling-output">4 %</output></span><input id="soiling-control" type="range" min="0" max="50" step="1" value="4"></label>
+            <div class="switch-row"><label class="switch"><input id="tracking-control" type="checkbox" checked><span></span>Seguimiento solar</label></div>
+            <label class="fault-label"><span>Inyección de avería</span><select id="fault-control"><option value="0">Sin avería</option><option value="1">Suciedad severa</option><option value="2">Disparo inversor Z02</option><option value="3">Punto caliente Z01</option><option value="4">String abierto Z03</option><option value="5">Pérdida de red</option></select></label>
+            <div class="deck-actions"><button id="run-button" class="primary">PARAR PLANTA</button><button id="reset-button" class="secondary">REINICIAR</button></div>
+          </aside>
+          <div class="zone-strip" id="zone-strip"></div>
+        </section>
+
+        <section class="protocol-section" id="explorador">
+          <div class="section-intro">
+            <p class="eyebrow">DEL CAMPO AL DATO</p>
+            <h2>Explora OPC UA<br>mientras la planta <em>respira.</em></h2>
+            <p>Cada valor de la escena existe como un nodo real. Observa el espacio de direcciones, identifica tipos y permisos, y escribe consignas desde tu cliente OPC UA.</p>
+            <div class="protocol-facts"><span><b id="node-count">—</b> nodos</span><span><b id="namespace-index">—</b> namespace</span><span><b>None</b> seguridad laboratorio</span></div>
+          </div>
+          <div class="browser-card">
+            <div class="browser-toolbar">
+              <div class="tabs" role="tablist"><button data-tab="nodes" aria-selected="true">Espacio de direcciones</button><button data-tab="events">Actividad</button></div>
+              <label class="search"><span>⌕</span><input id="node-search" type="search" placeholder="Buscar NodeId, nombre o ruta…"></label>
+            </div>
+            <div id="nodes-tab" class="nodes-layout">
+              <div class="tree-panel" id="node-tree"></div>
+              <div class="node-detail" id="node-detail"><div class="empty-detail"><span>ns=?;s=</span><strong>Selecciona un nodo</strong><p>Consulta sus atributos y valor en tiempo real.</p></div></div>
+            </div>
+            <div id="events-tab" class="events-panel" hidden><div class="event-head"><span>Hora</span><span>Servicio</span><span>Nodo</span><span>Valor</span></div><div id="event-list"></div></div>
+          </div>
+        </section>
+
+        <section class="lessons" id="practicas">
+          <div class="lessons-heading"><p class="eyebrow">ITINERARIO DOCENTE</p><h2>De navegar nodos<br>a diagnosticar <em>la planta.</em></h2></div>
+          <div class="lesson-grid">
+            <article><span>01 · DESCUBRIR</span><h3>Conecta y navega</h3><p>Localiza SolarLab en Objects, identifica el namespace y compara BrowseName, DisplayName y NodeId.</p><ul><li>Endpoint Discovery</li><li>Address Space</li><li>Atributos</li></ul></article>
+            <article><span>02 · MONITORIZAR</span><h3>Crea una suscripción</h3><p>Monitoriza potencia, irradiancia y temperatura. Experimenta con sampling interval y publishing interval.</p><ul><li>MonitoredItems</li><li>DataChange</li><li>Deadband</li></ul></article>
+            <article><span>03 · CONTROLAR</span><h3>Escribe consignas</h3><p>Modifica irradiancia y nubosidad desde el cliente. Comprueba AccessLevel y el tipo de dato antes de escribir.</p><ul><li>Write Service</li><li>Variant types</li><li>StatusCodes</li></ul></article>
+            <article><span>04 · DIAGNOSTICAR</span><h3>Encuentra la avería</h3><p>Compara zonas, detecta el inversor disparado y construye una regla de mantenimiento basada en condición.</p><ul><li>Jerarquía</li><li>Calidad del dato</li><li>Diagnóstico</li></ul></article>
+          </div>
+        </section>
+      </main>
+      <footer><span>SolarLab · Monitorización de Máquinas</span><span>Modelo educativo — no apto para ingeniería de diseño</span></footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

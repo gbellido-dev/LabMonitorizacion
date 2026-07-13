@@ -1,0 +1,2 @@
+"""SolarLab teaching simulator."""
+
