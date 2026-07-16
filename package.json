@@ -7,8 +7,11 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "vinext build",
-    "start": "vinext start",
+    "build": "vinext build && node build/fix-font-urls.mjs",
+    "start": "vite preview --port 3000 --strictPort",
+    "opcua": "node opcua/server.mjs",
+    "opcua:bridge": "node opcua/bridge.mjs",
+    "opcua:test": "node opcua/client-test.mjs",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
@@ -17,9 +20,11 @@
     "@types/three": "^0.185.1",
     "drizzle-orm": "0.45.2",
     "next": "16.2.6",
+    "node-opcua": "^2.175.2",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "three": "^0.185.1"
+    "three": "^0.185.1",
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",

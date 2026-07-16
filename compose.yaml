@@ -1,0 +1,44 @@
+# Gemelo digital de la fundición — entorno para alumnos
+#
+#   docker compose up --build
+#
+#   Dashboard 3D :  http://localhost:3000
+#   OPC UA       :  opc.tcp://localhost:4840/UA/Fundicion   (anónimo, sin cifrado)
+#   Puente WS    :  ws://localhost:8081  (snapshot de telemetría cada 1 s)
+#
+# El dashboard consume la telemetría del servidor OPC UA a través del puente;
+# si el puente no está, muestra sus valores estáticos de respaldo.
+# Los tres servicios comparten la misma imagen; compose la construye una vez.
+services:
+  web:
+    build: .
+    image: fundicion
+    command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  opcua:
+    image: fundicion
+    depends_on:
+      - web
+    command: ["npm", "run", "opcua"]
+    environment:
+      # Hostname que el servidor anuncia en sus endpoints; desde fuera del
+      # contenedor los clientes se conectan a localhost (o a la IP del host).
+      OPCUA_ALTERNATE_HOSTNAME: localhost
+    ports:
+      - "4840:4840"
+    restart: unless-stopped
+
+  bridge:
+    image: fundicion
+    depends_on:
+      - opcua
+    command: ["npm", "run", "opcua:bridge"]
+    environment:
+      # Dentro de la red de compose el servidor OPC UA se llama "opcua"
+      OPCUA_ENDPOINT: opc.tcp://opcua:4840/UA/Fundicion
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
