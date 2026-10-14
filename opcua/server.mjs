@@ -168,7 +168,16 @@ const furnaces = [
   { short: "IF-01", nomT: 1487, nomP: 1840, i: 1, t: 20 },
   { short: "IF-02", nomT: 1362, nomP: 1460, i: 0, t: 5 },
 ];
-const pourSt = { colando: true, t: 0 };
+// Línea de moldes sincronizada con la colada. La geometría replica la escena
+// 3D: bucle de 34 unidades, 8 moldes cada 4,25, cuchara en x = POUR_X.
+// Estados: MOVING (avanza) -> WAIT_METAL (molde en posición, cuchara baja)
+//          -> FILLING (colando, nivel 0..100%) -> PAUSE -> MOVING
+// POUR_X: posición del centro del molde cuando su bebedero (x molde + 0.4)
+// queda bajo la vertical del chorro de la cuchara (x mundo = 2.72)
+const LINE = { LOOP: 34, SPACING: 4.25, N: 8, POUR_X: 2.32, SPEED: 0.5 };
+const MOULD_MASS = 110; // kg de hierro por molde
+const lineSt = { off: 0, state: "MOVING", nivel: 0, pause: 0 };
+const mouldX = k => -12 + ((k * LINE.SPACING + lineSt.off) % LINE.LOOP);
 const shakeSt = { marcha: false, t: 0 };
 
 function processTick() {
@@ -182,16 +191,50 @@ function processTick() {
     setNum(`${f.short}.PotenciaBobina`, pTarget, 0.2, 12);
   }
 
-  // Colada: ciclos ON/OFF; la cuchara se vacía colando y se rellena en paro
+  // Línea + colada con interlock: solo se cuela con un molde parado debajo,
+  // y el molde espera hasta llenarse antes de que la línea se reanude.
   const peso = varIndex.get("COL-01.PesoCuchara");
   const caudal = varIndex.get("COL-01.CaudalColada");
-  pourSt.t += 1;
-  if (pourSt.colando && pourSt.t >= 14) { pourSt.colando = false; pourSt.t = 0; setFlag("COL-01.Colando", false); }
-  else if (!pourSt.colando && pourSt.t >= 10 && peso.value > 1250) { pourSt.colando = true; pourSt.t = 0; setFlag("COL-01.Colando", true); }
-  setNum("COL-01.CaudalColada", pourSt.colando ? 8.2 : 0, 0.5, pourSt.colando ? 0.4 : 0.02);
-  if (pourSt.colando) peso.value = Math.max(120, peso.value - caudal.value);
-  else if (peso.value < 1400) peso.value = Math.min(1450, peso.value + 130); // la grúa repone metal
+  if (lineSt.state === "MOVING") {
+    let dmin = Infinity;
+    for (let k = 0; k < LINE.N; k++) {
+      const d = (LINE.POUR_X - mouldX(k) + LINE.LOOP * 2) % LINE.LOOP;
+      if (d > 0.1 && d < dmin) dmin = d; // ignora el molde recién llenado (d≈0)
+    }
+    if (dmin <= LINE.SPEED) { // el molde alcanza la cuchara en este tick: parada exacta
+      lineSt.off = (lineSt.off + dmin) % LINE.LOOP;
+      lineSt.state = "WAIT_METAL";
+      lineSt.nivel = 0;
+      setFlag("COL-01.MoldeEnPosicion", true);
+    } else {
+      lineSt.off = (lineSt.off + LINE.SPEED) % LINE.LOOP;
+    }
+  }
+  if (lineSt.state === "WAIT_METAL" && peso.value >= MOULD_MASS * 1.3) {
+    lineSt.state = "FILLING";
+    setFlag("COL-01.Colando", true);
+  }
+  setNum("COL-01.CaudalColada", lineSt.state === "FILLING" ? 8.2 : 0, 0.5, lineSt.state === "FILLING" ? 0.4 : 0.02);
+  if (lineSt.state === "FILLING") {
+    lineSt.nivel = Math.min(100, lineSt.nivel + (caudal.value / MOULD_MASS) * 100);
+    peso.value = Math.max(80, peso.value - caudal.value);
+    if (lineSt.nivel >= 100) { lineSt.state = "PAUSE"; lineSt.pause = 0; setFlag("COL-01.Colando", false); }
+  }
+  if (lineSt.state === "PAUSE" && ++lineSt.pause >= 2) {
+    lineSt.state = "MOVING";
+    setFlag("COL-01.MoldeEnPosicion", false);
+  }
+  // la grúa repone la cuchara por lotes cuando baja de 400 kg (y no se cuela)
+  if (lineSt.state !== "FILLING" && peso.value < 400) peso.value = Math.min(1450, peso.value + 130);
   peso.node.setValueFromSource(new Variant({ dataType: DataType.Double, value: Math.round(peso.value) }));
+  const nivelVar = varIndex.get("COL-01.NivelLlenado");
+  nivelVar.value = lineSt.nivel;
+  nivelVar.node.setValueFromSource(new Variant({ dataType: DataType.Double, value: Math.round(lineSt.nivel) }));
+  // la velocidad cae a 0 en el mismo tick de la parada (interlock limpio)
+  setNum("KPIs.VelocidadLinea", lineSt.state === "MOVING" ? 1.5 : 0, lineSt.state === "MOVING" ? 0.5 : 1, lineSt.state === "MOVING" ? 0.04 : 0);
+  const posVar = varIndex.get("KPIs.PosicionLinea");
+  posVar.value = lineSt.off;
+  posVar.node.setValueFromSource(new Variant({ dataType: DataType.Double, value: Number(lineSt.off.toFixed(2)) }));
 
   // Desmoldeo: alterna MARCHA (35 s) / PARO (25 s)
   shakeSt.t += 1;

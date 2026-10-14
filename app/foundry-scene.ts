@@ -666,22 +666,39 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     g.add(box(2.05, 1, 1.95, M.sand, 0, 0.5, 0));
     g.add(box(2.15, 0.14, 2.05, M.darkSteel, 0, 0.06, 0));
     g.add(box(2.15, 0.14, 2.05, M.darkSteel, 0, 0.94, 0));
+    // bebedero centrado en z y a +0.4 en x: con el molde parado en POUR_X
+    // (2.32) queda exactamente bajo la vertical del chorro (x=2.72, z=4.8)
     const cupMat = sm(0xff5a14, 0.6, 0, { emissive: 0xff3800, emissiveIntensity: 0 });
-    const cup = cyl(0.2, 0.14, 0.09, cupMat, 0.4, 1.05, 0.3, 14);
+    const cup = cyl(0.2, 0.14, 0.09, cupMat, 0.4, 1.05, 0, 14);
     cup.castShadow = false;
     g.add(cup);
     g.position.set(-12 + i * 4.25, convY + 0.1, 4.8);
     scene.add(g);
     mouldUnits.push({ g, cupMat, base: -12 + i * 4.25 });
   }
-  // avance de línea proporcional a KPIs.VelocidadLinea (nominal 1,5 m/min)
+  // La posición de la línea la manda el servidor OPC UA (KPIs.PosicionLinea):
+  // integra localmente para suavidad y corrige la deriva hacia el valor
+  // publicado. Así el molde se para exactamente bajo la cuchara al colar.
   let lineOff = 0;
   updaters.push(f => {
-    lineOff += f.sdt * 0.5 * ((lkpi(f.live, "VelocidadLinea") ?? 1.5) / 1.5);
+    const posLive = lkpi(f.live, "PosicionLinea");
+    if (posLive != null) {
+      const moving = (lkpi(f.live, "VelocidadLinea") ?? 0) > 0.15;
+      lineOff += f.sdt * (moving ? 0.5 : 0);
+      let diff = (posLive - lineOff) % 34;
+      if (diff > 17) diff -= 34;
+      if (diff < -17) diff += 34;
+      lineOff = (lineOff + diff * Math.min(1, f.dt * 1.8) + 34) % 34;
+    } else {
+      lineOff = (lineOff + f.sdt * 0.5) % 34; // sin OPC UA: avance continuo
+    }
+    const nivel = lnum(f.live, "COL-01", "NivelLlenado");
     for (const m of mouldUnits) {
       const x = -12 + ((m.base + 12 + lineOff) % 34);
       m.g.position.x = x;
-      m.cupMat.emissiveIntensity = x < 1.4 ? 0 : x < 6.5 ? 2.3 : Math.max(0.25, 2.3 - (x - 6.5) * 0.3);
+      const filling = Math.abs(x - 2.32) < 0.25;
+      if (filling) m.cupMat.emissiveIntensity = 0.15 + ((nivel ?? 100) / 100) * 2.15;
+      else m.cupMat.emissiveIntensity = x < 2.3 ? 0 : x < 6.5 ? 2.3 : Math.max(0.25, 2.3 - (x - 6.5) * 0.3);
     }
   });
 
@@ -710,8 +727,8 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   const stream = cyl(0.09, 0.06, 3.1, streamMat, 1.72, 3.35, 0, 10);
   stream.castShadow = false;
   pour.add(stream);
-  const splash = new THREE.Mesh(new THREE.CircleGeometry(0.3, 16), sm(0xffa040, 0.5, 0, { emissive: 0xff6a10, emissiveIntensity: 2.2 }));
-  splash.rotation.x = -Math.PI / 2; splash.position.set(1.72, 2.02, 0);
+  const splash = new THREE.Mesh(new THREE.CircleGeometry(0.24, 16), sm(0xffa040, 0.5, 0, { emissive: 0xff6a10, emissiveIntensity: 2.2 }));
+  splash.rotation.x = -Math.PI / 2; splash.position.set(1.72, 2.26, 0);
   pour.add(splash);
   const pourGlow = new THREE.PointLight(0xff6a18, 0, 12, 1.8);
   pourGlow.position.set(1.72, 2.9, 0);
@@ -732,9 +749,15 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     splash.visible = f.pouring;
     pourGlow.intensity = f.pouring ? 26 + Math.sin(f.wall * 17) * 7 : 0;
   });
+  // depuración desde la consola del navegador: posiciones reales de chorro y moldes
+  (window as unknown as Record<string, unknown>).__foundryDebug = {
+    stream: () => { const v = new THREE.Vector3(); stream.getWorldPosition(v); return [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)]; },
+    splash: () => { const v = new THREE.Vector3(); splash.getWorldPosition(v); return [+v.x.toFixed(2), +v.z.toFixed(2)]; },
+    moulds: () => mouldUnits.map(m => +m.g.position.x.toFixed(2)),
+  };
   const pourSparks = makeSparks(160, texGlow, 0xffa24a, 0.14);
   scene.add(pourSparks.points);
-  const pourOrigin = new THREE.Vector3(2.72, 1.95, 4.8);
+  const pourOrigin = new THREE.Vector3(2.72, 2.28, 4.8);
   updaters.push(f => pourSparks.update(f.sdt, f.pouring ? pourOrigin : null, 130));
   const pourSmoke = makeSmoke(texSmoke, 6, 0x8a8f94, 3, 0.1);
   pourSmoke.group.position.set(2.7, 2.2, 4.8);

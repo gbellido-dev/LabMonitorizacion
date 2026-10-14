@@ -12,6 +12,7 @@ export type LiveSnapshot = {
   tags: Record<string, Record<string, LiveValue | undefined> | undefined>;
 };
 
+// Puerto del puente OPC UA->WS; se puede cambiar con ?wsport=NNNN en la URL
 const WS_PORT = 8081;
 const RETRY_MS = 3000;
 
@@ -31,7 +32,8 @@ export function useOpcUaLive() {
     let closed = false;
     let timer = 0;
     const connect = () => {
-      ws = new WebSocket(`ws://${location.hostname}:${WS_PORT}`);
+      const port = new URLSearchParams(location.search).get("wsport") ?? WS_PORT;
+      ws = new WebSocket(`ws://${location.hostname}:${port}`);
       ws.onopen = () => setWsConnected(true);
       ws.onmessage = e => {
         try {

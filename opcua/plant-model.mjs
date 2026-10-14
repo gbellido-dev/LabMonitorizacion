@@ -15,7 +15,8 @@ export const kpis = [
   { n: "PiezasConformes", unit: "%", v: 98.4, w: 0.15, dp: 2 },
   { n: "EnergiaEspecifica", unit: "kWh/t", v: 548, w: 4, dp: 0 },
   { n: "CO2Estimado", unit: "t/t", v: 0.42, w: 0.008, dp: 3 },
-  { n: "VelocidadLinea", unit: "m/min", v: 1.5, w: 0.05, dp: 2 },
+  { n: "VelocidadLinea", unit: "m/min", v: 1.5, w: 0.05, dp: 2, kind: "managed" },
+  { n: "PosicionLinea", unit: "m", v: 0, w: 0, dp: 2, kind: "managed" },
 ];
 
 export const loteActivo = { n: "LoteActivo", value: "FE-260713-084" };
@@ -86,7 +87,7 @@ export const assets = [
   },
   {
     short: "COL-01", name: "Estación de colada automática", zone: "Colada", status: "RUN", plc: "PLC-COL-01 · S7-1516F",
-    flags: [{ n: "Colando", type: "bool", v: true }],
+    flags: [{ n: "Colando", type: "bool", v: false }, { n: "MoldeEnPosicion", type: "bool", v: false }],
     vars: [
       { n: "TemperaturaColada", unit: "°C", v: 1421, w: 7, dp: 1 },
       { n: "TiempoCiclo", unit: "s", v: 31.2, w: 0.7, dp: 2 },
@@ -94,6 +95,7 @@ export const assets = [
       { n: "Vibracion", unit: "mm/s", v: 0.8, w: 0.1, dp: 2 },
       { n: "PesoCuchara", unit: "kg", v: 1240, w: 70, dp: 0, kind: "managed" },
       { n: "CaudalColada", unit: "kg/s", v: 8.2, w: 0.55, dp: 2, kind: "managed" },
+      { n: "NivelLlenado", unit: "%", v: 0, w: 0, dp: 0, kind: "managed" },
       { n: "OEE", unit: "%", v: 86.5, w: 0.4, dp: 1 },
     ],
     tags: [["Ladle.Weight", "DB30.DBD0"], ["Pour.Temp", "DB30.DBD8"], ["Flow.Rate", "DB31.DBD0"], ["Safety.Zone", "DB32.DBX1.0"]],
