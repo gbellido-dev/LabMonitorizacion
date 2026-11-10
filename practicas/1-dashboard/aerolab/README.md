@@ -2,15 +2,7 @@
 
 > Serie **1 · Node-RED + Dashboard**. Versión Markdown de [Practica_AeroLab_NodeRED_ES.docx](Practica_AeroLab_NodeRED_ES.docx). La continuación con ThingsBoard está en [2-thingsboard/aerolab](../../2-thingsboard/aerolab/README.md).
 >
-> Si trabajas con el `docker-compose.yml` del repositorio, donde la guía dice *IP del equipo* usa estos valores:
-
-| Dónde | Valor en el entorno Docker del laboratorio |
-|---|---|
-| Servidor Modbus (**Host**, **Port**, **Unit-Id**) | `aerolab`, `1502`, `1` |
-| Web de AeroLab | `http://localhost:8010` |
-| Dashboard de Node-RED | `http://localhost:1880/dashboard` |
-
-> **Nota (Dashboard 2.0 v1.36):** el nodo **text** ya no tiene el campo *Format*; donde la guía dice *Format* = `{{msg.payload}} unidad`, pon la unidad en *Label* (p. ej. `Velocidad del viento (m/s)`) o usa *Value* con una expresión JSONata.
+> Escrita para el entorno Docker del laboratorio (`docker compose up -d` o `start_lab.cmd`). Si trabajas con equipos sueltos, cambia los nombres de servicio (`aerolab`, `localhost`) por la IP de cada equipo.
 
 ## Introducción
 
@@ -35,15 +27,14 @@ esta guía y solo tendrás que pegarlo y, como mucho, cambiar un umbral.
 
 **Antes de empezar, comprueba que tienes:**
 
-- [ ] Node-RED funcionando en Docker y accesible desde el navegador
-  (normalmente `http://<IP>:1880`).
-- [ ] El dashboard instalado: paleta `@flowfuse/node-red-dashboard`
-  (Dashboard 2.0). El panel se abre en `http://<IP>:1880/dashboard`.
-- [ ] Los nodos Modbus instalados: paleta `node-red-contrib-modbus`.
-  Deben aparecer los nodos **Modbus Read** y **Modbus Write**.
-- [ ] AeroLab funcionando. Su web se abre en `http://<IP_AEROLAB>:8010`
+- [ ] El laboratorio arrancado y Node-RED en `http://localhost:1880`.
+- [ ] La paleta `@flowfuse/node-red-dashboard` (Dashboard 2.0), que ya
+  viene instalada en el laboratorio. El panel se abre en
+  `http://localhost:1880/dashboard`.
+- [ ] La paleta `node-red-contrib-modbus` (también instalada). Deben
+  aparecer los nodos **Modbus Read** y **Modbus Write**.
+- [ ] AeroLab funcionando. Su web se abre en `http://localhost:8010`
   y el rotor debe girar.
-- [ ] La IP del equipo de AeroLab (te la da el profesor).
 
 **Cómo da los datos un equipo Modbus.** Un equipo Modbus no envía
 mensajes con nombres ni JSON. Guarda sus datos en **tablas de casillas
@@ -85,8 +76,8 @@ Node-RED.
 2.  Abre el nodo **Modbus Read** y pulsa el lápiz junto a *Server* para
     crear la conexión:
     - **Type:** `TCP`
-    - **Host:** la IP del equipo de AeroLab. Si Node-RED y AeroLab están
-      en Docker en el mismo ordenador, prueba `host.docker.internal`.
+    - **Host:** `aerolab` (el nombre del servicio dentro de Docker; con
+      equipos sueltos, la IP del equipo de AeroLab).
     - **Port:** `1502`. **Unit-Id:** `1`.
 3.  En el nodo **Modbus Read** configura:
     - **Name:** `Input registers`
@@ -145,11 +136,12 @@ lista de números, hay que elegir la casilla y aplicar la escala.
     primera vez tendrás que crear:
     - una **página** (`ui-page`) llamada `Aerogenerador AeroLab`,
     - un **grupo** (`ui-group`) llamado `Pruebas`.
-3.  En el nodo **text**: *Label* = `Velocidad del viento`, *Format* =
-    `{{msg.payload}} m/s`.
-4.  **Deploy** y abre `http://<IP>:1880/dashboard`.
+3.  En el nodo **text**: *Label* = `Velocidad del viento (m/s)`. (En
+    Dashboard 2.0 el nodo **text** no tiene campo *Format*: la unidad va
+    en la etiqueta.)
+4.  **Deploy** y abre `http://localhost:1880/dashboard`.
 
-Debes ver algo así: **Velocidad del viento 8.9 m/s**, y el valor debe
+Debes ver algo así: **Velocidad del viento (m/s) 8.9**, y el valor debe
 cambiar cada segundo.
 
 **Comprueba.** Pon un nodo **debug** a la salida del nodo **change**.
@@ -373,7 +365,7 @@ tarda el rotor en adaptarse? ¿Qué hace el pitch cuando el viento pasa de
 
 ### Parte 8 — Simular una incidencia
 
-1.  En la web de AeroLab (`http://<IP_AEROLAB>:8010`), panel *Control de
+1.  En la web de AeroLab (`http://localhost:8010`), panel *Control de
     operación*, localiza el desplegable **Inyección de avería**.
 2.  Anota los valores **antes** de la avería.
 3.  Elige **Vibración elevada**.
@@ -763,7 +755,7 @@ que la orden se ha cumplido.
 
 | **Síntoma**                                                         | **Causa probable**                                     | **Qué hacer**                                                                                                           |
 |---------------------------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| El **Modbus Read** no se pone en verde                              | Host o puerto incorrectos                              | Revisa la IP y el puerto `1502`; desde Docker prueba `host.docker.internal`; el firewall debe permitir el puerto `1502` |
+| El **Modbus Read** no se pone en verde                              | Host o puerto incorrectos                              | Dentro de Docker usa **Host** `aerolab` y **Port** `1502` (no `localhost` ni `502`); con equipos sueltos, la IP y el firewall abierto al `1502` |
 | Conecta, pero da error o *timeout*                                  | Unit-Id distinto de 1                                  | Pon **Unit-Id** `1` en el servidor y en el nodo                                                                         |
 | Todos los datos parecen desplazados (el viento vale lo que las rpm) | Dirección `1` en lugar de `0`                          | Pon **Address** `0`: la referencia 30001 es la dirección 0                                                              |
 | Los números no se parecen a la tabla                                | FC equivocada                                          | Para medidas usa `FC 4` (input registers), no `FC 3`                                                                    |

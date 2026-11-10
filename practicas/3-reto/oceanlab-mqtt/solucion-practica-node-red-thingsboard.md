@@ -4,13 +4,11 @@ Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo
 
 ## Preparación del aula
 
-1. Iniciar OceanLab y comprobar la web en `http://localhost:8020` y MQTT en `1883`.
-2. Iniciar Node-RED, normalmente en `http://localhost:1880`.
-3. Importar el flujo de solución.
-4. Configurar **OceanLab MQTT** con la IP del simulador.
-5. Crear en ThingsBoard el dispositivo `Boya-Aula-01`.
-6. Configurar **ThingsBoard MQTT** con host, puerto y access token como Username.
-7. Desplegar y comprobar **Latest telemetry**.
+1. Arrancar el laboratorio y comprobar OceanLab en `http://localhost:8020` (publica en Mosquitto).
+2. Abrir Node-RED en `http://localhost:1880` e importar el flujo de solución.
+3. Ya trae los hosts del laboratorio: **OceanLab MQTT** → `mosquitto:1883`; **ThingsBoard MQTT** → `thingsboard:1883`.
+4. Crear en ThingsBoard el dispositivo `Boya-Aula-01` y pegar su access token como **Username** del broker de ThingsBoard.
+5. Desplegar y comprobar **Latest telemetry**.
 
 Los nodos MQTT son parte de la instalación estándar de Node-RED. El flujo exportado no contiene credenciales.
 
@@ -69,7 +67,7 @@ if (p.buoy_id !== "BOY-017") return null;
 
 ### Entrada OceanLab
 
-- Broker: IP de OceanLab.
+- Broker: `mosquitto` (el broker único del laboratorio, donde publica OceanLab).
 - Puerto: `1883`.
 - Protocolo: MQTT 3.1.1.
 - Autenticación: ninguna dentro de la red de prácticas.
@@ -152,7 +150,7 @@ En este caso las credenciales deben pertenecer a un dispositivo marcado como gat
 
 | Síntoma | Causa probable | Comprobación |
 |---|---|---|
-| MQTT in desconectado | host incorrecto o broker parado | comprobar `IP:1883` y OceanLab |
+| MQTT in desconectado | host incorrecto o broker parado | comprobar `mosquitto:1883` y que OceanLab está en marcha |
 | Llegan cadenas en vez de objetos | salida del nodo MQTT configurada como texto | añadir nodo `json` |
 | No sale nada del function | boya asignada distinta | revisar `p.buoy_id` |
 | ThingsBoard desconectado | token usado como contraseña | token debe ir en Username |

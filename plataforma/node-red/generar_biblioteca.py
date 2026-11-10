@@ -22,7 +22,7 @@ FLUJOS = [
     # Serie 3 · Reto: flujos de partida para el alumnado
     ("3-reto/aerolab-modbus/flows/aerolab-starter-flow.json", "alumnado", "Reto AeroLab Modbus - inicial"),
     ("3-reto/oceanlab-mqtt/flows/oceanlab-starter-flow.json", "alumnado", "Reto OceanLab MQTT - inicial"),
-    ("3-reto/solarlab-opcua/flows/solarlab-thingsboard-flow.json", "alumnado", "Reto SolarLab OPC UA - ThingsBoard"),
+    ("3-reto/solarlab-opcua/flows/solarlab-starter-flow.json", "alumnado", "Reto SolarLab OPC UA - inicial"),
     # Soluciones (solo con NODE_RED_INCLUIR_SOLUCIONES=true)
     ("2-thingsboard/aerolab/flows/aerolab-thingsboard-solucion.json", "soluciones", "Serie 2 AeroLab - ThingsBoard"),
     ("2-thingsboard/oceanlab/flows/oceanlab-thingsboard-solucion.json", "soluciones", "Serie 2 OceanLab - ThingsBoard"),
@@ -33,6 +33,7 @@ FLUJOS = [
     ("2-thingsboard/atomlab/flows/atomlab-thingsboard-solucion.json", "soluciones", "Serie 2 AtomLab - ThingsBoard"),
     ("3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json", "soluciones", "Reto AeroLab Modbus - solucion"),
     ("3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json", "soluciones", "Reto OceanLab MQTT - solucion"),
+    ("3-reto/solarlab-opcua/flows/solarlab-thingsboard-flow.json", "soluciones", "Reto SolarLab OPC UA - solucion"),
 ]
 
 

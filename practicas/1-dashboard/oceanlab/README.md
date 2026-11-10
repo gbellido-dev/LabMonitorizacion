@@ -2,15 +2,7 @@
 
 > Serie **1 · Node-RED + Dashboard**. Versión Markdown de [Practica_OceanLab_NodeRED_ES.docx](Practica_OceanLab_NodeRED_ES.docx). La continuación con ThingsBoard está en [2-thingsboard/oceanlab](../../2-thingsboard/oceanlab/README.md).
 >
-> Si trabajas con el `docker-compose.yml` del repositorio, donde la guía dice *IP del equipo* usa estos valores:
-
-| Dónde | Valor en el entorno Docker del laboratorio |
-|---|---|
-| Broker MQTT (**Server**, **Port**) | `mosquitto`, `1883` (el broker único del laboratorio, donde publica OceanLab) |
-| Web de OceanLab | `http://localhost:8020` |
-| Dashboard de Node-RED | `http://localhost:1880/dashboard` |
-
-> **Nota (Dashboard 2.0 v1.36):** el nodo **text** ya no tiene el campo *Format*; donde la guía dice *Format* = `{{msg.payload}} unidad`, pon la unidad en *Label* (p. ej. `Velocidad del viento (m/s)`) o usa *Value* con una expresión JSONata.
+> Escrita para el entorno Docker del laboratorio (`docker compose up -d` o `start_lab.cmd`). Si trabajas con equipos sueltos, cambia los nombres de servicio (`mosquitto`, `localhost`) por la IP de cada equipo.
 
 ## Introducción
 
@@ -32,12 +24,12 @@ cambiar un umbral.
 
 **Antes de empezar, comprueba que tienes:**
 
-- [ ] Node-RED funcionando en Docker y accesible desde el navegador
-  (normalmente `http://<IP>:1880`).
-- [ ] El dashboard instalado: paleta `@flowfuse/node-red-dashboard`
-  (Dashboard 2.0). El panel se abre en `http://<IP>:1880/dashboard`.
-- [ ] OceanLab funcionando en su contenedor y publicando datos.
-- [ ] La dirección del broker MQTT (te la da el profesor).
+- [ ] El laboratorio arrancado y Node-RED en `http://localhost:1880`.
+- [ ] La paleta `@flowfuse/node-red-dashboard` (Dashboard 2.0), que ya
+  viene instalada en el laboratorio. El panel se abre en
+  `http://localhost:1880/dashboard`.
+- [ ] OceanLab en `http://localhost:8020`, publicando en el broker
+  único del laboratorio (**Mosquitto**).
 
 **Cómo es un mensaje de la boya.** Cada pocos segundos la boya envía un
 mensaje JSON como este. Fíjate en que los datos están agrupados en
@@ -81,10 +73,8 @@ Objetivo: comprobar que los mensajes de la boya llegan a Node-RED.
     Únelos.
 2.  Abre el nodo **mqtt in** y pulsa el lápiz junto a *Server* para
     crear el broker:
-    - **Server:** la IP del equipo de OceanLab. Si Node-RED y OceanLab
-      están en Docker en el mismo ordenador, prueba
-      `host.docker.internal` o el nombre del servicio que indique el
-      profesor.
+    - **Server:** `mosquitto` (el broker del laboratorio, donde publica
+      OceanLab; con equipos sueltos, la IP del broker).
     - **Port:** `1883`. Protocolo MQTT 3.1.1, sin usuario ni contraseña.
 3.  En el nodo **mqtt in** configura:
     - **Topic:** `oceanlab/buoys/BOY-001/telemetry`
@@ -134,11 +124,12 @@ Objetivo: entender el camino **MQTT → dato → widget**.
     primera vez tendrás que crear:
     - una **página** (`ui-page`) llamada `Boya BOY-001`,
     - un **grupo** (`ui-group`) llamado `Pruebas`.
-4.  En el nodo **text**: *Label* = `Temperatura del agua`, *Format* =
-    `{{msg.payload}} °C`.
-5.  **Deploy** y abre `http://<IP>:1880/dashboard`.
+4.  En el nodo **text**: *Label* = `Temperatura del agua (°C)`. (En
+    Dashboard 2.0 el nodo **text** no tiene campo *Format*: la unidad va
+    en la etiqueta.)
+5.  **Deploy** y abre `http://localhost:1880/dashboard`.
 
-Debes ver algo así: **Temperatura del agua 15.2 °C**, y el valor debe
+Debes ver algo así: **Temperatura del agua (°C) 15.2**, y el valor debe
 cambiar cada pocos segundos.
 
 **Comprueba.** Pon un nodo **debug** a la salida del nodo **change**.
@@ -238,7 +229,7 @@ bajando? ¿Y con la gráfica?
 
 ### Parte 8 — Simular una incidencia
 
-1.  Abre OceanLab (`http://<IP_OCEANLAB>:8020`) y selecciona `BOY-001`.
+1.  Abre OceanLab (`http://localhost:8020`) y selecciona `BOY-001`.
 2.  Anota los valores **antes** de la tormenta.
 3.  Pulsa **Simular tormenta**.
 4.  Observa el dashboard durante 2–3 minutos y anota los valores
@@ -594,7 +585,7 @@ No se trata de construir un SCADA completo, sino de ver la idea de
 
 | **Síntoma**                                 | **Causa probable**                           | **Qué hacer**                                                                     |
 |---------------------------------------------|----------------------------------------------|-----------------------------------------------------------------------------------|
-| El **mqtt in** dice *disconnected*          | Dirección del broker incorrecta              | Revisa la IP; desde Docker prueba `host.docker.internal` o el nombre del servicio |
+| El **mqtt in** dice *disconnected*          | Dirección del broker incorrecta              | Dentro de Docker el servidor es `mosquitto`, puerto `1883`                        |
 | *Connected*, pero no llega nada             | Topic mal escrito                            | Copia el topic exacto, con mayúsculas (`BOY-001`)                                 |
 | El widget muestra `[object Object]`         | Llega el mensaje entero, no un dato          | Revisa la regla del **change**: tiene que apuntar a un dato concreto              |
 | El widget sale vacío                        | Ruta mal escrita                             | Usa el botón de copiar ruta del panel Debug                                       |

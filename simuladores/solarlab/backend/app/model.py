@@ -151,7 +151,8 @@ class SolarPlantSimulator:
             zone.panel_temperature_c = zone_temp
             zone.performance_ratio_pct = pr
             zone.available = zone_available
-            zone.alarm = (fault == FaultCode.INVERTER_TRIP and index == 1) or (fault in (FaultCode.HOTSPOT, FaultCode.STRING_OPEN) and index in (0, 2))
+            zone.alarm = ((fault == FaultCode.INVERTER_TRIP and index == 1) or (fault == FaultCode.HOTSPOT and index == 0)
+                          or (fault == FaultCode.STRING_OPEN and index == 2))
             zone_power.append(power)
 
         power = sum(zone_power)

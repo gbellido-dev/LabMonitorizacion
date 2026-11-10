@@ -32,23 +32,19 @@ Al terminar, el alumnado será capaz de:
 
 ## Material necesario
 
-- AeroLab en ejecución y accesible por red.
-- Node-RED con el paquete `node-red-contrib-modbus` instalado.
-- Una instancia de ThingsBoard y una cuenta con permiso para crear dispositivos y paneles.
-- Flujo inicial: `flows/aerolab-starter-flow.json`.
+- El laboratorio arrancado (`docker compose up -d` o `start_lab.cmd`): AeroLab, Node-RED y ThingsBoard.
+- Node-RED en `http://localhost:1880`; la paleta `node-red-contrib-modbus` ya está instalada.
+- ThingsBoard en `http://localhost:8080` (`tenant@thingsboard.org` / `tenant` o la cuenta que dé el profesor).
+- Flujo inicial: `flows/aerolab-starter-flow.json` (también en **Import → Local → LabMonitorizacion → alumnado**).
 
-Anota antes de comenzar:
-
-| Parámetro | Valor |
+| Parámetro | Valor en el laboratorio |
 |---|---|
-| IP o nombre del equipo AeroLab | ____________________ |
-| Puerto Modbus TCP | `1502` |
-| Unit ID | `1` |
-| URL de ThingsBoard | ____________________ |
-| Host MQTT de ThingsBoard | ____________________ |
-| Puerto MQTT | `1883` o `8883` con TLS |
+| Servidor Modbus TCP | host `aerolab`, puerto `1502`, Unit ID `1` |
+| Web de AeroLab | `http://localhost:8010` |
+| Web de ThingsBoard | `http://localhost:8080` |
+| MQTT de ThingsBoard (desde Node-RED) | host `thingsboard`, puerto `1883` |
 
-> Si Node-RED está instalado en el mismo Windows que AeroLab, el host Modbus será normalmente `127.0.0.1`. Si Node-RED está en un contenedor Docker y AeroLab se ejecuta en Windows, normalmente será `host.docker.internal`.
+> Dentro de Docker cada servicio se llama por su nombre (`aerolab`, `thingsboard`). Desde el navegador de tu ordenador se usa `localhost`. Con equipos sueltos, sustituye los nombres por las IP.
 
 ## Mapa de datos de trabajo
 
@@ -87,18 +83,17 @@ Las direcciones que se introducen en los nodos Modbus son **offsets PDU base cer
 
 ### 1. Comprobar el proceso
 
-1. Inicia AeroLab con `start_aerolab.cmd`.
-2. Abre `http://IP_AEROLAB:8010` y confirma que el rotor gira.
-3. Abre `http://IP_AEROLAB:8010/api/registers` para contrastar el mapa completo.
+1. Comprueba que el laboratorio está arrancado.
+2. Abre `http://localhost:8010` y confirma que el rotor gira.
+3. Abre `http://localhost:8010/api/registers` para contrastar el mapa completo.
 4. Cambia el viento desde la interfaz y observa la respuesta de RPM y potencia.
 
 **Evidencia 1:** captura de AeroLab en marcha y valor actual de viento, RPM y potencia.
 
 ### 2. Importar el flujo inicial y leer Modbus
 
-1. En Node-RED, instala `node-red-contrib-modbus` desde **Manage palette → Install** si todavía no aparece en la paleta.
-2. Importa `aerolab-starter-flow.json` con **Menu → Import**.
-3. Abre el nodo de configuración **AeroLab Modbus TCP** e introduce el host correcto; conserva puerto `1502` y Unit ID `1`.
+1. Importa `aerolab-starter-flow.json` con **Menu → Import** (o desde la biblioteca **LabMonitorizacion → alumnado**).
+2. Abre el nodo de configuración **AeroLab Modbus TCP** y comprueba host `aerolab`, puerto `1502` y Unit ID `1`.
 4. Despliega el flujo.
 5. Observa las dos salidas de depuración. Identifica el array de 16 registros y el array de 5 valores lógicos.
 
@@ -140,15 +135,14 @@ Crea un segundo nodo `function` llamado **Decodificar estados** para convertir l
 ### 4. Dar de alta el dispositivo en ThingsBoard
 
 1. En ThingsBoard abre **Entities → Devices**.
-2. Crea el dispositivo `Aerogenerador-Aula` con el perfil predeterminado.
+2. Crea el dispositivo `Aerogenerador-Reto` con el perfil predeterminado.
 3. Abre **Manage credentials** y conserva credenciales de tipo **Access token**.
 4. Copia el token y guárdalo como secreto; no debe aparecer en capturas, exportaciones ni entregas.
 
 ### 5. Publicar por MQTT
 
 1. Añade un nodo `mqtt out` conectado a cada objeto decodificado, usando antes un nodo `json` si necesitas serializarlo.
-2. Configura el broker con el host de ThingsBoard.
-3. Para una conexión sin TLS utiliza puerto `1883` y MQTT 3.1.1.
+2. Configura el broker con host `thingsboard`, puerto `1883` y MQTT 3.1.1 (sin TLS dentro del laboratorio).
 4. En **Security**, pega el access token en **Username** y deja **Password** vacío.
 5. Publica con QoS 0 en el topic:
 
@@ -156,13 +150,13 @@ Crea un segundo nodo `function` llamado **Decodificar estados** para convertir l
 v1/devices/me/telemetry
 ```
 
-6. Despliega y comprueba en **Aerogenerador-Aula → Latest telemetry** que aparecen las 21 claves.
+6. Despliega y comprueba en **Aerogenerador-Reto → Latest telemetry** que aparecen las 21 claves.
 
 **Evidencia 3:** dispositivo activo y telemetría actualizándose en ThingsBoard.
 
 ### 6. Construir el cuadro de mando
 
-Crea el dashboard `Monitorización Aerogenerador` y un alias fijo al dispositivo `Aerogenerador-Aula`. Debe incluir, como mínimo:
+Crea el dashboard `Monitorización Aerogenerador` y un alias fijo al dispositivo `Aerogenerador-Reto`. Debe incluir, como mínimo:
 
 | Widget | Claves | Configuración recomendada |
 |---|---|---|
@@ -180,7 +174,7 @@ Organiza el panel en tres zonas: **producción**, **condición de máquina** y *
 
 ### 7. Crear una alarma de mantenimiento
 
-En ThingsBoard 4.3 o posterior, abre **Alarms → Alarm rules** y crea una regla sobre el dispositivo:
+En ThingsBoard (4.3) abre el dispositivo **Aerogenerador-Reto** → pestaña **Alarm rules** → **+** y crea la regla:
 
 | Campo | Valor |
 |---|---|
@@ -190,7 +184,7 @@ En ThingsBoard 4.3 o posterior, abre **Alarms → Alarm rules** y crea una regla
 | Disparo | `vibration_mms > 7` durante 5 segundos |
 | Borrado automático | `vibration_mms < 6` durante 5 segundos |
 
-Si el aula utiliza una versión anterior, crea la condición equivalente en **Device profile → Alarm rules**.
+> El argumento se define como **Latest telemetry**; la duración se elige con *Condition type* **Duration**.
 
 ### 8. Ensayo de avería y diagnóstico
 

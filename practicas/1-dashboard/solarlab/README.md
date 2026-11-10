@@ -2,15 +2,7 @@
 
 > Serie **1 · Node-RED + Dashboard**. Versión Markdown de [Practica_SolarLab_NodeRED_ES.docx](Practica_SolarLab_NodeRED_ES.docx). La continuación con ThingsBoard está en [2-thingsboard/solarlab](../../2-thingsboard/solarlab/README.md).
 >
-> Si trabajas con el `docker-compose.yml` del repositorio, donde la guía dice *IP del equipo* usa estos valores:
-
-| Dónde | Valor en el entorno Docker del laboratorio |
-|---|---|
-| Endpoint OPC UA | `opc.tcp://solarlab:4840/solarlab/server/` |
-| Web de SolarLab | `http://localhost:8000` |
-| Dashboard de Node-RED | `http://localhost:1880/dashboard` |
-
-> **Nota (Dashboard 2.0 v1.36):** el nodo **text** ya no tiene el campo *Format*; donde la guía dice *Format* = `{{msg.payload}} unidad`, pon la unidad en *Label* (p. ej. `Velocidad del viento (m/s)`) o usa *Value* con una expresión JSONata.
+> Escrita para el entorno Docker del laboratorio (`docker compose up -d` o `start_lab.cmd`). Si trabajas con equipos sueltos, cambia los nombres de servicio (`solarlab`, `localhost`) por la IP de cada equipo.
 
 ## Introducción
 
@@ -35,16 +27,15 @@ mucho, cambiar un umbral.
 
 **Antes de empezar, comprueba que tienes:**
 
-- [ ] Node-RED funcionando en Docker y accesible desde el navegador
-  (normalmente `http://<IP>:1880`).
-- [ ] El dashboard instalado: paleta `@flowfuse/node-red-dashboard`
-  (Dashboard 2.0). El panel se abre en `http://<IP>:1880/dashboard`.
-- [ ] Los nodos OPC UA instalados: paleta `node-red-contrib-opcua`.
-  Deben aparecer los nodos **OpcUa-Item** y **OpcUa-Client**.
-- [ ] SolarLab funcionando. Su web se abre en
-  `http://<IP_SOLARLAB>:8000`.
-- [ ] El endpoint OPC UA de SolarLab (te lo da el profesor). Tiene esta
-  forma: `opc.tcp://<IP_SOLARLAB>:4840/solarlab/server/`.
+- [ ] El laboratorio arrancado y Node-RED en `http://localhost:1880`.
+- [ ] La paleta `@flowfuse/node-red-dashboard` (Dashboard 2.0), que ya
+  viene instalada en el laboratorio. El panel se abre en
+  `http://localhost:1880/dashboard`.
+- [ ] La paleta `node-red-contrib-opcua` (también instalada). Deben
+  aparecer los nodos **OpcUa-Item** y **OpcUa-Client**.
+- [ ] SolarLab funcionando. Su web se abre en `http://localhost:8000`.
+- [ ] El endpoint OPC UA de SolarLab: dentro de Docker,
+  `opc.tcp://solarlab:4840/solarlab/server/`.
 
 **Cómo están organizados los datos del parque.** En MQTT el equipo envía
 un mensaje JSON con todo dentro. En OPC UA es al revés: el servidor
@@ -94,9 +85,9 @@ Objetivo: comprobar que los valores del parque llegan a Node-RED.
     - **Name:** `Potencia activa`
 4.  Abre el nodo **OpcUa-Client** y pulsa el lápiz junto a *Endpoint*
     para crear la conexión:
-    - **Endpoint:** `opc.tcp://<IP_SOLARLAB>:4840/solarlab/server/`. Si
-      Node-RED y SolarLab están en Docker en el mismo ordenador, prueba
-      `host.docker.internal` en lugar de la IP.
+    - **Endpoint:** `opc.tcp://solarlab:4840/solarlab/server/` (con
+      equipos sueltos, la IP del equipo de SolarLab en lugar de
+      `solarlab`).
     - **Security policy:** `None`. **Security mode:** `None`. Sin
       usuario ni contraseña.
 5.  En el nodo **OpcUa-Client** configura **Action:** `SUBSCRIBE` e
@@ -162,11 +153,12 @@ con el que interesa.
     primera vez tendrás que crear:
     - una **página** (`ui-page`) llamada `Parque SolarLab`,
     - un **grupo** (`ui-group`) llamado `Pruebas`.
-4.  En el nodo **text**: *Label* = `Potencia activa`, *Format* =
-    `{{msg.payload}} kW`.
-5.  **Deploy** y abre `http://<IP>:1880/dashboard`.
+4.  En el nodo **text**: *Label* = `Potencia activa (kW)`. (En
+    Dashboard 2.0 el nodo **text** no tiene campo *Format*: la unidad va
+    en la etiqueta.)
+5.  **Deploy** y abre `http://localhost:1880/dashboard`.
 
-Debes ver algo así: **Potencia activa 3246 kW**, y el valor debe cambiar
+Debes ver algo así: **Potencia activa (kW) 3246**, y el valor debe cambiar
 cada segundo.
 
 **Comprueba.** Pon un nodo **debug** antes y otro después del
@@ -351,7 +343,7 @@ mientras había nubes?
 
 ### Parte 8 — Simular una incidencia
 
-1.  Abre SolarLab (`http://<IP_SOLARLAB>:8000`) y localiza el
+1.  Abre SolarLab (`http://localhost:8000`) y localiza el
     desplegable **Inyección de avería** en el panel *Control ambiental*.
 2.  Anota los valores **antes** de la avería.
 3.  Elige **Disparo inversor Z02**.
@@ -790,7 +782,7 @@ el problema está en esa zona.
 
 | **Síntoma**                             | **Causa probable**                           | **Qué hacer**                                                                                                                                          |
 |-----------------------------------------|----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| El **OpcUa-Client** no se pone en verde | Endpoint incorrecto o puerto bloqueado       | Revisa la IP y el final `/solarlab/server/`; desde Docker prueba `host.docker.internal`; el puerto `4840` debe estar abierto                           |
+| El **OpcUa-Client** no se pone en verde | Endpoint incorrecto o puerto bloqueado       | Dentro de Docker: `opc.tcp://solarlab:4840/solarlab/server/`, con la barra final; *Security* `None`                                                   |
 | Conecta, pero no llega nada             | No se ha creado la suscripción               | Comprueba que el **inject** tiene *Inject once* y que la acción del cliente es `SUBSCRIBE`; pulsa **Deploy** otra vez                                  |
 | Error con `BadNodeIdUnknown`            | NodeId mal escrito o `ns` distinto de 2      | Copia el NodeId desde el explorador de la web de SolarLab, con mayúsculas                                                                              |
 | El widget muestra `[object Object]`     | Llega el mensaje entero, no un dato          | Revisa la regla del **change**: tiene que apuntar a un dato concreto                                                                                   |

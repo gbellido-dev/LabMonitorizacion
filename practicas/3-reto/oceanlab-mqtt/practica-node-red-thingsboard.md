@@ -13,7 +13,7 @@ Una organización oceanográfica dispone de boyas que publican telemetría en un
 
 ```mermaid
 flowchart LR
-    A["OceanLab<br/>96 boyas publicadoras"] -->|"MQTT<br/>oceanlab/buoys/+/telemetry"| B["Broker OceanLab<br/>localhost:1883"]
+    A["OceanLab<br/>96 boyas publicadoras"] -->|"MQTT<br/>oceanlab/buoys/+/telemetry"| B["Mosquitto<br/>mosquitto:1883"]
     B -->|"SUBSCRIBE"| C["Node-RED<br/>filtrado y transformación"]
     C -->|"MQTT<br/>v1/devices/me/telemetry"| D["ThingsBoard<br/>histórico, panel y alarmas"]
 ```
@@ -33,23 +33,19 @@ Al terminar, el alumnado será capaz de:
 
 ## Material necesario
 
-- OceanLab en ejecución.
-- Node-RED con los nodos MQTT incluidos de serie.
-- Una instancia de ThingsBoard y permiso para crear dispositivos y dashboards.
-- Flujo inicial `flows/oceanlab-starter-flow.json`.
+- El laboratorio arrancado (`docker compose up -d` o `start_lab.cmd`): OceanLab, Mosquitto, Node-RED y ThingsBoard.
+- Node-RED en `http://localhost:1880` (los nodos MQTT vienen de serie).
+- ThingsBoard en `http://localhost:8080` (`tenant@thingsboard.org` / `tenant` o la cuenta que dé el profesor).
+- Flujo inicial `flows/oceanlab-starter-flow.json` (también en **Import → Local → LabMonitorizacion → alumnado**).
 
-Anota antes de comenzar:
-
-| Parámetro | Valor |
+| Parámetro | Valor en el laboratorio |
 |---|---|
-| IP del equipo OceanLab | ____________________ |
-| Puerto MQTT OceanLab | `1883` |
-| URL de ThingsBoard | ____________________ |
-| Host MQTT ThingsBoard | ____________________ |
-| Puerto ThingsBoard | `1883` o `8883` con TLS |
-| Boya asignada | `BOY-_____` |
+| Broker donde publica OceanLab | **Mosquitto**: host `mosquitto`, puerto `1883` |
+| Web de OceanLab | `http://localhost:8020` |
+| MQTT de ThingsBoard (desde Node-RED) | host `thingsboard`, puerto `1883` |
+| Boya asignada | `BOY-_____` (OceanLab tiene 96: de `BOY-001` a `BOY-096`) |
 
-> Si Node-RED se ejecuta en otro equipo, sustituye `localhost` por la IP de OceanLab. Si está en Docker sobre el mismo ordenador, puede ser necesario usar `host.docker.internal`.
+> Son **dos brokers distintos**: Mosquitto reparte los datos de las boyas y ThingsBoard tiene el suyo para sus dispositivos. Desde tu ordenador, Mosquitto está en `localhost:1883`.
 
 ## Topics disponibles
 
@@ -100,7 +96,7 @@ Cada mensaje de telemetría tiene esta estructura:
 
 ### 1. Reconocer la arquitectura
 
-1. Inicia OceanLab y abre `http://IP_OCEANLAB:8020`.
+1. Abre OceanLab en `http://localhost:8020`.
 2. Selecciona la boya asignada y anota temperatura del agua, altura de ola y batería.
 3. Localiza en la interfaz el publicador, el broker y el suscriptor.
 4. Explica por qué una boya no necesita conocer la dirección de ThingsBoard.
@@ -111,7 +107,7 @@ Cada mensaje de telemetría tiene esta estructura:
 
 1. Importa `oceanlab-starter-flow.json` mediante **Menu → Import**.
 2. Abre el nodo de configuración **OceanLab MQTT**.
-3. Introduce la IP de OceanLab y el puerto `1883`.
+3. Comprueba que apunta a `mosquitto`, puerto `1883`.
 4. Mantén MQTT 3.1.1, sesión limpia y sin usuario ni contraseña.
 5. Despliega el flujo y abre el panel **Debug**.
 6. Comprueba que llegan mensajes de distintas boyas.
@@ -166,7 +162,7 @@ No añadas unidades a los valores. `"8.3 m/s"` es una cadena y ThingsBoard no po
 
 1. Añade un nodo `json` para serializar el objeto transformado.
 2. Añade un nodo `mqtt out` con un segundo broker llamado **ThingsBoard MQTT**.
-3. Configura el host de ThingsBoard y MQTT 3.1.1.
+3. Configura host `thingsboard`, puerto `1883` y MQTT 3.1.1.
 4. Usa el access token como **Username** y deja **Password** vacío.
 5. Publica con QoS 0 y `retain` desactivado en:
 
@@ -210,7 +206,7 @@ Crea una regla de alarma equivalente a:
 | Disparo | `wave_height_m > 6` durante 5 s |
 | Borrado | `wave_height_m < 4` durante 10 s |
 
-Según la versión de ThingsBoard, la regla se encontrará en **Alarms → Alarm rules** o en las reglas del perfil de dispositivo.
+En ThingsBoard 4.3 la regla se crea en el dispositivo → pestaña **Alarm rules** (o en el **perfil** del dispositivo, si debe valer para todas las boyas).
 
 ### 9. Ensayar una tormenta y una desconexión
 

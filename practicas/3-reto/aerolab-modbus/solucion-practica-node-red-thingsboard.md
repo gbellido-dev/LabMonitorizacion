@@ -4,15 +4,12 @@ Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo
 
 ## Preparación rápida del aula
 
-1. Iniciar AeroLab y comprobar `http://localhost:8010` y Modbus TCP en `1502`.
-2. Iniciar Node-RED, normalmente en `http://localhost:1880`.
-3. Instalar `node-red-contrib-modbus` desde **Manage palette**.
-4. Importar el flujo de solución.
-5. Editar únicamente estos dos nodos de configuración:
-   - **AeroLab Modbus TCP:** host del simulador.
-   - **ThingsBoard MQTT:** host, puerto y access token como nombre de usuario.
-6. Crear el dispositivo `Aerogenerador-Aula` en ThingsBoard.
-7. Desplegar y verificar **Latest telemetry** antes de construir el dashboard.
+1. Arrancar el laboratorio (`docker compose up -d`) y comprobar AeroLab en `http://localhost:8010`.
+2. Abrir Node-RED en `http://localhost:1880` (la paleta Modbus ya está instalada).
+3. Importar el flujo de solución (`flows/aerolab-thingsboard-flow.json` o **LabMonitorizacion → soluciones** si la biblioteca de soluciones está activada).
+4. Ya trae los hosts del laboratorio: **AeroLab Modbus TCP** → `aerolab:1502`, Unit ID 1; **ThingsBoard MQTT** → `thingsboard:1883`.
+5. Crear el dispositivo `Aerogenerador-Reto` en ThingsBoard y pegar su access token como **Username** del broker.
+6. Desplegar y verificar **Latest telemetry** (21 claves) antes de construir el dashboard.
 
 El flujo no contiene credenciales. Node-RED guarda el usuario y la contraseña MQTT en su fichero de credenciales local, no en el JSON exportado.
 
@@ -145,13 +142,13 @@ Configurar una ventana global de 10 minutos permite ver la respuesta completa de
 
 Para ThingsBoard 4.3 o posterior:
 
-1. **Alarms → Alarm rules → Add alarm rule → Create new alarm rule**.
-2. Tipo `Vibración elevada` y entidad `Aerogenerador-Aula`.
+1. **Alarms → Alarm rules → Add alarm rule → Create new alarm rule** (o desde el dispositivo, pestaña **Alarm rules**).
+2. Tipo `Vibración elevada` y entidad `Aerogenerador-Reto`.
 3. Argumento `vibration`: **Current entity → Latest telemetry → vibration_mms**.
 4. Condición Major: `vibration > 7`, tipo **Duration**, 5 segundos.
 5. Clear condition: `vibration < 6`, tipo **Duration**, 5 segundos.
 
-La histéresis 7/6 evita alternancias rápidas cerca del umbral y permite borrar la alarma con carga nominal normal. En ThingsBoard anterior a 4.3 se puede crear la condición equivalente en el perfil de dispositivo.
+La histéresis 7/6 evita alternancias rápidas cerca del umbral y permite borrar la alarma con carga nominal normal.
 
 ## Resultados esperados de los ensayos
 

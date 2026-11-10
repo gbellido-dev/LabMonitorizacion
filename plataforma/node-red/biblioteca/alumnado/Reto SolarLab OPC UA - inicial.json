@@ -1,0 +1,297 @@
+[
+    {
+        "id": "31deccd8cc305afd",
+        "type": "tab",
+        "label": "SolarLab - reto inicial",
+        "disabled": false,
+        "info": "Flujo de partida del reto SolarLab: solo la adquisición OPC UA. Completa la transformación, la publicación en ThingsBoard y los mandos."
+    },
+    {
+        "id": "1de64a8171c1f17a",
+        "type": "comment",
+        "z": "31deccd8cc305afd",
+        "name": "1 · ADQUISICIÓN OPC UA",
+        "info": "Cada OpcUa-Item crea un MonitoredItem dentro de la suscripción del cliente.",
+        "x": 170,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "17ea4fe38b0a870e",
+        "type": "inject",
+        "z": "31deccd8cc305afd",
+        "name": "INICIAR SUSCRIPCIONES",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "x": 150,
+        "y": 90,
+        "wires": [
+            [
+                "a38e8fce7a7b6b56",
+                "3fdda1b202aebb72",
+                "c7b59853b0111e5d",
+                "3ed5d50e5e96cd54",
+                "233f703757136c94",
+                "c956e48a729c99b9",
+                "fae56b94734f4491",
+                "28e7e1282154007c"
+            ]
+        ]
+    },
+    {
+        "id": "a38e8fce7a7b6b56",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.ActivePower",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia activa · kW",
+        "x": 430,
+        "y": 80,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "3fdda1b202aebb72",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.Irradiance",
+        "datatype": "Double",
+        "value": "",
+        "name": "Irradiancia · W/m²",
+        "x": 430,
+        "y": 120,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "c7b59853b0111e5d",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.PanelTemperature",
+        "datatype": "Double",
+        "value": "",
+        "name": "Temperatura panel · °C",
+        "x": 440,
+        "y": 160,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "3ed5d50e5e96cd54",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.GridFrequency",
+        "datatype": "Double",
+        "value": "",
+        "name": "Frecuencia · Hz",
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "233f703757136c94",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.PerformanceRatio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Performance ratio · %",
+        "x": 440,
+        "y": 240,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "c956e48a729c99b9",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.Availability",
+        "datatype": "Double",
+        "value": "",
+        "name": "Disponibilidad · %",
+        "x": 430,
+        "y": 280,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "fae56b94734f4491",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Plant.AlarmActive",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Alarma activa",
+        "x": 410,
+        "y": 320,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "28e7e1282154007c",
+        "type": "OpcUa-Item",
+        "z": "31deccd8cc305afd",
+        "item": "ns=2;s=Zone02.ActivePower",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia Zona 02 · kW",
+        "x": 440,
+        "y": 360,
+        "wires": [
+            [
+                "1f2145ec38be7847"
+            ]
+        ]
+    },
+    {
+        "id": "1f2145ec38be7847",
+        "type": "OpcUa-Client",
+        "z": "31deccd8cc305afd",
+        "endpoint": "47208619c270ff02",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 720,
+        "y": 220,
+        "wires": [
+            [
+                "3d4eb5b9496e3e1a"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "3d4eb5b9496e3e1a",
+        "type": "debug",
+        "z": "31deccd8cc305afd",
+        "name": "Datos OPC UA",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "1c7b223a869de8c4",
+        "type": "catch",
+        "z": "31deccd8cc305afd",
+        "name": "Errores del flujo",
+        "scope": null,
+        "uncaught": false,
+        "x": 140,
+        "y": 870,
+        "wires": [
+            [
+                "c9387b036f679830"
+            ]
+        ]
+    },
+    {
+        "id": "c9387b036f679830",
+        "type": "debug",
+        "z": "31deccd8cc305afd",
+        "name": "ERROR",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 350,
+        "y": 870,
+        "wires": []
+    },
+    {
+        "id": "47208619c270ff02",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://solarlab:4840/solarlab/server/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "5a1a5b0c0e3d4f01",
+        "type": "comment",
+        "z": "31deccd8cc305afd",
+        "name": "2 · TRANSFORMACIÓN Y PUBLICACIÓN  →  complétalo tú (Parte 3)",
+        "info": "",
+        "x": 290,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "5a1a5b0c0e3d4f02",
+        "type": "comment",
+        "z": "31deccd8cc305afd",
+        "name": "3 · MANDO OPC UA  →  complétalo tú (Parte 6)",
+        "info": "",
+        "x": 240,
+        "y": 630,
+        "wires": []
+    }
+]

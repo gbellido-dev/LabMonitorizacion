@@ -41,6 +41,7 @@ REGISTER_DEFINITIONS = [
     RegisterDefinition("discrete", 1, "10002", "En marcha", "R", "Boolean", "—", "—"),
     RegisterDefinition("discrete", 2, "10003", "Alarma activa", "R", "Boolean", "—", "—"),
     RegisterDefinition("discrete", 3, "10004", "Conectado a red", "R", "Boolean", "—", "—"),
+    RegisterDefinition("discrete", 4, "10005", "Viento suficiente", "R", "Boolean", "—", "—"),
     RegisterDefinition("input", 0, "30001", "Velocidad del viento", "R", "UInt16", "0,1", "m/s"),
     RegisterDefinition("input", 1, "30002", "Velocidad del rotor", "R", "UInt16", "0,01", "rpm"),
     RegisterDefinition("input", 2, "30003", "Pitch real", "R", "UInt16", "0,01", "°"),

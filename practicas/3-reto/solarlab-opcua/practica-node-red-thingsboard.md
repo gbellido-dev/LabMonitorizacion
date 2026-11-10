@@ -10,7 +10,7 @@
 | Agrupamiento | Parejas |
 | Nivel | Intermedio |
 | Protocolos | OPC UA y MQTT |
-| Software | SolarLab, Node-RED y ThingsBoard CE/Cloud |
+| Software | Laboratorio Docker: SolarLab, Node-RED y ThingsBoard CE 4.3 |
 
 ## Situación profesional
 
@@ -42,42 +42,35 @@ Al terminar, el alumnado será capaz de:
 
 ## Material necesario
 
-- SolarLab funcionando.
-- Node-RED 4 o 5.
-- El módulo `node-red-contrib-opcua`.
-- Una instancia de ThingsBoard CE o ThingsBoard Cloud.
-- El flujo importable [solarlab-thingsboard-flow.json](flows/solarlab-thingsboard-flow.json).
-- Puertos disponibles: `4840` para OPC UA, `1883` para MQTT y `8080` para ThingsBoard local.
+- El laboratorio arrancado (`docker compose up -d` o `start_lab.cmd`): SolarLab, Node-RED y ThingsBoard.
+- Node-RED en `http://localhost:1880`; la paleta `node-red-contrib-opcua` ya está instalada.
+- ThingsBoard en `http://localhost:8080` (`tenant@thingsboard.org` / `tenant` o la cuenta que dé el profesor).
+- Flujo inicial [solarlab-starter-flow.json](flows/solarlab-starter-flow.json) (también en **Import → Local → LabMonitorizacion → alumnado**). Solo trae la adquisición OPC UA: la transformación, la publicación y los mandos los construyes tú.
 
-> Para una instalación local, ThingsBoard recomienda al menos 4 GB de RAM para un entorno de desarrollo o prueba de concepto.
+| Parámetro | Valor en el laboratorio |
+|---|---|
+| Endpoint OPC UA (desde Node-RED) | `opc.tcp://solarlab:4840/solarlab/server/`, *Security* `None` |
+| Web de SolarLab | `http://localhost:8000` |
+| MQTT de ThingsBoard (desde Node-RED) | host `thingsboard`, puerto `1883` |
+| Web de ThingsBoard | `http://localhost:8080` |
+
+> Dentro de Docker cada servicio se llama por su nombre (`solarlab`, `thingsboard`); desde el navegador se usa `localhost`. Desde un cliente instalado en tu ordenador (UaExpert), el endpoint es `opc.tcp://localhost:4840/solarlab/server/`.
 
 ## Preparación del docente
 
-1. Comprobar que SolarLab abre en `http://localhost:8000` y publica en:
+1. Comprobar que SolarLab abre en `http://localhost:8000` y que su explorador OPC UA muestra el servidor en marcha.
+2. Comprobar que ThingsBoard está instalado (el primer arranque tarda unos minutos) y repartir las cuentas.
+3. No facilitar inicialmente el código de la avería que se utilizará en el reto final.
 
-   ```text
-   opc.tcp://localhost:4840/solarlab/server/
-   ```
-
-2. Preparar ThingsBoard CE o facilitar las cuentas de ThingsBoard Cloud.
-3. Verificar que Node-RED puede alcanzar tanto SolarLab como ThingsBoard.
-4. No facilitar inicialmente el código de la avería que se utilizará en el reto final.
-
-Si Node-RED, SolarLab y ThingsBoard están en contenedores o equipos diferentes, `localhost` no identifica el mismo ordenador. Se deberá emplear la IP o nombre DNS correspondiente. En Docker Desktop puede ser necesario usar `host.docker.internal` para acceder desde un contenedor al equipo anfitrión.
+La solución está en [solucion-practica-node-red-thingsboard.md](solucion-practica-node-red-thingsboard.md) y el flujo resuelto en [flows/solarlab-thingsboard-flow.json](flows/solarlab-thingsboard-flow.json).
 
 ---
 
 ## Parte 1 · Arranque y reconocimiento del sistema
 
-### 1.1 Iniciar SolarLab
+### 1.1 Reconocer SolarLab
 
-Desde la carpeta del proyecto:
-
-```powershell
-.\scripts\run-dev.ps1
-```
-
-Abrir la interfaz y anotar:
+Abrir `http://localhost:8000` y anotar:
 
 - endpoint OPC UA;
 - Namespace URI;
@@ -116,7 +109,7 @@ El índice `ns=2` es habitual, pero no forma parte de la identidad permanente de
 
 ### 2.1 Acceder a la plataforma
 
-Para ThingsBoard CE local, abrir `http://localhost:8080`. Si la instalación se realizó cargando datos de demostración, la cuenta de laboratorio habitual es:
+Abrir `http://localhost:8080`. El laboratorio instala ThingsBoard con los datos de demostración; la cuenta habitual es:
 
 ```text
 Usuario: tenant@thingsboard.org
@@ -169,63 +162,70 @@ El mensaje que se espera publicar tendrá esta forma:
 
 ## Parte 3 · Configurar Node-RED como pasarela OPC UA
 
-### 3.1 Instalar los nodos OPC UA
+### 3.1 Importar el flujo inicial
 
-1. Abrir Node-RED, normalmente en `http://localhost:1880`.
-2. Menú principal → **Manage palette** → **Install**.
-3. Buscar `node-red-contrib-opcua`.
-4. Instalar el módulo y comprobar que aparecen los nodos `OpcUa-Item` y `OpcUa-Client`.
+1. Menú principal → **Import** → `flows/solarlab-starter-flow.json` (o **Local → LabMonitorizacion → alumnado → Reto SolarLab OPC UA - inicial**).
+2. Importarlo como una pestaña nueva.
 
-### 3.2 Importar el flujo
+Trae la zona **1 · Adquisición OPC UA** completa: un **inject** `INICIAR SUSCRIPCIONES`, ocho **OpcUa-Item** (los de la tabla 1.2 que empiezan por `Plant` y `Zone02`), un **OpcUa-Client** `OPC UA · Suscribir` y un **debug**.
 
-1. Menú principal → **Import**.
-2. Seleccionar el archivo `flows/solarlab-thingsboard-flow.json`.
-3. Importarlo como una pestaña nueva.
-4. Antes de desplegar, revisar todos los nodos marcados con un triángulo rojo.
+### 3.2 Comprobar el endpoint OPC UA
 
-El flujo está dividido en tres zonas:
-
-- **Adquisición OPC UA:** crea las suscripciones a las variables de SolarLab.
-- **Transformación y publicación:** agrega valores, forma el JSON y lo publica por MQTT.
-- **Mando OPC UA:** permite escribir consignas y códigos de avería.
-
-### 3.3 Configurar el endpoint OPC UA
-
-Abrir cualquiera de los nodos `OPC UA · Suscribir` o `OPC UA · Escribir` y editar su endpoint:
+Abrir el nodo `OPC UA · Suscribir` y revisar su endpoint:
 
 | Parámetro | Valor |
 |---|---|
-| Endpoint | `opc.tcp://localhost:4840/solarlab/server/` |
+| Endpoint | `opc.tcp://solarlab:4840/solarlab/server/` |
 | Security policy | `None` |
 | Security mode | `None` |
 | Login | Desactivado |
-| Keep session alive | Activado, si está disponible |
+| Action | `SUBSCRIBE`, intervalo `1 s` |
 
-Mantener un intervalo de suscripción de `1 s`.
+**Deploy**, pulsar `INICIAR SUSCRIPCIONES` y comprobar en **Debug** que llega un mensaje por cada variable que cambia: `msg.topic` es el NodeId y `msg.payload` el valor.
 
-### 3.4 Configurar MQTT para ThingsBoard
+### 3.3 Transformar a telemetría
 
-Abrir el nodo `MQTT → ThingsBoard` y editar el servidor:
+Crear en la zona **2** un nodo `function` llamado `OPC UA → Telemetría`, conectado al cliente. Requisitos:
 
-| Parámetro | ThingsBoard local | ThingsBoard Cloud |
-|---|---|---|
-| Servidor | `localhost` | Host indicado por ThingsBoard |
-| Puerto | `1883` | `1883` o el puerto TLS indicado |
-| TLS | No, solo laboratorio local | Según la plataforma |
+1. Traducir el NodeId a estas claves de ThingsBoard:
+
+   | NodeId | Clave |
+   |---|---|
+   | `Plant.ActivePower` | `activePowerKw` |
+   | `Plant.Irradiance` | `irradianceWm2` |
+   | `Plant.PanelTemperature` | `panelTemperatureC` |
+   | `Plant.GridFrequency` | `gridFrequencyHz` |
+   | `Plant.PerformanceRatio` | `performanceRatioPct` |
+   | `Plant.Availability` | `availabilityPct` |
+   | `Plant.AlarmActive` | `alarmActive` |
+   | `Zone02.ActivePower` | `zone02PowerKw` |
+
+2. Ignorar los mensajes cuyo NodeId no esté en la tabla (el cliente también emite avisos propios, por ejemplo `subscriptionId`).
+3. Si el valor llega envuelto (`{ value: … }`), extraer el número o booleano.
+4. Guardar el último valor de cada clave en el contexto del flujo y emitir **todas** las claves conocidas en un mensaje `{ ts, values }`, con `ts` = `Date.now()`.
+5. No convertir números en cadenas ni añadir unidades al valor.
+
+Después, un nodo `delay` en modo *Rate Limit*: **1 mensaje por segundo**, descartando los intermedios.
+
+### 3.4 Publicar en ThingsBoard
+
+Un nodo `mqtt out` conectado al `delay`, con un servidor nuevo:
+
+| Parámetro | Valor |
+|---|---|
+| Servidor | `thingsboard` |
+| Puerto | `1883` |
 | MQTT version | 3.1.1 |
-| Username | El `Access token` del dispositivo | El `Access token` |
-| Password | Vacío | Vacío |
-
-El tema ya está configurado como `v1/devices/me/telemetry` y se utiliza QoS 1.
+| Username | El `Access token` del dispositivo |
+| Password | Vacío |
+| Topic | `v1/devices/me/telemetry` |
+| QoS | 1 |
 
 ### 3.5 Desplegar y comprobar
 
-1. Pulsar **Deploy**.
-2. Pulsar una vez `INICIAR SUSCRIPCIONES`.
-3. Abrir el panel **Debug**.
-4. Comprobar que aparecen mensajes OPC UA y paquetes de telemetría.
-5. En ThingsBoard, abrir el dispositivo → **Latest telemetry**.
-6. Verificar que aparecen al menos estas claves:
+1. Pulsar **Deploy** y después `INICIAR SUSCRIPCIONES`.
+2. En ThingsBoard, abrir el dispositivo → **Latest telemetry**.
+3. Verificar que aparecen las ocho claves:
 
    ```text
    activePowerKw
@@ -305,7 +305,7 @@ En ThingsBoard, crear una regla de alarma para el dispositivo o, preferiblemente
 | Condición de creación | valor menor que `100` |
 | Condición de borrado | valor igual o mayor que `100` |
 
-Las versiones actuales de ThingsBoard permiten administrar las reglas desde **Alarms → Alarm rules** o desde la pestaña **Alarm Rules** del perfil/dispositivo, según la edición y versión.
+En ThingsBoard 4.3 las reglas se crean en **Alarms → Alarm rules** o en la pestaña **Alarm rules** del dispositivo o de su perfil. El argumento es de tipo **Latest telemetry**.
 
 ### 5.2 Verificar el ciclo de vida
 
@@ -330,11 +330,15 @@ La tercera opción es más representativa del mantenimiento basado en condición
 
 ## Parte 6 · Escritura OPC UA desde Node-RED
 
-El flujo contiene tres mandos manuales:
+Construir en la zona **3** del flujo tres mandos manuales:
 
-- `ESCRIBIR 900 W/m²` escribe un `Double` en `Controls.IrradianceSetpoint`.
-- `AVERÍA INVERSOR Z02` escribe el `Int32` 2 en `Controls.FaultCode`.
-- `QUITAR AVERÍA` escribe el `Int32` 0 en `Controls.FaultCode`.
+| Botón (**inject**) | NodeId | Tipo | Valor |
+|---|---|---|---|
+| `ESCRIBIR 900 W/m²` | `ns=2;s=Controls.IrradianceSetpoint` | `Double` | `900` |
+| `AVERÍA INVERSOR Z02` | `ns=2;s=Controls.FaultCode` | `Int32` | `2` |
+| `QUITAR AVERÍA` | `ns=2;s=Controls.FaultCode` | `Int32` | `0` |
+
+Cada **inject** envía el valor como `msg.payload` (número) a un **OpcUa-Item** con el NodeId y el tipo de la tabla; los items van a un **OpcUa-Client** nuevo con **Action** `WRITE` y el mismo endpoint, seguido de un **debug**.
 
 ### Procedimiento
 
@@ -344,6 +348,7 @@ El flujo contiene tres mandos manuales:
 4. Comprobar cómo la potencia evoluciona y llega a ThingsBoard.
 5. Inyectar y retirar la avería desde Node-RED.
 6. Confirmar el ciclo de creación y borrado de la alarma.
+7. Al terminar, dejar la irradiancia en `760 W/m²` y sin avería.
 
 ### Cuestiones 3
 
@@ -397,11 +402,9 @@ El token del dispositivo debe ocultarse en todas las capturas y eliminarse de cu
 ## Referencias
 
 - [Documentación de Node-RED](https://nodered.org/docs/)
-- [Gestión de la paleta de Node-RED](https://nodered.org/docs/user-guide/editor/palette/manager)
 - [node-red-contrib-opcua](https://www.npmjs.com/package/node-red-contrib-opcua)
 - [ThingsBoard: primeros pasos](https://thingsboard.io/docs/getting-started/)
 - [ThingsBoard MQTT Telemetry API](https://thingsboard.io/docs/reference/mqtt-api/telemetry/)
 - [ThingsBoard: dispositivos](https://thingsboard.io/docs/user-guide/devices/)
 - [ThingsBoard: alarmas](https://thingsboard.io/docs/user-guide/alarms/)
-- [Instalación de ThingsBoard CE con Docker en Windows](https://thingsboard.io/docs/installation/docker-windows/)
 

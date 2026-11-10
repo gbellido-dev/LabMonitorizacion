@@ -79,7 +79,7 @@ module.exports = {
     { tipo: "seccion", numero: 3, titulo: "MQTT en el laboratorio", texto: "Un broker para todo el aula y Node-RED como pasarela" },
 
     { tipo: "flujo", titulo: "De la boya al panel",
-      nodos: [{ titulo: "OceanLab", texto: "8 boyas publican cada pocos segundos" }, { titulo: "Mosquitto", texto: "Puerto 1883 y WebSocket 9001", color: "6A4C93" },
+      nodos: [{ titulo: "OceanLab", texto: "96 boyas publican cada 2 s" }, { titulo: "Mosquitto", texto: "Puerto 1883 y WebSocket 9001", color: "6A4C93" },
               { titulo: "Node-RED", texto: "**mqtt in** → traducir → **mqtt out**" }, { titulo: "ThingsBoard", texto: "Su propio MQTT (1883) con el token", color: "1982C4" }],
       flechas: ["publica", "suscribe", "publica"], hueco: 1.15,
       abajo: ["Hay **dos brokers** distintos: Mosquitto (datos de las boyas) y el MQTT interno de ThingsBoard.",
