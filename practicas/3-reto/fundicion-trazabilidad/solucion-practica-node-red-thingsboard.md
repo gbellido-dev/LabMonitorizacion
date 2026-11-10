@@ -125,6 +125,7 @@ l.avisado = true;
 // método OPC UA: Trazabilidad.PiezasDelLote(Lote) → [piezas[], rechazadas]
 return {
     lote: p.Lote, causas: l.causas,
+    topic: "ns=1;s=Trazabilidad",            // el nodo OPC UA no acepta un msg.topic vacío, ni en METHOD
     objectId: "ns=1;s=Trazabilidad",
     methodId: "ns=1;s=Trazabilidad.PiezasDelLote",
     inputArguments: [{ dataType: "String", value: p.Lote }]
@@ -184,7 +185,19 @@ Lectura para el informe:
 
 ## Verificación en el laboratorio
 
-(pendiente)
+Con el flujo resuelto desplegado, la planta a ×10 y la avería oculta 7 (termopar de IF-01):
+
+- **R1–R3**: una muestra por pieza en `Fundicion-Calidad` con las 15 claves; en 25 min reales (≈ 4 h de planta),
+  253 piezas y 51 rechazos, 42 diagnosticados como «colada fría» y 9 «sin causa aparente».
+- La planta lo confirma: `IF-01.TemperaturaMetal` = 1492 °C mientras `Simulacion.TemperaturaRealIF01` = 1431 °C y
+  `COL-01.TemperaturaColada` = 1401 °C.
+- **R5**: la colada `FE-261110-106` llegó a 3 rechazos; Node-RED llamó a `PiezasDelLote` y publicó los atributos
+  `lote_cuarentena` = `FE-261110-106`, `cuarentena_piezas` = 7, `cuarentena_rechazadas` = 3,
+  `cuarentena_causa` = «colada fría» y la lista de las 7 piezas.
+- **R4**: la regla «Racha de rechazos» saltó con el detalle «Última causa: colada fría».
+
+> El nodo OPC UA de Node-RED exige un `msg.topic` no vacío también en modo `METHOD`: sin él avisa «can't work without
+> OPC UA NodeId» y no llama al método. La solución pone en `msg.topic` el objeto del método.
 
 ## Preguntas finales · Orientación
 

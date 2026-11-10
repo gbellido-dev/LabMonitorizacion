@@ -102,6 +102,7 @@ Lleva la cuenta de piezas y rechazos **por colada** (`Lote`). Cuando una colada 
 vez), llama al método OPC UA `Trazabilidad.PiezasDelLote` con un **OpcUa-Client** en modo `METHOD`:
 
 ```javascript
+msg.topic = "ns=1;s=Trazabilidad";      // el nodo exige un msg.topic no vacío
 msg.objectId = "ns=1;s=Trazabilidad";
 msg.methodId = "ns=1;s=Trazabilidad.PiezasDelLote";
 msg.inputArguments = [{ dataType: "String", value: lote }];
