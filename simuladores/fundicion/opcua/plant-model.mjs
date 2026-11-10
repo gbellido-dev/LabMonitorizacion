@@ -1,13 +1,12 @@
-// Modelo de planta para el servidor OPC UA. Es la versión numérica de los
-// activos que muestra el dashboard (app/page.tsx); el servidor simula la
-// dinámica de cada variable con un paseo aleatorio alrededor del nominal.
+// Catálogo de la planta: activos, variables (con unidad y valor inicial),
+// señales discretas y mapa de tags S7. Define el espacio de direcciones OPC UA
+// (server.mjs) y lo que reenvía el puente WebSocket (bridge.mjs).
 //
-// Cada variable: { n: nombre, unit, v: valor nominal, w: amplitud de ruido,
-//                  dp: decimales, kind: "walk" (por defecto) | "counter" | "managed" }
-// "managed": la fija la lógica de proceso del servidor (fases, ciclos,
-// correlaciones), no el paseo aleatorio genérico.
-// flags: señales discretas por activo { n, type: "bool"|"string", v } que
-// también gobierna la lógica de proceso (fase del horno, colada activa...).
+// Los VALORES los calcula el motor de proceso (motor.mjs) a partir de la física
+// y de la trazabilidad de cada molde; aquí solo están los nombres y unidades.
+//
+// Cada variable: { n: nombre, unit, v: valor inicial, dp: decimales }
+// flags: señales discretas por activo { n, type: "bool"|"string", v }
 
 export const kpis = [
   { n: "OEEPlanta", unit: "%", v: 87.4, w: 0.6, dp: 1 },
@@ -32,6 +31,8 @@ export const assets = [
       { n: "Presion", unit: "Pa", v: -12, w: 2, dp: 1 },
       { n: "OEE", unit: "%", v: 91.2, w: 0.4, dp: 1 },
       { n: "NivelCarga", unit: "%", v: 68, w: 2.5, dp: 1 },
+      { n: "Inclinacion", unit: "°", v: 0, dp: 0 },
+      { n: "EnergiaConsumida", unit: "kWh", v: 0, dp: 1 },
     ],
     tags: [["Metal.Temp", "DB10.DBD0"], ["Coil.Power", "DB10.DBD8"], ["Tilt.Angle", "DB11.DBD4"], ["ReadyToPour", "DB11.DBX12.0"]],
   },
@@ -45,6 +46,8 @@ export const assets = [
       { n: "Presion", unit: "Pa", v: -9, w: 2, dp: 1 },
       { n: "OEE", unit: "%", v: 84.7, w: 0.5, dp: 1 },
       { n: "NivelCarga", unit: "%", v: 42, w: 2.5, dp: 1 },
+      { n: "Inclinacion", unit: "°", v: 0, dp: 0 },
+      { n: "EnergiaConsumida", unit: "kWh", v: 0, dp: 1 },
     ],
     tags: [["Metal.Temp", "DB10.DBD20"], ["Coil.Power", "DB10.DBD28"], ["Cooling.Flow", "DB12.DBD0"], ["Alarm.Word", "DB90.DBW4"]],
   },
@@ -57,6 +60,7 @@ export const assets = [
       { n: "Vibracion", unit: "mm/s", v: 1.7, w: 0.2, dp: 2 },
       { n: "Presion", unit: "bar", v: 6.2, w: 0.15, dp: 2 },
       { n: "OEE", unit: "%", v: 88.9, w: 0.4, dp: 1 },
+      { n: "HumedadArena", unit: "%", v: 3.6, dp: 2 },
     ],
     tags: [["Cycle.Time", "DB20.DBD0"], ["Press.Force", "DB20.DBD8"], ["Sand.Moisture", "DB21.DBD4"], ["Mould.OK", "DB22.DBX0.2"]],
   },
@@ -69,6 +73,7 @@ export const assets = [
       { n: "Vibracion", unit: "mm/s", v: 1.5, w: 0.2, dp: 2 },
       { n: "Presion", unit: "bar", v: 6.0, w: 0.15, dp: 2 },
       { n: "OEE", unit: "%", v: 90.1, w: 0.4, dp: 1 },
+      { n: "HumedadArena", unit: "%", v: 3.65, dp: 2 },
     ],
     tags: [["Cycle.Time", "DB20.DBD20"], ["Press.Force", "DB20.DBD28"], ["Sand.Density", "DB21.DBD16"], ["Mould.OK", "DB22.DBX0.3"]],
   },
@@ -87,7 +92,7 @@ export const assets = [
   },
   {
     short: "COL-01", name: "Estación de colada automática", zone: "Colada", status: "RUN", plc: "PLC-COL-01 · S7-1516F",
-    flags: [{ n: "Colando", type: "bool", v: false }, { n: "MoldeEnPosicion", type: "bool", v: false }],
+    flags: [{ n: "Colando", type: "bool", v: false }, { n: "MoldeEnPosicion", type: "bool", v: false }, { n: "CambioCuchara", type: "bool", v: false }],
     vars: [
       { n: "TemperaturaColada", unit: "°C", v: 1421, w: 7, dp: 1 },
       { n: "TiempoCiclo", unit: "s", v: 31.2, w: 0.7, dp: 2 },
@@ -123,6 +128,7 @@ export const assets = [
       { n: "Presion", unit: "kPa", v: 1.8, w: 0.1, dp: 2 },
       { n: "VelocidadVentiladores", unit: "rpm", v: 780, w: 22, dp: 0 },
       { n: "OEE", unit: "%", v: 94.3, w: 0.3, dp: 1 },
+      { n: "MoldesEnTunel", unit: "uds", v: 54, dp: 0 },
     ],
     tags: [["Mould.Temp", "DB40.DBD0"], ["Residence.Time", "DB40.DBD8"], ["Fan.Speed", "DB41.DBD0"], ["Exit.Ready", "DB42.DBX0.0"]],
   },

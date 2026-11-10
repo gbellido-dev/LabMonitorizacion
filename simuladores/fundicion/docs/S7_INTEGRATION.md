@@ -1,6 +1,6 @@
 # Integración Siemens S7 del gemelo digital
 
-El simulador trabaja ahora con telemetría sintética, pero su modelo de datos está preparado para sustituirla por señales reales sin cambiar la interfaz 3D.
+El simulador calcula sus señales con un motor de proceso (`opcua/motor.mjs`) y publica en cada activo, bajo `TagsS7`, el valor que tendría cada dirección de su PLC (por ejemplo `IF-01.TagsS7.Metal.Temp` = `DB10.DBD0`). Su modelo de datos está preparado para sustituir la simulación por señales reales sin cambiar la interfaz 3D.
 
 ## Arquitectura recomendada
 

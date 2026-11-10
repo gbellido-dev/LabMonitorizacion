@@ -1,6 +1,6 @@
 # Fundición · Gemelo digital de una planta de fundición con OPC UA
 
-La Fundición simula la **Planta Norte** de una fundición de hierro completa: dos hornos de inducción, moldeo, colada automática, túnel de enfriamiento, desmoldeo, robots y control de calidad. Publica **11 activos y 127 variables** en un servidor **OPC UA** y tiene un **gemelo digital 3D** en el navegador que se mueve con esos datos.
+La Fundición simula la **Planta Norte** de una fundición de hierro completa: dos hornos de inducción, moldeo, colada automática, túnel de enfriamiento, desmoldeo, robots y control de calidad. Publica **11 activos y 172 variables** (con trazabilidad pieza a pieza) en un servidor **OPC UA** y tiene un **gemelo digital 3D** en el navegador que se mueve con esos datos.
 
 Es el simulador con más activos del laboratorio: sirve para practicar el **descubrimiento** de un espacio de direcciones grande, el modelado de una planta como **jerarquía de activos** y los indicadores de planta (OEE, producción, energía).
 
@@ -22,12 +22,21 @@ Seguridad `None` y acceso anónimo (también admite las políticas seguras por d
  (hornos)          (prensas, machos)      (cuchara)         (túnel)          (desmoldeo)        (escáner 3D)
 ```
 
-La dinámica es coherente entre activos:
+Los valores los calcula un **motor de proceso causal** ([`opcua/motor.mjs`](opcua/motor.mjs)): nada es ruido
+alrededor de un nominal, cada cifra sale de lo que pasa en la planta.
 
-- **Hornos**: ciclo de fases `CARGA` → `FUSION` → `AFINO` → `LISTO` (variable `Fase`); la temperatura del metal y la potencia de la bobina siguen la fase.
-- **Línea y colada** con *interlock*: la línea avanza, se para con un molde bajo la cuchara (`MoldeEnPosicion`), cuela (`Colando`, `CaudalColada`, `NivelLlenado`) solo si la cuchara tiene metal (`PesoCuchara`) y reanuda; la grúa repone la cuchara por lotes.
-- **Desmoldeo**: alterna marcha (35 s) y paro (25 s); vibración, frecuencia y potencia siguen el estado.
-- El resto de variables evolucionan alrededor de su valor nominal.
+| Etapa | Qué se simula |
+|---|---|
+| **Fusión** | Hornos de 3 t (3,2 y 2,8 MW) con balance de energía: `CARGA` de chatarra → `FUSION` → `AFINO` → `LISTO`; cada horno da dos sangrados de 1 t y deja 1 t de pie. La temperatura la mide un termopar (que puede descalibrarse) |
+| **Colada** | La grúa cambia la cuchara por una llena de un horno `LISTO` (25 s; con avería, minutos). El metal se enfría en la cuchara (~3,6 °C/min) y se cuela molde a molde con *interlock* (`MoldeEnPosicion`, `Colando`, `CaudalColada`, `NivelLlenado`) |
+| **Moldeo** | Cada molde (90 kg) nace en una prensa con su **humedad de arena** y lleva macho (ROB-03); la línea va a la cadencia de las prensas (52 s, con micro-paradas) |
+| **Enfriamiento** | Los moldes recorren el túnel (FIFO de 54 moldes, ≈ 47 min) y se enfrían según su edad; los ventiladores regulan la salida a ~610 °C |
+| **Desmoldeo** | DES-01 vibra cada molde que sale (22 s); su **rodamiento se desgasta** y, si se rompe, la protección lo para y el túnel se llena hasta bloquear la línea |
+| **Calidad** | QC-01 mide cada pieza. El **defecto real** depende de las causas: colada fría → unión fría, arena húmeda → porosidad, desmoldeo caliente → deformación, sin inocular → fundición blanca. La **medida** incluye además la deriva del escáner |
+| **KPIs** | OEE = disponibilidad × rendimiento × calidad (medias de ~10 min); energía por tonelada colada; CO₂; producción del turno; lote activo (la colada de la cuchara) |
+
+La planta arranca «en caliente» (túnel lleno), así que desde el primer minuto salen piezas. Valores normales: OEE
+85–90 %, ~60 piezas/h, 98 % de conformes, 550–700 kWh/t.
 
 ## Espacio de direcciones
 
@@ -42,24 +51,42 @@ Objects
 │   ├── Enfriamiento ─ ENF-01
 │   ├── Acabado  ─ DES-01, ROB-02
 │   └── Calidad  ─ QC-01
-└── Mantenimiento           Averia (escribible), AveriaNombre
+├── Trazabilidad            UltimaPieza (Id, Molde, Prensa, Lote, TemperaturaColada, HumedadArena, Inoculada,
+│                           TiempoEnfriamiento, TemperaturaDesmoldeo, Desviacion, Resultado, Defecto),
+│                           PiezasInspeccionadas, PiezasRechazadas
+├── Mantenimiento           Averia (escribible), AveriaNombre
+└── Simulacion              Velocidad (escribible, ×1–×20), TiempoSimulado y la «verdad» que una planta real
+                            no tendría: DesgasteRodamiento, DerivaEscaner, TemperaturaRealIF01, DefectoRealUltimaPieza
 ```
 
-Cada activo tiene `Nombre`, `Estado` (`RUN`, `IDLE`, `WARN`, `ALARM`), `PLC`, `Zona`, sus variables de proceso, sus señales (`Fase`, `Colando`, `Marcha`…) y una carpeta `TagsS7` con la correspondencia a direcciones de un PLC Siemens (ver [docs/S7_INTEGRATION.md](docs/S7_INTEGRATION.md)).
+Cada activo tiene `Nombre`, `Estado` (`RUN`, `IDLE`, `WARN`, `ALARM`), `PLC`, `Zona`, sus variables de proceso,
+sus señales (`Fase`, `Colando`, `CambioCuchara`, `Marcha`…) y una carpeta `TagsS7` con las señales de su PLC
+Siemens: el **mismo dato** que leería un cliente S7 en esa dirección (ver [docs/S7_INTEGRATION.md](docs/S7_INTEGRATION.md)).
+Variables nuevas respecto a la versión anterior: `IF-0x.Inclinacion`, `IF-0x.EnergiaConsumida`,
+`MP-0x.HumedadArena`, `ENF-01.MoldesEnTunel` y `COL-01.CambioCuchara`.
 
-**NodeId**: `ns=1;s=<ACTIVO>.<Variable>`, por ejemplo `ns=1;s=IF-01.TemperaturaMetal`, `ns=1;s=COL-01.PesoCuchara`, `ns=1;s=KPIs.OEEPlanta`. Las carpetas de zona son `ns=1;s=Zona.Fusion`, etc.
+**NodeId**: `ns=1;s=<ACTIVO>.<Variable>`, por ejemplo `ns=1;s=IF-01.TemperaturaMetal`, `ns=1;s=COL-01.PesoCuchara`,
+`ns=1;s=KPIs.OEEPlanta`, `ns=1;s=Trazabilidad.UltimaPieza.Lote`. Las carpetas de zona son `ns=1;s=Zona.Fusion`, etc.
 
 ## Averías (para las prácticas)
 
-Escribiendo un `Int32` en `ns=1;s=Mantenimiento.Averia` (un valor fuera de 0–4 se rechaza con `BadOutOfRange`):
+Escribiendo un `Int32` en `ns=1;s=Mantenimiento.Averia` (un valor fuera de 0–7 se rechaza con `BadOutOfRange`).
+Las averías de moldeo y colada tardan **~47 min** en verse en calidad: es lo que tardan las piezas afectadas en
+cruzar el túnel (por eso importa la trazabilidad).
 
-| Código | Avería | Síntomas |
+| Código | Avería | Qué pasa (cadena causal) |
 |---|---|---|
-| 0 | Sin avería | — |
-| 1 | Rodamiento del desmoldeo DES-01 | La vibración crece +0,03 mm/s cada segundo (hasta +9) y sube la temperatura; `Estado` pasa a `WARN` |
-| 2 | Extracción de humos IF-02 | La presión del recinto del horno pasa de ≈ −9 Pa (depresión) a ≈ +6 Pa; `Estado` `ALARM` |
-| 3 | Retraso de la grúa de cuchara | La cuchara no se repone: la línea se queda esperando metal (`VelocidadLinea` 0), se para la producción y el OEE de planta cae a ≈ 61 % |
-| 4 | Deriva del escáner 3D QC-01 | Crece `DesviacionEscaneo` y bajan las piezas conformes (de la célula y de planta); `Estado` `WARN` |
+| 0 | Sin avería | — (al pasar a 0 desde la 1, el rodamiento se considera cambiado) |
+| 1 | Rodamiento del desmoldeo DES-01 | El desgaste crece: vibración en marcha > 12 mm/s a los ~13 min, `WARN` a los ~17, la protección **dispara** a los ~32 (`ALARM`); el túnel se llena y la línea se para |
+| 2 | Extracción de humos IF-02 | La presión del recinto pasa de ≈ −9 Pa a ≈ +6 Pa en ~2 min; `Estado` `ALARM` |
+| 3 | Retraso de la grúa de cuchara | El cambio de cuchara tarda 4–6 min: la línea espera metal y el OEE cae a ≈ 60 %; el metal llega más frío (algunas uniones frías) |
+| 4 | Deriva del escáner 3D QC-01 | La medida se desvía hasta +0,16 mm: el escáner **rechaza piezas buenas** (falsos rechazos; el defecto real no cambia) |
+| 5 | Humedad de arena alta | La humedad de las prensas sube ~0,8 puntos → **porosidad** en las piezas de esos moldes (~47 min después) |
+| 6 | Inoculación intermitente (ROB-01) | ~1 de cada 3 moldes sin inocular → **fundición blanca** |
+| 7 | Termopar de IF-01 descalibrado | El termopar lee hasta 60 °C de más: el horno parece estar a 1490 °C pero está más frío, el metal sale frío y aparecen **uniones frías**. `COL-01.TemperaturaColada` (pirómetro) sí lo delata |
+
+`Simulacion.Velocidad` acelera la planta (por ejemplo ×10 para ver en 5 minutos lo que pasaría en 50).
+`SIM_VELOCIDAD` y `SIM_SEMILLA` fijan la velocidad inicial y la semilla aleatoria.
 
 ## Puesta en marcha
 
@@ -74,6 +101,7 @@ npm run opcua          # servidor OPC UA (variable OPCUA_PORT, por defecto 4840)
 npm run opcua:bridge   # puente WebSocket en el puerto 8081 (OPCUA_ENDPOINT)
 npm run dev            # gemelo digital 3D en desarrollo
 npm run opcua:test     # cliente de prueba
+node --test tests/motor.test.mjs   # pruebas del motor de proceso
 ```
 
 `OPCUA_ALTERNATE_HOSTNAME` admite varios nombres separados por comas: son los que el servidor anuncia en sus endpoints (en el compose, `localhost` y `fundicion-opcua`).
