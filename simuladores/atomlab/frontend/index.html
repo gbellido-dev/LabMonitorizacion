@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AtomLab · Central RBMK</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three/build/three.module.js", "three/addons/": "/vendor/three/examples/jsm/" } }
+  </script>
+</head>
+<body>
+  <header class="barra">
+    <div class="marca"><span class="logo" aria-hidden="true"></span><div><b>AtomLab</b><small>Central RBMK-1000 · OPC UA</small></div></div>
+    <div class="kpis-cab">
+      <div><small>Estado</small><b id="k-estado" class="pildora">—</b></div>
+      <div><small>Térmica</small><b id="k-mwt">—</b><span>MWt</span></div>
+      <div><small>Eléctrica</small><b id="k-mwe">—</b><span>MWe</span></div>
+      <div><small>Reactividad</small><b id="k-rho">—</b><span>β</span></div>
+      <div><small>ORM</small><b id="k-orm">—</b><span>barras</span></div>
+      <div class="dosimetro"><small>Dosis sala central</small><b id="k-dosis">—</b></div>
+    </div>
+    <a class="pildora enlace" id="opcua-endpoint" href="#opcua">opc.tcp://…</a>
+  </header>
+
+  <main>
+    <section class="visor" id="visor" aria-label="Vista 3D de la central">
+      <div class="herramientas">
+        <div class="segmentado" id="vistas">
+          <button data-vista="general" class="sel">General</button>
+          <button data-vista="reactor">Reactor</button>
+          <button data-vista="nucleo">Núcleo</button>
+          <button data-vista="sala">Sala central</button>
+          <button data-vista="turbinas">Turbinas</button>
+          <button data-vista="torre">Torre</button>
+        </div>
+        <label class="interruptor"><input type="checkbox" id="ver-corte" checked> Corte</label>
+        <label class="interruptor"><input type="checkbox" id="ver-radiacion"> Radiación</label>
+      </div>
+      <div class="leyenda-barras">
+        <span><i style="background:#d8d2c0"></i>RR</span><span><i style="background:#3fa34d"></i>AR</span>
+        <span><i style="background:#d8b23a"></i>USP</span><span><i style="background:#c0392b"></i>AZ</span>
+        <span><i style="background:#1a1d22;border:1px solid #777"></i>B₄C</span><span><i style="background:#777b80"></i>desplazador</span>
+      </div>
+      <div class="cargando" id="cargando">Cargando escena 3D…</div>
+      <div class="banda-accidente" id="banda-accidente" hidden>ROTURA DE CANALES · EXPLOSIÓN DE VAPOR · LIBERACIÓN DE ACTIVIDAD</div>
+    </section>
+
+    <aside class="panel">
+      <section class="tarjeta">
+        <div class="cabecera"><h2>Mandos del reactor</h2><span class="nota" id="regulador-txt"></span></div>
+        <div class="fila">
+          <span>Regulador automático (AR)</span>
+          <div class="segmentado" id="regulador"><button data-v="1">Auto</button><button data-v="0">Manual</button></div>
+        </div>
+        <div class="mando" id="m-potencia">
+          <label for="r-potencia">Consigna de potencia</label>
+          <input type="range" id="r-potencia" min="0" max="3200" step="50">
+          <output id="o-potencia">—</output><button class="boton" data-enviar="potencia">Fijar</button>
+        </div>
+        <h3>Barras de control <small class="nota">inserción %</small></h3>
+        <div id="barras"></div>
+        <div class="fila">
+          <span>Bombas de circulación</span>
+          <div class="pasos"><button class="boton" id="bombas-menos">−</button><b id="bombas-n">—</b><button class="boton" id="bombas-mas">+</button></div>
+        </div>
+        <div class="fila">
+          <span>Turbina</span>
+          <div class="fila-botones">
+            <button class="boton" id="turbina-disparo">Disparar</button>
+            <button class="boton" id="turbina-rearme">Rearmar</button>
+            <button class="boton aviso" id="turbina-prueba" title="Cierra la admisión: 4 bombas siguen la velocidad del turbogenerador">Prueba de inercia</button>
+          </div>
+        </div>
+        <div class="fila">
+          <span>Protecciones automáticas</span>
+          <label class="interruptor grande"><input type="checkbox" id="protecciones"> <span id="protecciones-txt">—</span></label>
+        </div>
+        <div class="fila-az5">
+          <button class="boton az5" id="az5" title="Parada de emergencia: todas las barras entran a 0,4 m/s">AZ-5</button>
+          <div>
+            <button class="boton" id="rearmar">Rearmar SCRAM</button>
+            <p class="nota" id="motivo"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="tarjeta">
+        <div class="cabecera"><h2>Tendencias</h2><span class="nota">últimos 2 min</span></div>
+        <canvas id="grafica" height="170"></canvas>
+        <div class="leyenda"><span><i style="background:#f97316"></i>Potencia (log)</span><span><i style="background:#38bdf8"></i>Reactividad β</span><span><i style="background:#a3e635"></i>Vacío %</span></div>
+      </section>
+
+      <section class="tarjeta">
+        <div class="cabecera"><h2>Sistemas</h2></div>
+        <div class="sistemas" id="sistemas"></div>
+      </section>
+
+      <section class="tarjeta">
+        <div class="cabecera"><h2>Alarmas</h2><span class="nota" id="n-alarmas"></span></div>
+        <ul class="lista" id="alarmas"></ul>
+        <h3>Eventos</h3>
+        <ul class="lista eventos" id="eventos"></ul>
+      </section>
+
+      <section class="tarjeta">
+        <div class="cabecera"><h2>Escenario</h2></div>
+        <div class="fila-botones">
+          <button class="boton" data-escenario="normal">Plena potencia</button>
+          <button class="boton aviso" data-escenario="chernobil" title="26-04-1986, 01:22: 200 MWt, xenón alto, ORM ≈ 0, 8 bombas, protecciones anuladas">26-04-1986 · 01:22</button>
+        </div>
+        <div class="fila"><span>Escala de tiempo</span>
+          <div class="segmentado" id="escala"><button data-v="1">×1</button><button data-v="5">×5</button><button data-v="20">×20</button><button data-v="60">×60</button></div>
+        </div>
+        <p class="ayuda">Con ×1 la física va en tiempo real (la excursión de potencia dura décimas de segundo). Con ×60 se ven en minutos la intoxicación por xenón y el calor residual.</p>
+      </section>
+
+      <section class="tarjeta" id="opcua">
+        <div class="cabecera"><h2>Servidor OPC UA</h2><span class="pildora" id="opcua-estado">—</span></div>
+        <p class="ayuda">Endpoint <code id="opcua-url">—</code> · seguridad <code>None</code> · namespace <code>urn:atomlab:rbmk</code></p>
+        <details><summary>Espacio de direcciones</summary><div class="tabla"><table><thead><tr><th>NodeId</th><th>Tipo</th><th>Unidad</th><th>Acceso</th></tr></thead><tbody id="nodos"></tbody></table></div></details>
+        <h3>Accesos de clientes</h3>
+        <ul class="lista eventos" id="opcua-registro"></ul>
+      </section>
+    </aside>
+  </main>
+  <div class="aviso-flotante" id="aviso"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

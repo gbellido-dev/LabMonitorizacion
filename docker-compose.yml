@@ -11,10 +11,11 @@
 #   SolarLab   http://localhost:8000  OPC UA 4840  Copias       http://localhost:8090
 #   Fundición  http://localhost:3000  OPC UA 4841
 #   ReactorLab http://localhost:8030  REST · WebSocket · SSE · webhooks
+#   AtomLab    http://localhost:8040  OPC UA 4842 (central nuclear RBMK, vista 3D)
 #
 # Dentro de la red de Docker cada servicio se alcanza por su nombre
 # (aerolab:1502, mosquitto:1883, solarlab:4840, fundicion-opcua:4841,
-# reactorlab:8030, thingsboard:1883 ...).
+# reactorlab:8030, atomlab:4842, thingsboard:1883 ...).
 
 name: labmonitorizacion
 
@@ -66,6 +67,17 @@ services:
       - reactorlab-data:/data
     ports:
       - "8030:8030"   # web + REST + WebSocket + SSE (protocolos web)
+    restart: unless-stopped
+
+  atomlab:
+    build: simuladores/atomlab
+    image: labmonitorizacion/atomlab
+    environment:
+      ATOMLAB_OPCUA_HOST: ${ATOMLAB_OPCUA_HOST:-localhost}   # nombre que se anuncia en el endpoint
+      ATOMLAB_ESCALA_TIEMPO: "1"                             # física en tiempo real
+    ports:
+      - "8040:8040"   # sala de control web con la vista 3D
+      - "4842:4842"   # OPC UA (opc.tcp://localhost:4842/atomlab/)
     restart: unless-stopped
 
   fundicion-web:

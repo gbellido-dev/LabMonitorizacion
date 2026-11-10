@@ -35,6 +35,7 @@ flowchart LR
 | [`simuladores/oceanlab`](simuladores/oceanlab) | Red mundial de boyas, broker MQTT integrado, globo 3D | repo `Clima-Oce-nico` |
 | [`simuladores/solarlab`](simuladores/solarlab) | Parque fotovoltaico 5 MWp, servidor OPC UA, escena 3D | repo `ParqueSolar` |
 | [`simuladores/reactorlab`](simuladores/reactorlab) | Reactor químico (Tennessee Eastman simplificado, portado de GRFICS) con API REST, WebSocket, SSE, webhooks y la vista 3D original de GRFICS | GRFICSv3 (GPL-3.0) |
+| [`simuladores/atomlab`](simuladores/atomlab) | Central nuclear RBMK-1000 (tipo Chernóbil) con servidor OPC UA, sala de control web y vista 3D realista (Three.js); incluye el escenario del 26-04-1986 | nuevo |
 | [`simuladores/fundicion`](simuladores/fundicion) | Gemelo digital 3D de una fundición, servidor OPC UA + puente WebSocket | repo `Fundicion` |
 | [`plataforma/node-red`](plataforma/node-red) | Imagen Node-RED con Modbus, OPC UA y Dashboard 2.0 + biblioteca de flujos | nuevo |
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
@@ -66,6 +67,7 @@ También se puede arrancar solo una parte, por ejemplo `docker compose up -d aer
 | SolarLab | http://localhost:8000 · `opc.tcp://localhost:4840/solarlab/server/` | `opc.tcp://solarlab:4840/solarlab/server/` |
 | Fundición | http://localhost:3000 · `opc.tcp://localhost:4841/UA/Fundicion` | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
 | ReactorLab | http://localhost:8030 · vista 3D en `/3d/` · API en `/docs` | `http://reactorlab:8030` · `ws://reactorlab:8030/ws` |
+| AtomLab | http://localhost:8040 · OPC UA `opc.tcp://localhost:4842/atomlab/` | `opc.tcp://atomlab:4842/atomlab/` |
 | Node-RED | http://localhost:1880 · dashboard en `/dashboard` | `nodered:1880` |
 | Mosquitto | MQTT `localhost:1883` · WS `localhost:9001` | `mosquitto:1883` |
 | ThingsBoard | http://localhost:8080 | `thingsboard:8080` · MQTT de dispositivos `thingsboard:1883` |

@@ -1,0 +1,11 @@
+{
+  "name": "atomlab-frontend",
+  "private": true,
+  "description": "Vista 3D de AtomLab: Three.js se sirve tal cual (sin empaquetador) desde /vendor/three",
+  "scripts": {
+    "vendor": "node copiar-vendor.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}

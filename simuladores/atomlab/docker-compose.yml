@@ -1,0 +1,12 @@
+# AtomLab por separado. Con el laboratorio completo se usa el docker-compose.yml de la raíz.
+services:
+  atomlab:
+    build: .
+    container_name: atomlab
+    ports:
+      - "8040:8040"   # sala de control web y API
+      - "4842:4842"   # servidor OPC UA
+    environment:
+      ATOMLAB_OPCUA_HOST: localhost
+      ATOMLAB_ESCALA_TIEMPO: "1"
+    restart: unless-stopped
