@@ -14,9 +14,12 @@
 //   Objects/Mantenimiento                   Averia (escribible) y AveriaNombre
 //   Objects/Simulacion                      Velocidad (escribible) y la «verdad» de la simulación
 //
+// Además: alarmas y condiciones OPC UA (ExclusiveLimitAlarm) sobre variables clave, métodos
+// (InyectarAveria, Reparar, ConsultarPieza, PiezasDelLote) e histórico (HistoryRead) de 2 h.
+//
 // Seguridad: pensado para simulación. Acepta conexiones anónimas y sin
 // cifrado (SecurityPolicy None) además de las políticas seguras por defecto.
-import { OPCUAServer, Variant, DataType, StatusCodes } from "node-opcua";
+import { OPCUAServer, Variant, DataType, StatusCodes, VariantArrayType } from "node-opcua";
 import { assets, kpis, loteActivo, zones } from "./plant-model.mjs";
 import { Planta, AVERIAS } from "./motor.mjs";
 
@@ -49,6 +52,9 @@ await server.initialize();
 const addressSpace = server.engine.addressSpace;
 const ns = addressSpace.getOwnNamespace();
 const objects = addressSpace.rootFolder.objects;
+addressSpace.installAlarmsAndConditionsService();
+const nodos = new Map();   // "IF-01.TemperaturaMetal" → UAVariable (para alarmas e histórico)
+const activosObj = new Map();
 
 // Cada variable publicada: { node, dataType, leer: () => valor, ultimo }
 const publicadas = [];
@@ -58,6 +64,7 @@ function variable(parent, browseName, nodeId, dataType, leer, extra = {}) {
     componentOf: parent, browseName, nodeId: `s=${nodeId}`,
     dataType: DataType[dataType], accessLevel: "CurrentRead", minimumSamplingInterval: 250, ...extra,
   });
+  nodos.set(nodeId, node);
   const entrada = { node, dataType: DataType[dataType], leer, ultimo: undefined };
   publicadas.push(entrada);
   escribir(entrada);
@@ -83,8 +90,13 @@ const tipoTag = (dir) => (dir.includes("DBX") ? "Boolean" : dir.includes("DBW") 
 
 /* ──────────────── PlantaNorte ──────────────── */
 const plant = ns.addFolder(objects, { browseName: "PlantaNorte", nodeId: "s=PlantaNorte" });
+// Los activos son fuentes de eventos del objeto Server (i=2253): un cliente que se suscribe a eventos en
+// Server recibe las alarmas de toda la planta. (Se cuelgan del Server y no de la carpeta de la planta para
+// que un BROWSE de PlantaNorte siga devolviendo cada zona y cada activo una sola vez.)
+const servidorObj = addressSpace.rootFolder.objects.server;
 
-const kpiFolder = ns.addObject({ organizedBy: plant, browseName: "KPIs", nodeId: "s=KPIs" });
+const kpiFolder = ns.addObject({ organizedBy: plant, browseName: "KPIs", nodeId: "s=KPIs", eventSourceOf: servidorObj, eventNotifier: 1 });
+activosObj.set("KPIs", kpiFolder);
 for (const k of kpis) {
   const n = variable(kpiFolder, k.n, `KPIs.${k.n}`, "Double", () => planta.v[`KPIs.${k.n}`], { description: `${k.n} [${k.unit}]` });
   if (k.unit) constante(n, "Unidad", `KPIs.${k.n}.Unidad`, k.unit);
@@ -96,8 +108,9 @@ const zoneFolders = new Map(zones.map((z) => [z, ns.addFolder(plant, { browseNam
 for (const a of assets) {
   const device = ns.addObject({
     organizedBy: zoneFolders.get(a.zone), browseName: a.short, displayName: `${a.short} · ${a.name}`,
-    description: a.name, nodeId: `s=${a.short}`,
+    description: a.name, nodeId: `s=${a.short}`, eventSourceOf: servidorObj, eventNotifier: 1,
   });
+  activosObj.set(a.short, device);
   constante(device, "Nombre", `${a.short}.Nombre`, a.name);
   variable(device, "Estado", `${a.short}.Estado`, "String", () => planta.estados[a.short]);
   constante(device, "PLC", `${a.short}.PLC`, a.plc);
@@ -191,6 +204,68 @@ variable(simObj, "TemperaturaRealIF01", "Simulacion.TemperaturaRealIF01", "Doubl
   { description: "Temperatura real del metal en IF-01 (el termopar puede mentir) [°C]" });
 variable(simObj, "DefectoRealUltimaPieza", "Simulacion.DefectoRealUltimaPieza", "String", () => P().defectoReal,
   { description: "Defecto real de la última pieza (aunque el escáner no lo vea, o vea uno que no hay)" });
+
+/* ──────────────── Alarmas y condiciones (OPC UA A&C) ──────────────── */
+// ExclusiveLimitAlarm: el propio servidor vigila la variable y activa la alarma en el nivel que toque
+// (LowLow, Low, High, HighHigh). Cada cambio de estado es un evento que reciben los clientes suscritos.
+const ALARMAS = [
+  ["IF-01", "TemperaturaMetal", "AlarmaTemperatura", { lowLimit: 1100, highLimit: 1530, highHighLimit: 1550 }],
+  ["IF-02", "Presion", "AlarmaSobrepresion", { lowLimit: -40, highLimit: 0, highHighLimit: 4 }],
+  ["COL-01", "TemperaturaColada", "AlarmaColadaFria", { lowLowLimit: 1390, lowLimit: 1405, highLimit: 1530 }],
+  ["DES-01", "Vibracion", "AlarmaVibracion", { lowLimit: -1, highLimit: 12, highHighLimit: 18 }],
+  ["QC-01", "DesviacionEscaneo", "AlarmaDesviacion", { lowLimit: -1, highLimit: 0.2, highHighLimit: 0.3 }],
+  ["KPIs", "OEEPlanta", "AlarmaOEE", { lowLowLimit: 60, lowLimit: 75, highLimit: 101 }],
+];
+for (const [activo, variableN, nombre, limites] of ALARMAS) {
+  const fuente = activosObj.get(activo);
+  const entrada = nodos.get(`${activo}.${variableN}`);
+  ns.instantiateExclusiveLimitAlarm("ExclusiveLimitAlarmType", {
+    browseName: nombre, nodeId: `s=${activo}.${nombre}`, componentOf: fuente, conditionSource: fuente,
+    conditionName: nombre, inputNode: entrada, optionals: ["ConfirmedState", "Confirm"], ...limites,
+  });
+}
+
+/* ──────────────── Métodos ──────────────── */
+const metodo = (padre, browseName, nodeId, entradas, salidas, fn, descripcion) => {
+  const m = ns.addMethod(padre, { browseName, nodeId: `s=${nodeId}`, description: descripcion,
+    inputArguments: entradas, outputArguments: salidas });
+  m.bindMethod(async (args, _contexto) => {   // dos parámetros: estilo «promesa» de node-opcua
+    try { return await fn(args.map((a) => a.value)); }
+    catch (e) { return { statusCode: StatusCodes.BadInvalidArgument }; }
+  });
+};
+metodo(maint, "InyectarAveria", "Mantenimiento.InyectarAveria",
+  [{ name: "Codigo", dataType: DataType.Int32, description: `0-${AVERIAS.length - 1}` }],
+  [{ name: "Nombre", dataType: DataType.String }],
+  ([codigo]) => planta.setAveria(Number(codigo))
+    ? { statusCode: StatusCodes.Good, outputArguments: [{ dataType: DataType.String, value: AVERIAS[codigo] }] }
+    : { statusCode: StatusCodes.BadOutOfRange },
+  "Inyecta una avería (igual que escribir Mantenimiento.Averia)");
+metodo(maint, "Reparar", "Mantenimiento.Reparar", [], [],
+  () => { planta.setAveria(0); return { statusCode: StatusCodes.Good }; }, "Quita la avería (y cambia el rodamiento si estaba dañado)");
+metodo(traz, "ConsultarPieza", "Trazabilidad.ConsultarPieza",
+  [{ name: "Id", dataType: DataType.String, description: "Número de serie, p. ej. P-004120" }],
+  [{ name: "Historia", dataType: DataType.String, description: "JSON con molde, colada, condiciones y resultado" }],
+  ([id]) => {
+    const pz = planta.piezas.find((x) => x.id === id);
+    if (!pz) return { statusCode: StatusCodes.BadNotFound };
+    const { defectoReal, ts, ...visible } = pz;      // la verdad de la simulación no se publica aquí
+    return { statusCode: StatusCodes.Good, outputArguments: [{ dataType: DataType.String, value: JSON.stringify(visible) }] };
+  }, "Historia de una de las últimas 500 piezas");
+metodo(traz, "PiezasDelLote", "Trazabilidad.PiezasDelLote",
+  [{ name: "Lote", dataType: DataType.String, description: "Colada, p. ej. FE-261110-085" }],
+  [{ name: "Piezas", dataType: DataType.String, valueRank: 1, arrayDimensions: [0] }, { name: "Rechazadas", dataType: DataType.UInt32 }],
+  ([lote]) => {
+    const pz = planta.piezas.filter((x) => x.lote === lote);
+    return { statusCode: StatusCodes.Good, outputArguments: [
+      { dataType: DataType.String, arrayType: VariantArrayType.Array, value: pz.map((x) => x.id) },
+      { dataType: DataType.UInt32, value: pz.filter((x) => x.resultado !== "OK").length }] };
+  }, "Piezas inspeccionadas de una colada (para retirar un lote)");
+
+/* ──────────────── Histórico (HistoryRead) ──────────────── */
+const HISTORICO = ["KPIs.OEEPlanta", "KPIs.EnergiaEspecifica", "IF-01.TemperaturaMetal", "COL-01.TemperaturaColada",
+  "DES-01.Vibracion", "QC-01.DesviacionEscaneo"];
+for (const id of HISTORICO) addressSpace.installHistoricalDataNode(nodos.get(id), { maxOnlineValues: 7200 });
 
 /* ──────────────── bucle: 1 s real = «velocidad» segundos simulados ──────────────── */
 const timer = setInterval(() => {

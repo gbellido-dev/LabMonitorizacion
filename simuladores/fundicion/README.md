@@ -11,6 +11,7 @@ Es el simulador con más activos del laboratorio: sirve para practicar el **desc
 | `fundicion-opcua` | `4841` | Servidor OPC UA: `opc.tcp://localhost:4841/UA/Fundicion` (desde otro contenedor, `opc.tcp://fundicion-opcua:4841/UA/Fundicion`) |
 | `fundicion-bridge` | `8081` | Puente OPC UA → WebSocket: se suscribe a las variables y envía una instantánea cada segundo a la escena 3D |
 | `fundicion-web` | `3000` | Gemelo digital 3D: `http://localhost:3000` |
+| `fundicion-s7` | `102` | PLC Siemens S7 simulado (S7comm): las `TagsS7` en sus DB, y DB100 para órdenes (ver [docs/S7_INTEGRATION.md](docs/S7_INTEGRATION.md)) |
 
 Seguridad `None` y acceso anónimo (también admite las políticas seguras por defecto de node-opcua).
 
@@ -68,6 +69,14 @@ Variables nuevas respecto a la versión anterior: `IF-0x.Inclinacion`, `IF-0x.En
 **NodeId**: `ns=1;s=<ACTIVO>.<Variable>`, por ejemplo `ns=1;s=IF-01.TemperaturaMetal`, `ns=1;s=COL-01.PesoCuchara`,
 `ns=1;s=KPIs.OEEPlanta`, `ns=1;s=Trazabilidad.UltimaPieza.Lote`. Las carpetas de zona son `ns=1;s=Zona.Fusion`, etc.
 
+## OPC UA avanzado
+
+| Función | Dónde | Qué ofrece |
+|---|---|---|
+| **Alarmas y condiciones** | `ExclusiveLimitAlarm` en los activos; eventos al objeto `Server` (`i=2253`) | `IF-01.AlarmaTemperatura` (> 1530 / 1550 °C), `IF-02.AlarmaSobrepresion` (> 0 / 4 Pa), `COL-01.AlarmaColadaFria` (< 1405 / 1390 °C), `DES-01.AlarmaVibracion` (> 12 / 18 mm/s), `QC-01.AlarmaDesviacion` (> 0,2 / 0,3 mm), `KPIs.AlarmaOEE` (< 75 / 60 %). El servidor las activa y desactiva solo y cada cambio es un evento con mensaje y severidad |
+| **Métodos** | `Mantenimiento`, `Trazabilidad` | `InyectarAveria(Codigo)`, `Reparar()`, `ConsultarPieza(Id)` → JSON con la historia de la pieza, `PiezasDelLote(Lote)` → piezas de una colada y cuántas se rechazaron |
+| **Histórico** | HistoryRead | 2 h a 1 Hz de `KPIs.OEEPlanta`, `KPIs.EnergiaEspecifica`, `IF-01.TemperaturaMetal`, `COL-01.TemperaturaColada`, `DES-01.Vibracion`, `QC-01.DesviacionEscaneo` |
+
 ## Averías (para las prácticas)
 
 Escribiendo un `Int32` en `ns=1;s=Mantenimiento.Averia` (un valor fuera de 0–7 se rechaza con `BadOutOfRange`).
@@ -90,7 +99,7 @@ cruzar el túnel (por eso importa la trazabilidad).
 
 ## Puesta en marcha
 
-Con el laboratorio completo: `docker compose up -d fundicion-opcua fundicion-bridge fundicion-web`.
+Con el laboratorio completo: `docker compose up -d fundicion-opcua fundicion-bridge fundicion-web fundicion-s7`.
 
 Por separado (Node.js ≥ 22.13):
 

@@ -1,0 +1,2 @@
+python-snap7==3.2.1
+asyncua==2.1.0

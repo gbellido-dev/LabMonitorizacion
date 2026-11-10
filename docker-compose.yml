@@ -111,6 +111,18 @@ services:
       - "8081:8081"   # WebSocket que consume el dashboard 3D
     restart: unless-stopped
 
+  fundicion-s7:
+    # PLC Siemens S7 simulado: las TagsS7 de cada activo en sus DB (S7comm)
+    build: simuladores/fundicion/s7
+    image: labmonitorizacion/fundicion-s7
+    depends_on:
+      - fundicion-opcua
+    environment:
+      OPCUA_ENDPOINT: opc.tcp://fundicion-opcua:4841/UA/Fundicion
+    ports:
+      - "102:102"     # S7comm (rack 0, slot 1); desde Node-RED: fundicion-s7:102
+    restart: unless-stopped
+
   # ------------------------------------------------------------- plataforma IIoT
   mosquitto:
     image: eclipse-mosquitto:2.0.22

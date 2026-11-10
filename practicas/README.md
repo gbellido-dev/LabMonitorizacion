@@ -106,6 +106,7 @@ Los guiones de las series 1 y 3 están escritos también para instalaciones suel
 | URL de webhooks hacia Node-RED | `http://nodered:1880/...` |
 | API HTTP de ThingsBoard | `http://thingsboard:8080/api/v1/{TOKEN}/...` |
 | Endpoint OPC UA Fundición | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
+| PLC S7 Fundición | host `fundicion-s7`, puerto `102`, rack 0, slot 1 |
 | MQTT de ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
 | Web de ThingsBoard | `http://localhost:8080` (`tenant@thingsboard.org` / `tenant`) |
 | Dashboard 2.0 | `http://localhost:1880/dashboard` |

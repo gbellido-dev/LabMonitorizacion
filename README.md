@@ -36,7 +36,7 @@ flowchart LR
 | [`simuladores/solarlab`](simuladores/solarlab) | Parque fotovoltaico 5 MWp, servidor OPC UA, escena 3D | repo `ParqueSolar` |
 | [`simuladores/reactorlab`](simuladores/reactorlab) | Reactor químico (Tennessee Eastman simplificado, portado de GRFICS) con API REST, WebSocket, SSE, webhooks y la vista 3D original de GRFICS | GRFICSv3 (GPL-3.0) |
 | [`simuladores/atomlab`](simuladores/atomlab) | Central nuclear RBMK-1000 (tipo Chernóbil) con servidor OPC UA, sala de control web y vista 3D realista (Three.js); incluye el escenario del 26-04-1986 | nuevo |
-| [`simuladores/fundicion`](simuladores/fundicion) | Gemelo digital 3D de una fundición, servidor OPC UA + puente WebSocket | repo `Fundicion` |
+| [`simuladores/fundicion`](simuladores/fundicion) | Gemelo digital 3D de una fundición con motor de proceso causal y trazabilidad, servidor OPC UA (alarmas, métodos, histórico), PLC S7 simulado y puente WebSocket | repo `Fundicion` |
 | [`plataforma/node-red`](plataforma/node-red) | Imagen Node-RED con Modbus, OPC UA y Dashboard 2.0 + biblioteca de flujos | nuevo |
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
 | [`plataforma/thingsboard`](plataforma/thingsboard) | ThingsBoard CE 4.3.1 que se instala solo en el primer arranque | nuevo |
@@ -67,7 +67,7 @@ También se puede arrancar solo una parte, por ejemplo `docker compose up -d aer
 | AeroLab | http://localhost:8010 · Modbus `localhost:1502` | `aerolab:1502` |
 | OceanLab | http://localhost:8020 (publica en Mosquitto) | `oceanlab:8020` |
 | SolarLab | http://localhost:8000 · `opc.tcp://localhost:4840/solarlab/server/` | `opc.tcp://solarlab:4840/solarlab/server/` |
-| Fundición | http://localhost:3000 · `opc.tcp://localhost:4841/UA/Fundicion` | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
+| Fundición | http://localhost:3000 · `opc.tcp://localhost:4841/UA/Fundicion` · PLC S7 `localhost:102` | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` · S7 `fundicion-s7:102` |
 | ReactorLab | http://localhost:8030 · vista 3D en `/3d/` · API en `/docs` | `http://reactorlab:8030` · `ws://reactorlab:8030/ws` |
 | AtomLab | http://localhost:8040 · OPC UA `opc.tcp://localhost:4842/atomlab/` | `opc.tcp://atomlab:4842/atomlab/` |
 | Node-RED | http://localhost:1880 · dashboard en `/dashboard` | `nodered:1880` |
