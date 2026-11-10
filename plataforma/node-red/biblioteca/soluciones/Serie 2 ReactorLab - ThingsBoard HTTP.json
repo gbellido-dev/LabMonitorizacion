@@ -1,0 +1,589 @@
+[
+    {
+        "id": "d1b136ac6d2c9805",
+        "type": "tab",
+        "label": "ReactorLab → ThingsBoard (HTTP)",
+        "disabled": false,
+        "info": "Solución de la práctica 2-thingsboard/reactorlab. Pon el token del dispositivo en la variable de entorno TB_TOKEN (tipo credencial) de esta pestaña.",
+        "env": [
+            {
+                "name": "TB_TOKEN",
+                "value": "",
+                "type": "cred"
+            }
+        ]
+    },
+    {
+        "id": "5cd85945bc6e91cb",
+        "type": "comment",
+        "z": "d1b136ac6d2c9805",
+        "name": "FASE 1 · Telemetría y atributos por HTTP",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "e54da1a2d483b1c7",
+        "type": "inject",
+        "z": "d1b136ac6d2c9805",
+        "name": "Cada 5 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "66df742fb84fce9b"
+            ]
+        ]
+    },
+    {
+        "id": "66df742fb84fce9b",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "GET /api/v1/proceso",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://reactorlab:8030/api/v1/proceso",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 300,
+        "y": 100,
+        "wires": [
+            [
+                "7396b15aaa0b498d"
+            ]
+        ]
+    },
+    {
+        "id": "7396b15aaa0b498d",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Comprobar respuesta",
+        "func": "// ENTRADA: la respuesta de ReactorLab (por HTTP o, más adelante, por WebSocket)\n//   msg.statusCode = código HTTP (200 = correcto). Por WebSocket no existe.\n//   msg.payload    = el estado de la planta en JSON\n// SALIDA:  el mismo mensaje, solo si la respuesta es correcta\n\nif (msg.statusCode !== undefined && msg.statusCode !== 200) {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"HTTP \" + msg.statusCode });\n    return null;                          // 404, 500, ECONNREFUSED... no seguimos\n}\nif (typeof msg.payload !== \"object\" || !msg.payload.medidas) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"respuesta no válida\" });\n    return null;\n}\nnode.status({ fill: \"green\", shape: \"dot\", text: \"secuencia \" + msg.payload.secuencia });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 100,
+        "wires": [
+            [
+                "21d2798fcf0f25d0"
+            ]
+        ]
+    },
+    {
+        "id": "21d2798fcf0f25d0",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Preparar telemetría",
+        "func": "// ENTRADA: el estado completo de la planta (GET /api/v1/proceso)\n// SALIDA:  msg.payload = { ts, values } y msg.url = API HTTP de ThingsBoard\n\nconst p = msg.payload;\nconst m = p.medidas;\nconst v = p.valvulas;\n\nmsg.payload = {\n    ts: Date.parse(p.timestamp),          // hora de la medida en la planta\n    values: {\n        presion_kpa:           m.presion_kpa,\n        nivel_pct:             m.nivel_pct,\n        caudal_f1_kmolh:       m.caudal_kmolh.f1,\n        caudal_f2_kmolh:       m.caudal_kmolh.f2,\n        caudal_purga_kmolh:    m.caudal_kmolh.purga,\n        caudal_producto_kmolh: m.caudal_kmolh.producto,\n        a_purga_pct:           m.composicion_purga_pct.A,\n        coste_relativo:        m.coste_relativo,\n        valvula_f1_pct:        v.f1.posicion_pct,\n        valvula_f2_pct:        v.f2.posicion_pct,\n        valvula_purga_pct:     v.purga.posicion_pct,\n        valvula_producto_pct:  v.producto.posicion_pct,\n        sp_presion_kpa:        p.consignas.presion_kpa,\n        sp_produccion_kmolh:   p.consignas.caudal_producto_kmolh,\n        modo:                  p.estado.modo,\n        paro_emergencia:       p.estado.paro_emergencia,\n        alarmas_activas:       p.estado.alarmas_activas\n    }\n};\n\n// En la API HTTP de ThingsBoard el token va en la URL. Lo leemos de una\n// variable de entorno de tipo credencial: así no aparece en el flujo exportado.\nmsg.method = \"POST\";\nmsg.url = \"http://thingsboard:8080/api/v1/\" + env.get(\"TB_TOKEN\") + \"/telemetry\";\nmsg.headers = { \"Content-Type\": \"application/json\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 100,
+        "wires": [
+            [
+                "af4ed2f993ca1320"
+            ]
+        ]
+    },
+    {
+        "id": "af4ed2f993ca1320",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "POST telemetría",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 960,
+        "y": 100,
+        "wires": [
+            [
+                "6e19df94b747441d"
+            ]
+        ]
+    },
+    {
+        "id": "6e19df94b747441d",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Comprobar envío",
+        "func": "// ENTRADA: la respuesta de ThingsBoard\n// SALIDA:  nada; solo muestra el resultado debajo del nodo\n\nif (msg.statusCode === 200) {\n    node.status({ fill: \"green\", shape: \"dot\", text: \"ThingsBoard 200\" });\n} else {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"ThingsBoard \" + msg.statusCode });\n    node.warn(\"ThingsBoard respondió \" + msg.statusCode + \" (¿token mal copiado?)\");\n}\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "275974dc62ac3667",
+        "type": "inject",
+        "z": "d1b136ac6d2c9805",
+        "name": "Al desplegar y cada 10 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 180,
+        "wires": [
+            [
+                "4d55a29214723413"
+            ]
+        ]
+    },
+    {
+        "id": "4d55a29214723413",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Ficha del reactor",
+        "func": "// SALIDA: datos fijos del reactor (atributos de cliente) por HTTP\n\nmsg.payload = {\n    proceso:          \"Tennessee Eastman simplificado (A + C -> D)\",\n    volumen_m3:       122,\n    volumen_liquido_max_m3: 30,\n    protocolo:        \"REST / WebSocket / webhooks\",\n    api:              \"http://reactorlab:8030/api/v1/proceso\"\n};\nmsg.method = \"POST\";\nmsg.url = \"http://thingsboard:8080/api/v1/\" + env.get(\"TB_TOKEN\") + \"/attributes\";\nmsg.headers = { \"Content-Type\": \"application/json\" };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 180,
+        "wires": [
+            [
+                "d154a548cacb438f"
+            ]
+        ]
+    },
+    {
+        "id": "d154a548cacb438f",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "POST atributos",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 560,
+        "y": 180,
+        "wires": [
+            [
+                "218c2eff404f611b"
+            ]
+        ]
+    },
+    {
+        "id": "218c2eff404f611b",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Comprobar envío",
+        "func": "// ENTRADA: la respuesta de ThingsBoard\n// SALIDA:  nada; solo muestra el resultado debajo del nodo\n\nif (msg.statusCode === 200) {\n    node.status({ fill: \"green\", shape: \"dot\", text: \"ThingsBoard 200\" });\n} else {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"ThingsBoard \" + msg.statusCode });\n    node.warn(\"ThingsBoard respondió \" + msg.statusCode + \" (¿token mal copiado?)\");\n}\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2cd0f7029274f034",
+        "type": "comment",
+        "z": "d1b136ac6d2c9805",
+        "name": "FASE 2 · Órdenes desde ThingsBoard (RPC por long polling HTTP)",
+        "info": "",
+        "x": 230,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "34fadd3808ae4eae",
+        "type": "inject",
+        "z": "d1b136ac6d2c9805",
+        "name": "Empezar a escuchar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 320,
+        "wires": [
+            [
+                "86541a277156af92"
+            ]
+        ]
+    },
+    {
+        "id": "86541a277156af92",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Esperar órdenes",
+        "func": "// SALIDA: petición GET de \"long polling\" a ThingsBoard.\n// ThingsBoard mantiene la petición abierta hasta 20 s: si llega una orden,\n// responde 200 con ella; si no, responde 408 y volvemos a preguntar.\n\nmsg.method = \"GET\";\nmsg.url = \"http://thingsboard:8080/api/v1/\" + env.get(\"TB_TOKEN\") + \"/rpc?timeout=20000\";\nmsg.requestTimeout = 25000;            // ms: algo más que el timeout de ThingsBoard\ndelete msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 320,
+        "wires": [
+            [
+                "98ef3f34ccf41881"
+            ]
+        ]
+    },
+    {
+        "id": "98ef3f34ccf41881",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "GET rpc (long polling)",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 520,
+        "y": 320,
+        "wires": [
+            [
+                "556db67e68271d2b"
+            ]
+        ]
+    },
+    {
+        "id": "556db67e68271d2b",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Traducir orden",
+        "func": "// ENTRADA: respuesta de ThingsBoard al long polling\n//   200 -> msg.payload = { \"id\": 3, \"method\": \"setPresion\", \"params\": 2800 }\n//   408 -> no había órdenes (se vuelve a preguntar)\n//   (el nodo http request devuelve el texto tal cual: lo convertimos aquí)\n//   otro (401, ECONNREFUSED...) -> error: se reintenta dentro de 5 s\n// SALIDAS: 1 petición para ReactorLab · 2 volver a esperar · 3 reintentar más tarde\n\nconst CLAVE = \"reactorlab\";\n\nif (msg.statusCode === 408) {\n    return [null, { payload: null }, null];          // no había órdenes\n}\nif (msg.statusCode === 200 && typeof msg.payload === \"string\") {\n    msg.payload = JSON.parse(msg.payload);           // ThingsBoard responde texto JSON\n}\nif (msg.statusCode !== 200 || !msg.payload || msg.payload.id === undefined) {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"ThingsBoard \" + msg.statusCode });\n    return [null, null, { payload: null }];          // error: esperar antes de reintentar\n}\nnode.status({ fill: \"green\", shape: \"dot\", text: \"orden \" + msg.payload.method });\nconst orden = msg.payload;\nconst peticion = {\n    rpcId: orden.id,                   // lo necesitaremos para responder\n    headers: { \"X-API-Key\": CLAVE, \"Content-Type\": \"application/json\" }\n};\n\nif (orden.method === \"setPresion\") {\n    peticion.method = \"PUT\";\n    peticion.url = \"http://reactorlab:8030/api/v1/consignas\";\n    peticion.payload = { presion_kpa: Number(orden.params) };\n} else if (orden.method === \"setProduccion\") {\n    peticion.method = \"PUT\";\n    peticion.url = \"http://reactorlab:8030/api/v1/consignas\";\n    peticion.payload = { caudal_producto_kmolh: Number(orden.params) };\n} else if (orden.method === \"paroEmergencia\") {\n    peticion.method = \"POST\";\n    peticion.url = \"http://reactorlab:8030/api/v1/paro-emergencia\";\n    peticion.payload = { activo: orden.params === true || orden.params === \"true\" };\n} else {\n    // orden desconocida: se responde con error sin tocar la planta\n    peticion.method = \"SKIP\";\n    peticion.payload = { ok: false, error: \"Orden desconocida: \" + orden.method };\n}\nreturn [peticion, null, null];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 320,
+        "wires": [
+            [
+                "b576865937eab62d"
+            ],
+            [
+                "86541a277156af92"
+            ],
+            [
+                "63c63ec4614086a3"
+            ]
+        ]
+    },
+    {
+        "id": "63c63ec4614086a3",
+        "type": "delay",
+        "z": "d1b136ac6d2c9805",
+        "name": "Esperar 5 s",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 740,
+        "y": 400,
+        "wires": [
+            [
+                "86541a277156af92"
+            ]
+        ]
+    },
+    {
+        "id": "b576865937eab62d",
+        "type": "switch",
+        "z": "d1b136ac6d2c9805",
+        "name": "¿Orden conocida?",
+        "property": "method",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "SKIP",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "SKIP",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 960,
+        "y": 300,
+        "wires": [
+            [
+                "4e1fbea743e0a8a7"
+            ],
+            [
+                "f86902f21ba795a9"
+            ]
+        ]
+    },
+    {
+        "id": "4e1fbea743e0a8a7",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "Llamar a ReactorLab",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1160,
+        "y": 290,
+        "wires": [
+            [
+                "f86902f21ba795a9"
+            ]
+        ]
+    },
+    {
+        "id": "f86902f21ba795a9",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Responder a ThingsBoard",
+        "func": "// ENTRADA: la respuesta de ReactorLab a la orden (o una orden desconocida)\n// SALIDA:  POST con el resultado a ThingsBoard (cierra la petición RPC)\n\nlet resultado;\nif (msg.method === \"SKIP\") {\n    resultado = msg.payload;\n} else if (msg.statusCode === 200) {\n    resultado = { ok: true, respuesta: msg.payload };\n} else {\n    resultado = { ok: false, http: msg.statusCode, error: msg.payload && msg.payload.detail };\n}\nreturn {\n    method: \"POST\",\n    url: \"http://thingsboard:8080/api/v1/\" + env.get(\"TB_TOKEN\") + \"/rpc/\" + msg.rpcId,\n    headers: { \"Content-Type\": \"application/json\" },\n    payload: resultado\n};",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1380,
+        "y": 320,
+        "wires": [
+            [
+                "ddff08ac6dc91f16",
+                "5f6297300becc176"
+            ]
+        ]
+    },
+    {
+        "id": "ddff08ac6dc91f16",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "POST rpc/{id}",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1580,
+        "y": 320,
+        "wires": [
+            [
+                "86541a277156af92"
+            ]
+        ]
+    },
+    {
+        "id": "5f6297300becc176",
+        "type": "debug",
+        "z": "d1b136ac6d2c9805",
+        "name": "Órdenes",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1580,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "c0c9575575ba7e8b",
+        "type": "comment",
+        "z": "d1b136ac6d2c9805",
+        "name": "FASE 2 · Webhook de ReactorLab directo a ThingsBoard",
+        "info": "",
+        "x": 220,
+        "y": 470,
+        "wires": []
+    },
+    {
+        "id": "fdf30ed1289f1753",
+        "type": "inject",
+        "z": "d1b136ac6d2c9805",
+        "name": "Al desplegar y cada 10 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 530,
+        "wires": [
+            [
+                "da24a6a223acb445"
+            ]
+        ]
+    },
+    {
+        "id": "da24a6a223acb445",
+        "type": "function",
+        "z": "d1b136ac6d2c9805",
+        "name": "Alta del webhook",
+        "func": "// SALIDA: alta de un webhook de ReactorLab que envía las alarmas\n// DIRECTAMENTE a ThingsBoard, sin pasar por Node-RED\n\nconst CLAVE = \"reactorlab\";\n\nmsg.method  = \"POST\";\nmsg.url     = \"http://reactorlab:8030/api/v1/webhooks\";\nmsg.headers = { \"X-API-Key\": CLAVE, \"Content-Type\": \"application/json\" };\nmsg.payload = {\n    url: \"http://thingsboard:8080/api/v1/\" + env.get(\"TB_TOKEN\") + \"/telemetry\",\n    eventos: [\"alarma\"],\n    formato: \"plano\"                   // claves sin anidar: alarma_codigo, alarma_valor...\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 530,
+        "wires": [
+            [
+                "8d0392e27a9e5878"
+            ]
+        ]
+    },
+    {
+        "id": "8d0392e27a9e5878",
+        "type": "http request",
+        "z": "d1b136ac6d2c9805",
+        "name": "POST /api/v1/webhooks",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 560,
+        "y": 530,
+        "wires": [
+            [
+                "fd2ea51e2fbd613d"
+            ]
+        ]
+    },
+    {
+        "id": "fd2ea51e2fbd613d",
+        "type": "debug",
+        "z": "d1b136ac6d2c9805",
+        "name": "Alta webhook",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 530,
+        "wires": []
+    }
+]

@@ -1,6 +1,6 @@
 # LabMonitorizacion
 
-Banco de prácticas de la asignatura **Monitorización de Máquinas** (especialización en Digitalización del Mantenimiento). Reúne en un único repositorio cuatro simuladores industriales, la plataforma IIoT con la que se trabaja en clase (**Node-RED**, **Mosquitto** y **ThingsBoard**) y las prácticas.
+Banco de prácticas de la asignatura **Monitorización de Máquinas** (especialización en Digitalización del Mantenimiento). Reúne en un único repositorio cinco simuladores industriales, la plataforma IIoT con la que se trabaja en clase (**Node-RED**, **Mosquitto** y **ThingsBoard**) y las prácticas.
 
 ```mermaid
 flowchart LR
@@ -9,6 +9,7 @@ flowchart LR
         O["OceanLab<br/>boyas · MQTT"]
         S["SolarLab<br/>parque FV · OPC UA"]
         F["Fundición<br/>gemelo digital · OPC UA"]
+        R["ReactorLab<br/>planta química · REST/WebSocket/webhooks"]
     end
     N["Node-RED<br/>pasarela edge + Dashboard 2.0"]
     M["Mosquitto<br/>broker MQTT único"]
@@ -19,6 +20,8 @@ flowchart LR
     M -- "MQTT" --> N
     S -- "OPC UA" --> N
     F -- "OPC UA" --> N
+    R -- "HTTP · WebSocket · webhooks" --> N
+    R -. "webhook" .-> T
     N -- "MQTT v1/devices/me/telemetry" --> T
     C -. "copia / restaura" .-> N
     C -. "copia / restaura" .-> T
@@ -31,6 +34,7 @@ flowchart LR
 | [`simuladores/aerolab`](simuladores/aerolab) | Aerogenerador 5 MW, servidor Modbus TCP, escena 3D | repo `Aerogenerador` |
 | [`simuladores/oceanlab`](simuladores/oceanlab) | Red mundial de boyas, broker MQTT integrado, globo 3D | repo `Clima-Oce-nico` |
 | [`simuladores/solarlab`](simuladores/solarlab) | Parque fotovoltaico 5 MWp, servidor OPC UA, escena 3D | repo `ParqueSolar` |
+| [`simuladores/reactorlab`](simuladores/reactorlab) | Reactor químico (Tennessee Eastman simplificado, portado de GRFICS) con API REST, WebSocket, SSE, webhooks y la vista 3D original de GRFICS | GRFICSv3 (GPL-3.0) |
 | [`simuladores/fundicion`](simuladores/fundicion) | Gemelo digital 3D de una fundición, servidor OPC UA + puente WebSocket | repo `Fundicion` |
 | [`plataforma/node-red`](plataforma/node-red) | Imagen Node-RED con Modbus, OPC UA y Dashboard 2.0 + biblioteca de flujos | nuevo |
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
@@ -61,6 +65,7 @@ También se puede arrancar solo una parte, por ejemplo `docker compose up -d aer
 | OceanLab | http://localhost:8020 (publica en Mosquitto) | `oceanlab:8020` |
 | SolarLab | http://localhost:8000 · `opc.tcp://localhost:4840/solarlab/server/` | `opc.tcp://solarlab:4840/solarlab/server/` |
 | Fundición | http://localhost:3000 · `opc.tcp://localhost:4841/UA/Fundicion` | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
+| ReactorLab | http://localhost:8030 · vista 3D en `/3d/` · API en `/docs` | `http://reactorlab:8030` · `ws://reactorlab:8030/ws` |
 | Node-RED | http://localhost:1880 · dashboard en `/dashboard` | `nodered:1880` |
 | Mosquitto | MQTT `localhost:1883` · WS `localhost:9001` | `mosquitto:1883` |
 | ThingsBoard | http://localhost:8080 | `thingsboard:8080` · MQTT de dispositivos `thingsboard:1883` |
@@ -107,7 +112,7 @@ Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 
 ## Prácticas
 
-Tres series, cada una con AeroLab (Modbus TCP), OceanLab (MQTT) y SolarLab (OPC UA):
+Tres series, con AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA) y, en las series 1 y 2, ReactorLab (protocolos web):
 
 | Serie | Contenido |
 |---|---|

@@ -1,0 +1,1801 @@
+[
+    {
+        "id": "9fff18c5b8ffb5cc",
+        "type": "tab",
+        "label": "ReactorLab · Dashboard",
+        "disabled": false,
+        "info": "Solución de la práctica 1-dashboard/reactorlab (protocolos web + Dashboard 2.0)."
+    },
+    {
+        "id": "cc3ffb2cd3ddbf47",
+        "type": "ui-base",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false,
+        "name": "LabMonitorizacion"
+    },
+    {
+        "id": "8db9101cf4fa6dc2",
+        "type": "ui-theme",
+        "name": "Tema LabMonitorizacion",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "eb2a19be82071067",
+        "type": "ui-page",
+        "name": "Reactor",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/reactorlab",
+        "icon": "factory",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "5d403883d577a214",
+        "type": "ui-page",
+        "name": "Mandos",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/reactorlab-mandos",
+        "icon": "tune",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "7e32babd25d3eab5",
+        "type": "ui-group",
+        "name": "REACTOR",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "eb2a19be82071067"
+    },
+    {
+        "id": "32cc174f0167d83e",
+        "type": "ui-group",
+        "name": "CAUDALES",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "eb2a19be82071067"
+    },
+    {
+        "id": "dc55d7823cd764d9",
+        "type": "ui-group",
+        "name": "VÁLVULAS",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "eb2a19be82071067"
+    },
+    {
+        "id": "f17f9011d1107fc7",
+        "type": "ui-group",
+        "name": "ALARMAS",
+        "width": "6",
+        "height": "1",
+        "order": 4,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "eb2a19be82071067"
+    },
+    {
+        "id": "a53c553935b3434a",
+        "type": "ui-group",
+        "name": "HISTÓRICO",
+        "width": "12",
+        "height": "1",
+        "order": 5,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "eb2a19be82071067"
+    },
+    {
+        "id": "79b795866bdd913a",
+        "type": "ui-group",
+        "name": "ÓRDENES",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "5d403883d577a214"
+    },
+    {
+        "id": "c1172cc3d0a2f88c",
+        "type": "ui-group",
+        "name": "EVENTOS (WEBHOOK)",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "5d403883d577a214"
+    },
+    {
+        "id": "71f6e82872e07fff",
+        "type": "comment",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "FASE 1 · Leer la planta por HTTP (REST)",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "1d5220a6fa1012b6",
+        "type": "inject",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Cada 2 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "31c98f8a1101e038"
+            ]
+        ],
+        "d": true
+    },
+    {
+        "id": "31c98f8a1101e038",
+        "type": "http request",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "GET /api/v1/proceso",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://reactorlab:8030/api/v1/proceso",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 300,
+        "y": 100,
+        "wires": [
+            [
+                "7dc3e51f57d200b9",
+                "77897203a8ea4bb0"
+            ]
+        ]
+    },
+    {
+        "id": "7dc3e51f57d200b9",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Comprobar respuesta",
+        "func": "// ENTRADA: la respuesta de ReactorLab (por HTTP o, más adelante, por WebSocket)\n//   msg.statusCode = código HTTP (200 = correcto). Por WebSocket no existe.\n//   msg.payload    = el estado de la planta en JSON\n// SALIDA:  el mismo mensaje, solo si la respuesta es correcta\n\nif (msg.statusCode !== undefined && msg.statusCode !== 200) {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"HTTP \" + msg.statusCode });\n    return null;                          // 404, 500, ECONNREFUSED... no seguimos\n}\nif (typeof msg.payload !== \"object\" || !msg.payload.medidas) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"respuesta no válida\" });\n    return null;\n}\nnode.status({ fill: \"green\", shape: \"dot\", text: \"secuencia \" + msg.payload.secuencia });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 100,
+        "wires": [
+            [
+                "c26dd5e835f2a098",
+                "c13c922b0080d3c5",
+                "5667ada5a7b41372",
+                "b5e41cfbdacc4d0a",
+                "64801bbe189e4b54",
+                "9503d37011f199cb",
+                "371d089557c2a5e8",
+                "0e59cb1a40c8179b",
+                "e230b124298068a6",
+                "f1f1e28f5246bdb2",
+                "37aac226f253db8a",
+                "5cf7624b0a12c293",
+                "00d298f3cd491836",
+                "416561290f9697c3",
+                "dbb2e277ece8e582",
+                "611363761ed8070d",
+                "f674ff595f3308d0"
+            ]
+        ]
+    },
+    {
+        "id": "77897203a8ea4bb0",
+        "type": "debug",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Respuesta",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 520,
+        "y": 50,
+        "wires": []
+    },
+    {
+        "id": "c26dd5e835f2a098",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Presión",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.presion_kpa",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 160,
+        "wires": [
+            [
+                "c4f0a330df0d43b7"
+            ]
+        ]
+    },
+    {
+        "id": "c4f0a330df0d43b7",
+        "type": "ui-gauge",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Presión",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "kPa",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 2400,
+                "color": "#5cd65c"
+            },
+            {
+                "from": 2800,
+                "color": "#ffc800"
+            },
+            {
+                "from": 2850,
+                "color": "#ea5353"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "7e32babd25d3eab5",
+        "min": 2400,
+        "max": 3000,
+        "x": 1000,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c13c922b0080d3c5",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Nivel",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.nivel_pct",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 200,
+        "wires": [
+            [
+                "5619cd001018e3fa"
+            ]
+        ]
+    },
+    {
+        "id": "5619cd001018e3fa",
+        "type": "ui-gauge",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "order": 2,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Nivel",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "%",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 0,
+                "color": "#ea5353"
+            },
+            {
+                "from": 15,
+                "color": "#ffc800"
+            },
+            {
+                "from": 25,
+                "color": "#5cd65c"
+            },
+            {
+                "from": 70,
+                "color": "#ffc800"
+            },
+            {
+                "from": 80,
+                "color": "#ea5353"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "7e32babd25d3eab5",
+        "min": 0,
+        "max": 100,
+        "x": 1000,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "5667ada5a7b41372",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "% A en purga",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.composicion_purga_pct.A",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 240,
+        "wires": [
+            [
+                "2689a3f45fe98945"
+            ]
+        ]
+    },
+    {
+        "id": "2689a3f45fe98945",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "% A en purga (%)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "7e32babd25d3eab5",
+        "x": 1000,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "b5e41cfbdacc4d0a",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Producción",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.caudal_kmolh.producto",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 280,
+        "wires": [
+            [
+                "71ba48eb98e42e8e"
+            ]
+        ]
+    },
+    {
+        "id": "71ba48eb98e42e8e",
+        "type": "ui-gauge",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Producción",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "kmol/h",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 0,
+                "color": "#ea5353"
+            },
+            {
+                "from": 80,
+                "color": "#ffc800"
+            },
+            {
+                "from": 90,
+                "color": "#5cd65c"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "32cc174f0167d83e",
+        "min": 0,
+        "max": 140,
+        "x": 1000,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "64801bbe189e4b54",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Caudal F1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.caudal_kmolh.f1",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 320,
+        "wires": [
+            [
+                "3cd34793411a1225"
+            ]
+        ]
+    },
+    {
+        "id": "3cd34793411a1225",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Alimentación F1 (kmol/h)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "32cc174f0167d83e",
+        "x": 1000,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "9503d37011f199cb",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Caudal F2",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.caudal_kmolh.f2",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 360,
+        "wires": [
+            [
+                "e86f484c7d5f08f8"
+            ]
+        ]
+    },
+    {
+        "id": "e86f484c7d5f08f8",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Alimentación F2 (kmol/h)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "32cc174f0167d83e",
+        "x": 1000,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "371d089557c2a5e8",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Caudal purga",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.caudal_kmolh.purga",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 400,
+        "wires": [
+            [
+                "8f787ecb840310b4"
+            ]
+        ]
+    },
+    {
+        "id": "8f787ecb840310b4",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Purga (kmol/h)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "32cc174f0167d83e",
+        "x": 1000,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "0e59cb1a40c8179b",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Válvula F1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.valvulas.f1.posicion_pct",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 440,
+        "wires": [
+            [
+                "7221a3885b959619"
+            ]
+        ]
+    },
+    {
+        "id": "7221a3885b959619",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Válvula F1 (%)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "dc55d7823cd764d9",
+        "x": 1000,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "e230b124298068a6",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Válvula F2",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.valvulas.f2.posicion_pct",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 480,
+        "wires": [
+            [
+                "b02c373ed6c56388"
+            ]
+        ]
+    },
+    {
+        "id": "b02c373ed6c56388",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Válvula F2 (%)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "dc55d7823cd764d9",
+        "x": 1000,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "f1f1e28f5246bdb2",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Válvula purga",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.valvulas.purga.posicion_pct",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 520,
+        "wires": [
+            [
+                "df7f42a29d808a7b"
+            ]
+        ]
+    },
+    {
+        "id": "df7f42a29d808a7b",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Válvula de purga (%)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "dc55d7823cd764d9",
+        "x": 1000,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "37aac226f253db8a",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Válvula producto",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.valvulas.producto.posicion_pct",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 560,
+        "wires": [
+            [
+                "129cf77ebb64cccf"
+            ]
+        ]
+    },
+    {
+        "id": "129cf77ebb64cccf",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Válvula de producto (%)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "dc55d7823cd764d9",
+        "x": 1000,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "f3cbd6294f778b5c",
+        "type": "comment",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "FASE 1 · Histórico, alarma y estado general",
+        "info": "",
+        "x": 200,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "5cf7624b0a12c293",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Presión gráfica",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.presion_kpa",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Presión (kPa)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 680,
+        "wires": [
+            [
+                "3b50ec30e1d42a7b"
+            ]
+        ]
+    },
+    {
+        "id": "3b50ec30e1d42a7b",
+        "type": "ui-chart",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "Presión del reactor",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "kPa",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 0,
+        "showLegend": true,
+        "removeOlder": 15,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095FF",
+            "#FF0000",
+            "#FF7F0E",
+            "#2CA02C",
+            "#A347E1",
+            "#D62728",
+            "#FF9896",
+            "#9467BD",
+            "#C5B0D5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 6,
+        "className": "",
+        "interpolation": "linear",
+        "group": "a53c553935b3434a",
+        "x": 1000,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "00d298f3cd491836",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Nivel gráfica",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.medidas.nivel_pct",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Nivel (%)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 720,
+        "wires": [
+            [
+                "0e06c6122fb28e79"
+            ]
+        ]
+    },
+    {
+        "id": "0e06c6122fb28e79",
+        "type": "ui-chart",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "Nivel del reactor",
+        "order": 2,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "%",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 0,
+        "showLegend": true,
+        "removeOlder": 15,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095FF",
+            "#FF0000",
+            "#FF7F0E",
+            "#2CA02C",
+            "#A347E1",
+            "#D62728",
+            "#FF9896",
+            "#9467BD",
+            "#C5B0D5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 6,
+        "className": "",
+        "interpolation": "linear",
+        "group": "a53c553935b3434a",
+        "x": 1000,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "416561290f9697c3",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Alarma presión",
+        "func": "// ENTRADA: el estado de la planta (msg.payload)\n// SALIDA:  msg.payload = \"NORMAL\" o \"ALARMA\"\n\nconst LIMITE_PRESION = 2850;   // kPa. Puedes cambiar este valor.\n\nconst presion = msg.payload.medidas.presion_kpa;\n\nif (presion > LIMITE_PRESION) {\n    msg.payload = \"ALARMA\";\n} else {\n    msg.payload = \"NORMAL\";\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 780,
+        "wires": [
+            [
+                "ef6a1d0ee4d2c903"
+            ]
+        ]
+    },
+    {
+        "id": "ef6a1d0ee4d2c903",
+        "type": "ui-template",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "head": "",
+        "noerr": 0,
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "group": "f17f9011d1107fc7",
+        "format": "<template>\n  <div :style=\"{ background: color, color: 'white', padding: '12px',\n                 textAlign: 'center', fontSize: '1.6em',\n                 fontWeight: 'bold', borderRadius: '8px' }\">\n    {{ msg?.payload || 'SIN DATOS' }}\n  </div>\n</template>\n\n<script>\nexport default {\n  computed: {\n    color() {\n      const colores = { 'NORMAL': '#2e7d32', 'ATENCIÓN': '#f9a825', 'ALARMA': '#c62828' };\n      return colores[this.msg?.payload] || '#757575';\n    }\n  }\n}\n</script>",
+        "x": 1000,
+        "y": 780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dbb2e277ece8e582",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Estado general",
+        "func": "// ENTRADA: el estado de la planta (msg.payload)\n// SALIDA 1: \"NORMAL\", \"ATENCIÓN\" o \"ALARMA\"\n// SALIDA 2: el motivo, en texto\n\n// ---- UMBRALES (puedes cambiarlos) ----\nconst PRESION_ATENCION = 2800, PRESION_ALARMA = 2850;   // kPa\nconst NIVEL_MIN = 25, NIVEL_MAX = 70;                   // % (fuera: ATENCIÓN)\nconst PRODUCCION_MIN = 90;                              // kmol/h\nconst VALVULA_PRODUCTO_MAX = 70;                        // % (lo normal es ~47 %)\n// --------------------------------------\n\nconst p = msg.payload;\nconst m = p.medidas;\n\nlet nivel = 0;            // 0 = NORMAL, 1 = ATENCIÓN, 2 = ALARMA\nconst motivos = [];\nfunction avisar(n, texto) {\n    if (n > nivel) nivel = n;\n    motivos.push(texto);\n}\n\nif (p.estado.paro_emergencia) avisar(2, \"Paro de emergencia\");\nelse if (!p.estado.en_marcha) avisar(1, \"Planta parada\");\nif (p.estado.modo === \"manual\") avisar(1, \"Modo manual\");\n\nconst pres = \"Presión \" + m.presion_kpa + \" kPa\";\nif (m.presion_kpa > PRESION_ALARMA) avisar(2, pres);\nelse if (m.presion_kpa > PRESION_ATENCION) avisar(1, pres);\n\nif (m.nivel_pct < NIVEL_MIN || m.nivel_pct > NIVEL_MAX) avisar(1, \"Nivel \" + m.nivel_pct + \" %\");\nif (m.caudal_kmolh.producto < PRODUCCION_MIN) avisar(1, \"Producción \" + m.caudal_kmolh.producto + \" kmol/h\");\n\n// un controlador que \"tapa\" una avería: la válvula se abre mucho más de lo normal\nconst vp = p.valvulas.producto.posicion_pct;\nif (vp > VALVULA_PRODUCTO_MAX) avisar(1, \"Válvula de producto al \" + vp + \" %: ¿obstruida?\");\n\nconst estados = [\"NORMAL\", \"ATENCIÓN\", \"ALARMA\"];\nreturn [\n    { payload: estados[nivel] },\n    { payload: motivos.length ? motivos.join(\" · \") : \"Sin incidencias\" }\n];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 840,
+        "wires": [
+            [
+                "c620756d02a8caec"
+            ],
+            [
+                "306d8249a05942ad"
+            ]
+        ]
+    },
+    {
+        "id": "c620756d02a8caec",
+        "type": "ui-template",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "head": "",
+        "noerr": 0,
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "group": "f17f9011d1107fc7",
+        "format": "<template>\n  <div :style=\"{ background: color, color: 'white', padding: '12px',\n                 textAlign: 'center', fontSize: '1.6em',\n                 fontWeight: 'bold', borderRadius: '8px' }\">\n    {{ msg?.payload || 'SIN DATOS' }}\n  </div>\n</template>\n\n<script>\nexport default {\n  computed: {\n    color() {\n      const colores = { 'NORMAL': '#2e7d32', 'ATENCIÓN': '#f9a825', 'ALARMA': '#c62828' };\n      return colores[this.msg?.payload] || '#757575';\n    }\n  }\n}\n</script>",
+        "x": 1000,
+        "y": 830,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "306d8249a05942ad",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Motivo",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "f17f9011d1107fc7",
+        "x": 1000,
+        "y": 870,
+        "wires": []
+    },
+    {
+        "id": "611363761ed8070d",
+        "type": "trigger",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Sin datos 10 s",
+        "op1": "",
+        "op2": "ALARMA",
+        "op1type": "nul",
+        "op2type": "str",
+        "duration": "10",
+        "extend": true,
+        "overrideDelay": false,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 760,
+        "y": 910,
+        "wires": [
+            [
+                "c620756d02a8caec"
+            ]
+        ]
+    },
+    {
+        "id": "7de51b1ee97a10e2",
+        "type": "comment",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "FASE 2 · Tiempo real (WebSocket), órdenes (PUT/POST) y webhooks",
+        "info": "",
+        "x": 220,
+        "y": 980,
+        "wires": []
+    },
+    {
+        "id": "d231a7615f7a97c1",
+        "type": "websocket-client",
+        "path": "ws://reactorlab:8030/ws",
+        "tls": "",
+        "wholemsg": "false",
+        "hb": "0",
+        "subprotocol": "",
+        "headers": []
+    },
+    {
+        "id": "165fd314a7e233a0",
+        "type": "websocket in",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "ws://reactorlab:8030/ws",
+        "server": "",
+        "client": "d231a7615f7a97c1",
+        "x": 140,
+        "y": 1040,
+        "wires": [
+            [
+                "85c8db195436149e"
+            ]
+        ]
+    },
+    {
+        "id": "85c8db195436149e",
+        "type": "json",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 330,
+        "y": 1040,
+        "wires": [
+            [
+                "7dc3e51f57d200b9"
+            ]
+        ]
+    },
+    {
+        "id": "b34391fdf04073b0",
+        "type": "ui-slider",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "Consigna de presión (kPa)",
+        "tooltip": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "passthru": false,
+        "outs": "end",
+        "topic": "topic",
+        "topicType": "msg",
+        "thumbLabel": "always",
+        "showTicks": "always",
+        "min": 2500,
+        "max": 2950,
+        "step": 10,
+        "className": "",
+        "iconPrepend": "",
+        "iconAppend": "",
+        "color": "",
+        "colorTrack": "",
+        "colorThumb": "",
+        "showTextField": true,
+        "group": "79b795866bdd913a",
+        "x": 140,
+        "y": 1110,
+        "wires": [
+            [
+                "e58a8b1170d596c1"
+            ]
+        ]
+    },
+    {
+        "id": "e58a8b1170d596c1",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Orden de consigna",
+        "func": "// ENTRADA: el valor del slider (kPa)\n// SALIDA:  una petición HTTP PUT para ReactorLab\n\nconst CLAVE = \"reactorlab\";            // clave de la API (cabecera X-API-Key)\nconst MIN = 2500, MAX = 2950;           // kPa\n\nconst kpa = Math.round(Number(msg.payload));\nif (!Number.isFinite(kpa) || kpa < MIN || kpa > MAX) {\n    node.warn(\"Consigna fuera de rango: \" + msg.payload);\n    return null;                       // no se envía nada a la planta\n}\nmsg.method  = \"PUT\";\nmsg.url     = \"http://reactorlab:8030/api/v1/consignas\";\nmsg.headers = { \"X-API-Key\": CLAVE, \"Content-Type\": \"application/json\" };\nmsg.payload = { presion_kpa: kpa };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 1110,
+        "wires": [
+            [
+                "a48d71cccd294fbf"
+            ]
+        ]
+    },
+    {
+        "id": "11e9143be48aab40",
+        "type": "ui-button",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "PARO DE EMERGENCIA",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "#c62828",
+        "textColor": "#ffffff",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "group": "79b795866bdd913a",
+        "x": 140,
+        "y": 1160,
+        "wires": [
+            [
+                "6224bce278ff4347"
+            ]
+        ]
+    },
+    {
+        "id": "075841b83e1343d7",
+        "type": "ui-button",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "REARMAR",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "#2e7d32",
+        "textColor": "#ffffff",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "group": "79b795866bdd913a",
+        "x": 140,
+        "y": 1200,
+        "wires": [
+            [
+                "6224bce278ff4347"
+            ]
+        ]
+    },
+    {
+        "id": "6224bce278ff4347",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Orden de paro",
+        "func": "// ENTRADA: true (botón PARO) o false (botón REARMAR)\n// SALIDA:  una petición HTTP POST para ReactorLab\n\nconst CLAVE = \"reactorlab\";\n\nmsg.method  = \"POST\";\nmsg.url     = \"http://reactorlab:8030/api/v1/paro-emergencia\";\nmsg.headers = { \"X-API-Key\": CLAVE, \"Content-Type\": \"application/json\" };\nmsg.payload = { activo: msg.payload === true };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 1180,
+        "wires": [
+            [
+                "a48d71cccd294fbf"
+            ]
+        ]
+    },
+    {
+        "id": "a48d71cccd294fbf",
+        "type": "http request",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Enviar orden",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 600,
+        "y": 1150,
+        "wires": [
+            [
+                "bca28a73b6a23d78"
+            ]
+        ]
+    },
+    {
+        "id": "bca28a73b6a23d78",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Resultado de la orden",
+        "func": "// ENTRADA: la respuesta de ReactorLab a una orden\n// SALIDA:  un texto para el dashboard\n\nif (msg.statusCode === 200) {\n    msg.payload = \"Aceptada (HTTP 200)\";\n} else {\n    const detalle = msg.payload && msg.payload.detail ? JSON.stringify(msg.payload.detail) : \"\";\n    msg.payload = \"Rechazada (HTTP \" + msg.statusCode + \") \" + detalle.slice(0, 120);\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 1150,
+        "wires": [
+            [
+                "8d1f8826288ebdad"
+            ]
+        ]
+    },
+    {
+        "id": "8d1f8826288ebdad",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 5,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Respuesta",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "79b795866bdd913a",
+        "x": 1040,
+        "y": 1150,
+        "wires": []
+    },
+    {
+        "id": "f674ff595f3308d0",
+        "type": "change",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Consigna actual",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.consignas.presion_kpa",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 760,
+        "y": 1240,
+        "wires": [
+            [
+                "0e3ccd4ecb5fd645"
+            ]
+        ]
+    },
+    {
+        "id": "0e3ccd4ecb5fd645",
+        "type": "ui-text",
+        "z": "9fff18c5b8ffb5cc",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Consigna en la planta (kPa)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "79b795866bdd913a",
+        "x": 1000,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "cae40a36b42569b8",
+        "type": "inject",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Al desplegar y cada 10 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 1310,
+        "wires": [
+            [
+                "4e4929896cce3dfe"
+            ]
+        ]
+    },
+    {
+        "id": "4e4929896cce3dfe",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Alta del webhook",
+        "func": "// SALIDA: una petición HTTP POST que da de alta este Node-RED como webhook\n\nconst CLAVE = \"reactorlab\";\n\nmsg.method  = \"POST\";\nmsg.url     = \"http://reactorlab:8030/api/v1/webhooks\";\nmsg.headers = { \"X-API-Key\": CLAVE, \"Content-Type\": \"application/json\" };\nmsg.payload = {\n    url: \"http://nodered:1880/reactorlab/eventos\",     // dónde nos avisará ReactorLab\n    eventos: [\"alarma\", \"estado\", \"consigna\"]          // qué avisos queremos\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 1310,
+        "wires": [
+            [
+                "1dbd5f91da7ab9e4"
+            ]
+        ]
+    },
+    {
+        "id": "1dbd5f91da7ab9e4",
+        "type": "http request",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "POST /api/v1/webhooks",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 560,
+        "y": 1310,
+        "wires": [
+            [
+                "4759e02c8ca3fb3f"
+            ]
+        ]
+    },
+    {
+        "id": "4759e02c8ca3fb3f",
+        "type": "debug",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Alta webhook",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 1310,
+        "wires": []
+    },
+    {
+        "id": "515189afe8114a7b",
+        "type": "http in",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "url": "/reactorlab/eventos",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 1380,
+        "wires": [
+            [
+                "33c62345cbbd60f0",
+                "beddc3db210676c1"
+            ]
+        ]
+    },
+    {
+        "id": "33c62345cbbd60f0",
+        "type": "http response",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Responder 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 380,
+        "y": 1420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "beddc3db210676c1",
+        "type": "function",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "Registrar evento",
+        "func": "// ENTRADA: el aviso que envía ReactorLab (msg.payload = evento en JSON)\n// SALIDA:  la lista de los últimos 10 eventos, para la tabla\n\nconst ev = msg.payload;\nlet detalle = \"\";\nif (ev.alarma) {\n    detalle = ev.alarma.texto + \" (\" + ev.alarma.valor + \")\";\n} else if (ev.consignas) {\n    detalle = JSON.stringify(ev.consignas);\n} else if (ev.modo) {\n    detalle = \"Modo \" + ev.modo;\n} else if (\"activo\" in ev) {\n    detalle = ev.activo ? \"Paro de emergencia\" : \"Paro rearmado\";\n}\n\nconst lista = flow.get(\"eventos\") || [];\nlista.unshift({\n    Hora:    new Date(ev.timestamp).toLocaleTimeString(\"es-ES\"),\n    Evento:  ev.evento,\n    Detalle: detalle\n});\nflow.set(\"eventos\", lista.slice(0, 10));\n\nmsg.payload = flow.get(\"eventos\");\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 1380,
+        "wires": [
+            [
+                "4be575dbff23a7ea"
+            ]
+        ]
+    },
+    {
+        "id": "4be575dbff23a7ea",
+        "type": "ui-table",
+        "z": "9fff18c5b8ffb5cc",
+        "name": "",
+        "label": "Últimos eventos",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "maxrows": 10,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "group": "c1172cc3d0a2f88c",
+        "x": 640,
+        "y": 1380,
+        "wires": []
+    }
+]

@@ -2,11 +2,23 @@
 
 Las prácticas están organizadas en **tres series** que se pueden hacer en orden con cada simulador. Todas siguen el mismo esquema: una **Fase 1** de monitorización (leer, mostrar, histórico, incidencia, alarmas, pérdida de comunicación) y una **Fase 2** que amplía (órdenes a la máquina o varios equipos).
 
-| Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) |
-|---|---|---|---|---|
-| **1 · Node-RED + Dashboard** | Adquirir datos con Node-RED y construir un dashboard con alarmas (Dashboard 2.0) | [guía](1-dashboard/aerolab/README.md) · [.docx](1-dashboard/aerolab/Practica_AeroLab_NodeRED_ES.docx) | [guía](1-dashboard/oceanlab/README.md) · [.docx](1-dashboard/oceanlab/Practica_OceanLab_NodeRED_ES.docx) | [guía](1-dashboard/solarlab/README.md) · [.docx](1-dashboard/solarlab/Practica_SolarLab_NodeRED_ES.docx) |
-| **2 · Node-RED + ThingsBoard** | Node-RED como pasarela: dispositivo, telemetría y atributos, panel, reglas de alarma, inactividad, RPC y API de gateway | [guía](2-thingsboard/aerolab/README.md) · [.docx](2-thingsboard/aerolab/Practica_AeroLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/oceanlab/README.md) · [.docx](2-thingsboard/oceanlab/Practica_OceanLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/solarlab/README.md) · [.docx](2-thingsboard/solarlab/Practica_SolarLab_ThingsBoard_ES.docx) |
-| **3 · Reto** | La misma integración, menos guiada, con criterios de evaluación y rúbrica | [guion](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) · [solución](3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) · [solución](3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) |
+| Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) | ReactorLab (protocolos web) |
+|---|---|---|---|---|---|
+| **1 · Node-RED + Dashboard** | Adquirir datos con Node-RED y construir un dashboard con alarmas (Dashboard 2.0) | [guía](1-dashboard/aerolab/README.md) · [.docx](1-dashboard/aerolab/Practica_AeroLab_NodeRED_ES.docx) | [guía](1-dashboard/oceanlab/README.md) · [.docx](1-dashboard/oceanlab/Practica_OceanLab_NodeRED_ES.docx) | [guía](1-dashboard/solarlab/README.md) · [.docx](1-dashboard/solarlab/Practica_SolarLab_NodeRED_ES.docx) | [guía](1-dashboard/reactorlab/README.md) · [.docx](1-dashboard/reactorlab/Practica_ReactorLab_NodeRED_ES.docx) |
+| **2 · Node-RED + ThingsBoard** | Node-RED como pasarela: dispositivo, telemetría y atributos, panel, reglas de alarma, inactividad, RPC y API de gateway | [guía](2-thingsboard/aerolab/README.md) · [.docx](2-thingsboard/aerolab/Practica_AeroLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/oceanlab/README.md) · [.docx](2-thingsboard/oceanlab/Practica_OceanLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/solarlab/README.md) · [.docx](2-thingsboard/solarlab/Practica_SolarLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/reactorlab/README.md) · [.docx](2-thingsboard/reactorlab/Practica_ReactorLab_ThingsBoard_ES.docx) |
+| **3 · Reto** | La misma integración, menos guiada, con criterios de evaluación y rúbrica | [guion](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) · [solución](3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) · [solución](3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) | — |
+
+## ReactorLab: las mismas ideas con protocolos web
+
+| Parte | 1 · Dashboard | 2 · ThingsBoard |
+|---|---|---|
+| 1–3 | Petición `GET` REST, ruta en el JSON, comprobar el código de estado | Lectura REST, token como **credencial** de Node-RED |
+| 4–6 | Reactor, caudales y **válvulas** (el esfuerzo del control) | Telemetría y atributos por la **API HTTP** de ThingsBoard, primer panel |
+| 7–8 | Histórico; avería oculta: **válvula sucia** | Histórico de medidas y válvulas; avería oculta: **sensor en deriva** |
+| 9–10 | Alarma, estado general y pérdida de comunicación | Reglas de alarma (medida, válvula y coste) e inactividad |
+| 11 | **WebSocket**: el servidor empuja los datos | **Webhook** de la planta directo a ThingsBoard |
+| 12 | Órdenes `PUT`/`POST` con **clave API** (401, 403, 422) | Órdenes RPC por **long polling HTTP** |
+| 13 | **Webhooks**: Node-RED como servidor web | Mandos en el panel (sliders y botones RPC) |
 
 ## Serie 2 · Contenido de cada práctica
 
@@ -37,6 +49,9 @@ Los guiones de las series 1 y 3 están escritos también para instalaciones suel
 | Servidor Modbus (AeroLab) | host `aerolab`, puerto `1502`, Unit ID `1` |
 | Broker MQTT (OceanLab) | host `mosquitto`, puerto `1883`, el broker único del laboratorio |
 | Endpoint OPC UA SolarLab | `opc.tcp://solarlab:4840/solarlab/server/` |
+| API de ReactorLab | `http://reactorlab:8030` (REST), `ws://reactorlab:8030/ws`, clave `X-API-Key: reactorlab` |
+| URL de webhooks hacia Node-RED | `http://nodered:1880/...` |
+| API HTTP de ThingsBoard | `http://thingsboard:8080/api/v1/{TOKEN}/...` |
 | Endpoint OPC UA Fundición (ampliación) | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
 | MQTT de ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
 | Web de ThingsBoard | `http://localhost:8080` (`tenant@thingsboard.org` / `tenant`) |
@@ -55,5 +70,6 @@ Con el compose levantado y ThingsBoard 4.3.1 se ha verificado de extremo a extre
   - reglas de alarma: vibración (con duración), rendimiento bajo, oleaje en el perfil `boya`, zona fuera de servicio en el perfil `zona-fv` y sin comunicación por `inactivityTimeout`. Todas se crean con la incidencia y se borran solas al quitarla;
   - RPC: `setLimite`, `setMarcha` y `rearmar` llegan a AeroLab por Modbus; `setIrradiancia` y `setAveria` llegan a SolarLab por OPC UA; los valores fuera de rango se rechazan;
   - paneles resueltos: el interruptor y el slider del panel de AeroLab paran y arrancan la máquina y cambian el límite de potencia.
+- **ReactorLab**: dashboard completo por REST y WebSocket, órdenes con clave (401/403/422), webhooks hacia Node-RED y directos a ThingsBoard, telemetría por la API HTTP de ThingsBoard y órdenes RPC por long polling (incluidos los botones y sliders del panel).
 - Serie 3: SolarLab → Node-RED → ThingsBoard y OceanLab → Mosquitto → Node-RED → ThingsBoard.
 - Snapshot de Node-RED + ThingsBoard → borrar dispositivo y flujos → restaurar: todo vuelve y la telemetría sigue llegando.

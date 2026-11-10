@@ -10,6 +10,8 @@
 | Web de SolarLab | `http://localhost:8000` |
 | Dashboard de Node-RED | `http://localhost:1880/dashboard` |
 
+> **Nota (Dashboard 2.0 v1.36):** el nodo **text** ya no tiene el campo *Format*; donde la guía dice *Format* = `{{msg.payload}} unidad`, pon la unidad en *Label* (p. ej. `Velocidad del viento (m/s)`) o usa *Value* con una expresión JSONata.
+
 ## Introducción
 
 Al terminar esta práctica tendrás un dashboard en Node-RED que te dice,
