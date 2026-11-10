@@ -326,7 +326,8 @@ module.exports = {
          * telemetry without seeking further consent in the editor.
          * The user can override this setting via the user settings dialog within the editor
          */
-        // enabled: true,
+        // LabMonitorizacion: sin telemetría ni aviso de consentimiento en el aula
+        enabled: false,
         /**
          * If telemetry is enabled, the editor will notify the user if a new version of Node-RED
          * is available. Set the following property to false to disable this notification.

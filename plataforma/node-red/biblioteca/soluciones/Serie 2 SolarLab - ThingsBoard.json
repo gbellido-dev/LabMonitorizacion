@@ -1,0 +1,654 @@
+[
+    {
+        "id": "84f510b6cd7b77eb",
+        "type": "tab",
+        "label": "SolarLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución de la práctica 2-thingsboard/solarlab. Pega los tokens en los dos brokers de ThingsBoard."
+    },
+    {
+        "id": "847eff53a55f4e0c",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://solarlab:4840/solarlab/server/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "37aedda0142e4f97",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Parque-SolarLab",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-solarlab",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "e9d7864ccc113190",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Pasarela-Zonas (gateway)",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-pasarela-zonas",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "7e6d587c3dc5af4e",
+        "type": "comment",
+        "z": "84f510b6cd7b77eb",
+        "name": "FASE 1 · El parque",
+        "info": "",
+        "x": 170,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "7519d4ff5180d91c",
+        "type": "inject",
+        "z": "84f510b6cd7b77eb",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 220,
+        "wires": [
+            [
+                "2c667cb5b1b56ee4",
+                "e5fa5d7642aa45cc",
+                "aa7c125910d4306f",
+                "cc48f77f8b9b7119",
+                "e47db1ce16b36442",
+                "435096ab7c4ded76",
+                "86ba248c8f2f6254",
+                "c9ff34994339af37",
+                "deb94db206af2bd1",
+                "cd998cf89b977211",
+                "496107896f467d68",
+                "8628d889d08e5899"
+            ]
+        ]
+    },
+    {
+        "id": "2bbc2bf3a4167f82",
+        "type": "OpcUa-Client",
+        "z": "84f510b6cd7b77eb",
+        "endpoint": "847eff53a55f4e0c",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 220,
+        "wires": [
+            [
+                "c7c36d3b2eb3d188"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "2c667cb5b1b56ee4",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.ActivePower",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia activa",
+        "x": 320,
+        "y": 60,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "e5fa5d7642aa45cc",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.DailyEnergy",
+        "datatype": "Double",
+        "value": "",
+        "name": "Energía diaria",
+        "x": 320,
+        "y": 92,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "aa7c125910d4306f",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.Irradiance",
+        "datatype": "Double",
+        "value": "",
+        "name": "Irradiancia",
+        "x": 320,
+        "y": 124,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "cc48f77f8b9b7119",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.AmbientTemperature",
+        "datatype": "Double",
+        "value": "",
+        "name": "Temp. ambiente",
+        "x": 320,
+        "y": 156,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "e47db1ce16b36442",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.PanelTemperature",
+        "datatype": "Double",
+        "value": "",
+        "name": "Temp. panel",
+        "x": 320,
+        "y": 188,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "435096ab7c4ded76",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.PerformanceRatio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Performance ratio",
+        "x": 320,
+        "y": 220,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "86ba248c8f2f6254",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.Availability",
+        "datatype": "Double",
+        "value": "",
+        "name": "Disponibilidad",
+        "x": 320,
+        "y": 252,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "c9ff34994339af37",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.GridVoltage",
+        "datatype": "Double",
+        "value": "",
+        "name": "Tensión de red",
+        "x": 320,
+        "y": 284,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "deb94db206af2bd1",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.GridFrequency",
+        "datatype": "Double",
+        "value": "",
+        "name": "Frecuencia de red",
+        "x": 320,
+        "y": 316,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "cd998cf89b977211",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.Connected",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Conectado a red",
+        "x": 320,
+        "y": 348,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "496107896f467d68",
+        "type": "OpcUa-Item",
+        "z": "84f510b6cd7b77eb",
+        "item": "ns=2;s=Plant.AlarmActive",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Alarma activa",
+        "x": 320,
+        "y": 380,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "c7c36d3b2eb3d188",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por bloque\n\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 100) / 100;       // 2 decimales\n}\n\n// \"ns=2;s=Plant.ActivePower\"  →  bloque \"Plant\", variable \"ActivePower\"\nconst nombre = String(msg.topic).split(\"s=\").pop();\nconst [bloque, variable] = nombre.split(\".\");\n\nconst parque = flow.get(\"parque\") || {};\nparque[bloque] = parque[bloque] || {};\nparque[bloque][variable] = valor;\nparque.timestamp = new Date().toISOString();\nflow.set(\"parque\", parque);\n\nmsg.payload = parque;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 220,
+        "wires": [
+            [
+                "ad73a1a001bd3ceb"
+            ]
+        ]
+    },
+    {
+        "id": "ad73a1a001bd3ceb",
+        "type": "delay",
+        "z": "84f510b6cd7b77eb",
+        "name": "1 mensaje/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 940,
+        "y": 220,
+        "wires": [
+            [
+                "abfdf263aa336b28",
+                "e8c03f7e9e2d9143"
+            ]
+        ]
+    },
+    {
+        "id": "abfdf263aa336b28",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Preparar telemetría",
+        "func": "// ENTRADA: el mensaje agrupado (bloque Plant y, más adelante, las zonas)\n// SALIDA:  msg.payload = { ts, values } con las variables del parque\n\nconst parque = msg.payload.Plant;\nif (!parque) {\n    return null;                          // todavía no ha llegado nada del parque\n}\nmsg.payload = {\n    ts: Date.now(),\n    values: parque                        // claves = nombre del NodeId (ActivePower...)\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 180,
+        "wires": [
+            [
+                "2b2d1068a84a4245",
+                "d684bd33b35dbd27"
+            ]
+        ]
+    },
+    {
+        "id": "2b2d1068a84a4245",
+        "type": "mqtt out",
+        "z": "84f510b6cd7b77eb",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "37aedda0142e4f97",
+        "x": 1340,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "d684bd33b35dbd27",
+        "type": "debug",
+        "z": "84f510b6cd7b77eb",
+        "name": "Telemetría",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1320,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "6ceddb572a39388e",
+        "type": "inject",
+        "z": "84f510b6cd7b77eb",
+        "name": "Al desplegar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 400,
+        "wires": [
+            [
+                "4119f3c7a130ff3e"
+            ]
+        ]
+    },
+    {
+        "id": "4119f3c7a130ff3e",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Ficha del parque",
+        "func": "// SALIDA: msg.payload = datos fijos del parque (atributos de cliente)\n\nmsg.payload = {\n    potencia_pico_kwp: 5000,\n    zonas:             4,\n    seguidores:        96,\n    protocolo:         \"OPC UA\",\n    endpoint:          \"opc.tcp://solarlab:4840/solarlab/server/\",\n    namespace_uri:     \"urn:solarlab:parque-fotovoltaico\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 400,
+        "wires": [
+            [
+                "706a69e4b02a5639"
+            ]
+        ]
+    },
+    {
+        "id": "706a69e4b02a5639",
+        "type": "mqtt out",
+        "z": "84f510b6cd7b77eb",
+        "name": "Atributos → ThingsBoard",
+        "topic": "v1/devices/me/attributes",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "37aedda0142e4f97",
+        "x": 600,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "9cf68545002eaf83",
+        "type": "comment",
+        "z": "84f510b6cd7b77eb",
+        "name": "FASE 2 · Zonas (API de gateway) y órdenes (RPC)",
+        "info": "",
+        "x": 200,
+        "y": 470,
+        "wires": []
+    },
+    {
+        "id": "8628d889d08e5899",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Suscribir zonas",
+        "func": "// ENTRADA: el mensaje del inject \"Iniciar\"\n// SALIDA:  un mensaje por cada variable a suscribir (msg.topic = NodeId)\n\nconst ZONAS     = [\"Zone01\", \"Zone02\", \"Zone03\", \"Zone04\"];\nconst VARIABLES = [\"ActivePower\", \"PerformanceRatio\",\n                   \"PanelTemperature\", \"Available\"];\n\nconst mensajes = [];\nfor (const zona of ZONAS) {\n    for (const variable of VARIABLES) {\n        mensajes.push({\n            topic: \"ns=2;s=\" + zona + \".\" + variable,\n            datatype: variable === \"Available\" ? \"Boolean\" : \"Double\"\n        });\n    }\n}\n// los corchetes hacen que salgan todos, uno detrás de otro\nreturn [mensajes];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 520,
+        "wires": [
+            [
+                "2bbc2bf3a4167f82"
+            ]
+        ]
+    },
+    {
+        "id": "e8c03f7e9e2d9143",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Gateway zonas",
+        "func": "// ENTRADA: el mensaje agrupado (parque + 4 zonas)\n// SALIDA:  mensajes para la API de gateway de ThingsBoard (una zona = un dispositivo)\n\nconst ZONAS = { Zone01: \"SolarLab Zona 01\", Zone02: \"SolarLab Zona 02\",\n                Zone03: \"SolarLab Zona 03\", Zone04: \"SolarLab Zona 04\" };\n\nconst ahora = Date.now();\nconst telemetria = {};\nfor (const [zona, dispositivo] of Object.entries(ZONAS)) {\n    if (msg.payload[zona]) {\n        telemetria[dispositivo] = [ { ts: ahora, values: msg.payload[zona] } ];\n    }\n}\nif (Object.keys(telemetria).length === 0) {\n    return null;                          // todavía no han llegado datos de las zonas\n}\n\nconst mensajes = [];\n// La primera vez: dar de alta las zonas con el perfil \"zona-fv\"\nif (!context.get(\"conectadas\")) {\n    context.set(\"conectadas\", true);\n    for (const dispositivo of Object.values(ZONAS)) {\n        mensajes.push({ topic: \"v1/gateway/connect\",\n                        payload: { device: dispositivo, type: \"zona-fv\" } });\n    }\n}\nmensajes.push({ topic: \"v1/gateway/telemetry\", payload: telemetria });\nreturn [mensajes];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1110,
+        "y": 260,
+        "wires": [
+            [
+                "7071f318c856e3c9"
+            ]
+        ]
+    },
+    {
+        "id": "7071f318c856e3c9",
+        "type": "mqtt out",
+        "z": "84f510b6cd7b77eb",
+        "name": "Gateway → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e9d7864ccc113190",
+        "x": 1340,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3f884aabb36e9658",
+        "type": "mqtt in",
+        "z": "84f510b6cd7b77eb",
+        "name": "Órdenes de ThingsBoard",
+        "topic": "v1/devices/me/rpc/request/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "37aedda0142e4f97",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 600,
+        "wires": [
+            [
+                "905d68b70bc337e2"
+            ]
+        ]
+    },
+    {
+        "id": "905d68b70bc337e2",
+        "type": "function",
+        "z": "84f510b6cd7b77eb",
+        "name": "Órdenes desde ThingsBoard",
+        "func": "// ENTRADA: una orden (petición RPC) enviada desde un panel de ThingsBoard\n//   msg.topic   = \"v1/devices/me/rpc/request/7\"\n//   msg.payload = { \"method\": \"setIrradiancia\", \"params\": 900 }\n// SALIDAS: 1 escritura OPC UA · 2 respuesta a ThingsBoard\n\nconst id     = msg.topic.split(\"/\").pop();\nconst metodo = msg.payload.method;\nconst valor  = Number(msg.payload.params);\n\nfunction respuesta(datos) {\n    return { topic: \"v1/devices/me/rpc/response/\" + id, payload: datos };\n}\n\nif (metodo === \"setIrradiancia\") {\n    if (!Number.isFinite(valor) || valor < 0 || valor > 1200) {\n        return [null, respuesta({ ok: false, error: \"Fuera de rango (0-1200 W/m²)\" })];\n    }\n    return [{ topic: \"ns=2;s=Controls.IrradianceSetpoint\", datatype: \"Double\", payload: valor },\n            respuesta({ ok: true, irradiancia: valor })];\n}\nif (metodo === \"setAveria\") {\n    if (!Number.isInteger(valor) || valor < 0 || valor > 5) {\n        return [null, respuesta({ ok: false, error: \"Código de avería 0-5\" })];\n    }\n    return [{ topic: \"ns=2;s=Controls.FaultCode\", datatype: \"Int32\", payload: valor },\n            respuesta({ ok: true, averia: valor })];\n}\nreturn [null, respuesta({ ok: false, error: \"Orden desconocida: \" + metodo })];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 600,
+        "wires": [
+            [
+                "079ed22047dad788"
+            ],
+            [
+                "9eab620bbcf9a5ec"
+            ]
+        ]
+    },
+    {
+        "id": "079ed22047dad788",
+        "type": "OpcUa-Client",
+        "z": "84f510b6cd7b77eb",
+        "endpoint": "847eff53a55f4e0c",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 700,
+        "y": 580,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "9eab620bbcf9a5ec",
+        "type": "mqtt out",
+        "z": "84f510b6cd7b77eb",
+        "name": "Respuesta → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "37aedda0142e4f97",
+        "x": 710,
+        "y": 640,
+        "wires": []
+    }
+]

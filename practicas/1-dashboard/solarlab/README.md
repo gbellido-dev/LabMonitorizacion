@@ -1,6 +1,14 @@
 # Práctica: SolarLab con Node-RED (OPC UA → Dashboard 2.0)
 
-> Versión Markdown de [Practica_SolarLab_NodeRED_ES.docx](Practica_SolarLab_NodeRED_ES.docx). En el entorno integrado del laboratorio usa el endpoint `opc.tcp://solarlab:4840/solarlab/server/` desde Node-RED (ver [README de prácticas](../README.md)).
+> Serie **1 · Node-RED + Dashboard**. Versión Markdown de [Practica_SolarLab_NodeRED_ES.docx](Practica_SolarLab_NodeRED_ES.docx). La continuación con ThingsBoard está en [2-thingsboard/solarlab](../../2-thingsboard/solarlab/README.md).
+>
+> Si trabajas con el `docker-compose.yml` del repositorio, donde la guía dice *IP del equipo* usa estos valores:
+
+| Dónde | Valor en el entorno Docker del laboratorio |
+|---|---|
+| Endpoint OPC UA | `opc.tcp://solarlab:4840/solarlab/server/` |
+| Web de SolarLab | `http://localhost:8000` |
+| Dashboard de Node-RED | `http://localhost:1880/dashboard` |
 
 ## Introducción
 
@@ -67,7 +75,7 @@ clara, bajas al nivel de las cuatro zonas.
 En toda la Fase 1 trabajas solo con variables del bloque `Plant`.
 Todavía no miras las zonas.
 
-## Parte 1 — Recibir datos OPC UA
+### Parte 1 — Recibir datos OPC UA
 
 Objetivo: comprobar que los valores del parque llegan a Node-RED.
 
@@ -97,7 +105,8 @@ Objetivo: comprobar que los valores del parque llegan a Node-RED.
     estado en verde y en la pestaña **Debug** deben llegar mensajes cada
     segundo.
 
-<img src="img/rId21.png" style="width:6.3in;height:1.36776in" />
+<img src="img/rId21.png"
+style="width:6.3in;height:1.36776in" />
 
 *Flujo de la Parte 1 (esquema).* El **inject** dispara la suscripción
 una vez; a partir de ahí el **OpcUa-Client** envía un mensaje cada vez
@@ -134,7 +143,7 @@ valor:
 > valor actual. Comprueba ahí el número de `ns=`: suele ser 2, pero si
 > es otro tienes que cambiarlo en todos los items.
 
-## Parte 2 — Mostrar un único dato
+### Parte 2 — Mostrar un único dato
 
 Objetivo: entender el camino **OPC UA → dato → widget**. Como todos los
 valores salen por el mismo **OpcUa-Client**, primero hay que quedarse
@@ -162,7 +171,7 @@ cada segundo.
 **switch**. ¿Cuántos mensajes llegan a cada uno en 10 segundos? ¿Por
 qué?
 
-## Parte 3 — Juntar todos los datos en un mensaje
+### Parte 3 — Juntar todos los datos en un mensaje
 
 Con un **switch** por variable el flujo se vuelve enorme. Es mejor
 juntar todas las variables en **un solo mensaje**, como el de un equipo
@@ -232,7 +241,7 @@ bloque Plant → potencia activa*, igual que el NodeId
 **OpcUa-Client** y lo que sale del **delay**? ¿Qué pasa si borras un
 **OpcUa-Item** y haces Deploy?
 
-## Parte 4 — Producción y condiciones
+### Parte 4 — Producción y condiciones
 
 A partir de aquí, todos los nodos **change** cuelgan del **delay** de la
 Parte 3. Ya puedes borrar el **switch** y el grupo `Pruebas` de la Parte
@@ -264,7 +273,7 @@ rellena *Min*, *Max* y *Units*.
 > no**: con nubes baja la potencia, pero el PR se mantiene. Un PR de
 > 80–90 % es normal; si baja mucho, algo falla en la instalación.
 
-## Parte 5 — Red y disponibilidad
+### Parte 5 — Red y disponibilidad
 
 Crea el grupo `RED Y DISPONIBILIDAD` y muestra:
 
@@ -284,11 +293,12 @@ Crea el grupo `RED Y DISPONIBILIDAD` y muestra:
 Así queda el flujo al terminar la Parte 5. Todos los nodos **change**
 cuelgan del mismo **delay**; cada banda es un grupo del dashboard.
 
-<img src="img/rId28.png" style="width:6.3in;height:5.18092in" />
+<img src="img/rId28.png"
+style="width:6.3in;height:5.18092in" />
 
 *Flujo tras las partes 3 a 5 (esquema).*
 
-## Parte 6 — Organizar el dashboard
+### Parte 6 — Organizar el dashboard
 
 Todo debe caber en una sola pantalla y leerse en pocos segundos.
 
@@ -302,7 +312,8 @@ Todo debe caber en una sola pantalla y leerse en pocos segundos.
 
 Layout orientativo (no hace falta copiarlo exactamente):
 
-<img src="img/rId32.png" style="width:6.3in;height:4.26908in" />
+<img src="img/rId32.png"
+style="width:6.3in;height:4.26908in" />
 
 *Dashboard de la Parte 6 (maqueta con los valores del mensaje de
 ejemplo).*
@@ -312,7 +323,7 @@ ejemplo).*
 
 ## Fase 1 — Histórico, incidencia y alarmas (partes 7 a 10)
 
-## Parte 7 — Añadir un histórico
+### Parte 7 — Añadir un histórico
 
 Objetivo: diferenciar **valor actual** (el gauge) y **evolución en el
 tiempo** (la gráfica).
@@ -336,7 +347,7 @@ tiempo** (la gráfica).
 oscila por las nubes? ¿Y con la gráfica? ¿Ha cambiado mucho el PR
 mientras había nubes?
 
-## Parte 8 — Simular una incidencia
+### Parte 8 — Simular una incidencia
 
 1.  Abre SolarLab (`http://<IP_SOLARLAB>:8000`) y localiza el
     desplegable **Inyección de avería** en el panel *Control ambiental*.
@@ -362,7 +373,7 @@ mientras había nubes?
     la instalación?
 3.  ¿Qué ves en la gráfica que no veías en el gauge?
 
-## Parte 9 — Primera alarma
+### Parte 9 — Primera alarma
 
 Objetivo: entender la idea **ENTRA UN VALOR → SE COMPARA CON UN LÍMITE →
 NORMAL / ALARMA**.
@@ -423,7 +434,7 @@ demasiado bajo es un problema para el técnico? Vuelve a `60`, quita la
 avería y sube la **Temperatura** ambiente a 45 °C: ¿salta la alarma? ¿Es
 realmente una avería?
 
-## Parte 10 — Estado general del parque (ampliación)
+### Parte 10 — Estado general del parque (ampliación)
 
 Un técnico no puede vigilar 11 datos a la vez. Este nodo los resume en
 **una sola palabra**: NORMAL, ATENCIÓN o ALARMA, y además dice el
@@ -505,7 +516,8 @@ Así queda el flujo al final de la Fase 1. La salida 1 del **Estado
 general** y el **trigger** llegan al mismo template: cualquiera de los
 dos puede ponerlo en ALARMA.
 
-<img src="img/rId40.png" style="width:6.3in;height:3.81316in" />
+<img src="img/rId40.png"
+style="width:6.3in;height:3.81316in" />
 
 *Flujo completo de la Fase 1 (esquema).*
 
@@ -518,7 +530,8 @@ Así debería verse el dashboard con el inversor de la zona 02 disparado:
 la potencia cae, la temperatura sigue normal y el estado general pasa a
 rojo.
 
-<img src="img/rId43.png" style="width:6.3in;height:3.56447in" />
+<img src="img/rId43.png"
+style="width:6.3in;height:3.56447in" />
 
 *Dashboard al final de la Fase 1, durante el disparo del inversor Z02
 (maqueta; la curva es ilustrativa).*
@@ -546,7 +559,7 @@ Cuatro zonas por cuatro variables son 16 suscripciones. En lugar de
 crear 16 nodos **OpcUa-Item** a mano, los vas a generar con un nodo
 **function**.
 
-## Parte 11 — Recibir las cuatro zonas
+### Parte 11 — Recibir las cuatro zonas
 
 1.  Añade un nodo **function** llamado `Suscribir zonas`. Conecta su
     entrada al **inject** `Iniciar` y su salida al mismo
@@ -589,7 +602,7 @@ variable, las zonas aparecen solas en el mensaje como `Zone01`,
 3.  ¿Llegan muchos más mensajes al **Agrupar** que antes? ¿Y a la salida
     del **delay**? ¿Por qué?
 
-## Parte 12 — Seleccionar una zona
+### Parte 12 — Seleccionar una zona
 
 Ahora el mensaje trae el parque y las cuatro zonas, pero queremos que
 una parte del dashboard enseñe solo la zona que elija el técnico. La
@@ -648,7 +661,7 @@ idea:
 cuatro zonas con el selector. ¿En qué zona la potencia cae a 0? ¿Qué
 muestra *Available* en esa zona?
 
-## Parte 13 — Comparar las zonas (ampliación final)
+### Parte 13 — Comparar las zonas (ampliación final)
 
 Objetivo: supervisar varios **equipos iguales** en una sola tabla y
 detectar el que se comporta distinto, como haría un técnico con muchas
@@ -711,7 +724,8 @@ Así queda el flujo de la Fase 2. La función **Suscribir zonas** añade
 las suscripciones al mismo cliente, y todo lo nuevo cuelga del mensaje
 agrupado.
 
-<img src="img/rId50.png" style="width:6.3in;height:3.73026in" />
+<img src="img/rId50.png"
+style="width:6.3in;height:3.73026in" />
 
 *Flujo de la Fase 2 (esquema).*
 

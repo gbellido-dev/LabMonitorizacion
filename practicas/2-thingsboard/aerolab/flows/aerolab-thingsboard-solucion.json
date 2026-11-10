@@ -1,0 +1,518 @@
+[
+    {
+        "id": "0e818bb2030e9e24",
+        "type": "tab",
+        "label": "AeroLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución de la práctica 2-thingsboard/aerolab. Pega el token del dispositivo en el broker ThingsBoard."
+    },
+    {
+        "id": "4027187683129f22",
+        "type": "modbus-client",
+        "name": "AeroLab Modbus TCP",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "aerolab",
+        "tcpPort": "1502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "75d97bd59c27e79d",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Aerogenerador-Aula",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-aerolab",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "e341b8992b11fd92",
+        "type": "comment",
+        "z": "0e818bb2030e9e24",
+        "name": "FASE 1 · Telemetría y atributos",
+        "info": "",
+        "x": 190,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "0be06be496f655bf",
+        "type": "modbus-read",
+        "z": "0e818bb2030e9e24",
+        "name": "Input registers (FC 4)",
+        "topic": "",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "InputRegister",
+        "adr": "0",
+        "quantity": "16",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "4027187683129f22",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "13e9f4e524b3622c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "13e9f4e524b3622c",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Decodificar",
+        "func": "// ENTRADA: msg.payload = los 16 input registers (enteros de 0 a 65535)\n// SALIDA:  msg.payload = los datos en unidades reales, agrupados por bloque\n\nconst r = msg.payload;\nif (!Array.isArray(r) || r.length < 16) {\n    return null;                      // respuesta incompleta: no seguimos\n}\n\nconst int16  = (v) => v >= 32768 ? v - 65536 : v;  // registros con signo\nconst uint32 = (alta, baja) => alta * 65536 + baja; // datos que ocupan 2 registros\n\nconst ESTADOS = [\"PARADO\", \"ARRANCANDO\", \"EN MARCHA\", \"FRENANDO\", \"AVERÍA\"];\nconst AVERIAS = [\"Sin avería\", \"Sobretemperatura de rodamiento\",\n                 \"Vibración elevada\", \"Pérdida de red\", \"Sobrevelocidad\"];\n\nmsg.payload = {\n    viento: {\n        velocidad_mps: r[0] / 10,\n        direccion_deg: r[5] / 10\n    },\n    rotor: {\n        rpm:           r[1] / 100,\n        pitch_deg:     r[2] / 100,\n        yaw_deg:       r[6] / 10,\n        generador_rpm: r[10]\n    },\n    produccion: {\n        potencia_kw:   uint32(r[3], r[4]),\n        par_nm:        r[11] * 10,\n        energia_kwh:   uint32(r[12], r[13]) / 10\n    },\n    condicion: {\n        vibracion_mms:        r[7] / 100,\n        temp_rodamiento_c:    int16(r[8]) / 10,\n        temp_multiplicador_c: int16(r[9]) / 10\n    },\n    estado: {\n        codigo:        r[14],\n        nombre:        ESTADOS[r[14]] ?? \"DESCONOCIDO\",\n        averia_codigo: r[15],\n        averia:        AVERIAS[r[15]] ?? \"Desconocida\"\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "35bc8834e9f445de"
+            ]
+        ]
+    },
+    {
+        "id": "35bc8834e9f445de",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Preparar telemetría",
+        "func": "// ENTRADA: el mensaje decodificado (bloques viento, rotor, produccion...)\n// SALIDA:  msg.payload = { ts, values } con claves planas para ThingsBoard\n\nconst p = msg.payload;\n\nmsg.payload = {\n    ts: Date.now(),                       // momento de la medida, en milisegundos\n    values: {\n        viento_mps:           p.viento.velocidad_mps,\n        direccion_viento_deg: p.viento.direccion_deg,\n        rotor_rpm:            p.rotor.rpm,\n        pitch_deg:            p.rotor.pitch_deg,\n        yaw_deg:              p.rotor.yaw_deg,\n        generador_rpm:        p.rotor.generador_rpm,\n        potencia_kw:          p.produccion.potencia_kw,\n        par_nm:               p.produccion.par_nm,\n        energia_kwh:          p.produccion.energia_kwh,\n        vibracion_mms:        p.condicion.vibracion_mms,\n        temp_rodamiento_c:    p.condicion.temp_rodamiento_c,\n        temp_multiplicador_c: p.condicion.temp_multiplicador_c,\n        estado_codigo:        p.estado.codigo,\n        estado:               p.estado.nombre,\n        averia_codigo:        p.estado.averia_codigo,\n        averia:               p.estado.averia\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 100,
+        "wires": [
+            [
+                "26605bebfba8c681",
+                "e6187b2e4e5908c4"
+            ]
+        ]
+    },
+    {
+        "id": "4e8860c1c8256373",
+        "type": "modbus-read",
+        "z": "0e818bb2030e9e24",
+        "name": "Discrete inputs (FC 2)",
+        "topic": "",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Input",
+        "adr": "0",
+        "quantity": "5",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "4027187683129f22",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 170,
+        "y": 170,
+        "wires": [
+            [
+                "126b406b3ce0399c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "126b406b3ce0399c",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Señales",
+        "func": "// ENTRADA: los 5 discrete inputs (true / false)\n// SALIDA:  msg.payload = las señales con nombre (ThingsBoard pone la hora)\n\nconst s = msg.payload;\nif (!Array.isArray(s) || s.length < 5) {\n    return null;\n}\nmsg.payload = {\n    preparado:     s[0],\n    en_marcha:     s[1],\n    alarma:        s[2],\n    conectado_red: s[3],\n    viento_valido: s[4]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 170,
+        "wires": [
+            [
+                "26605bebfba8c681"
+            ]
+        ]
+    },
+    {
+        "id": "90733518b51d9151",
+        "type": "modbus-read",
+        "z": "0e818bb2030e9e24",
+        "name": "Holding registers (FC 3)",
+        "topic": "",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "0",
+        "quantity": "8",
+        "rate": "2",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "4027187683129f22",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 170,
+        "y": 240,
+        "wires": [
+            [
+                "cb08c5fd4671d814"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "cb08c5fd4671d814",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Consignas",
+        "func": "// ENTRADA: los 8 holding registers (consignas guardadas en la máquina)\n// SALIDA:  msg.payload = las consignas que interesan en ThingsBoard\n\nconst h = msg.payload;\nif (!Array.isArray(h) || h.length < 8) {\n    return null;\n}\nmsg.payload = {\n    limite_kw:        h[4],\n    averia_inyectada: h[5]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 240,
+        "wires": [
+            [
+                "26605bebfba8c681"
+            ]
+        ]
+    },
+    {
+        "id": "26605bebfba8c681",
+        "type": "mqtt out",
+        "z": "0e818bb2030e9e24",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "75d97bd59c27e79d",
+        "x": 920,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "e6187b2e4e5908c4",
+        "type": "debug",
+        "z": "0e818bb2030e9e24",
+        "name": "Telemetría",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "e8e3cdfb459a7072",
+        "type": "inject",
+        "z": "0e818bb2030e9e24",
+        "name": "Al desplegar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 320,
+        "wires": [
+            [
+                "cd0ef638b4bb4c2c"
+            ]
+        ]
+    },
+    {
+        "id": "cd0ef638b4bb4c2c",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Ficha del aerogenerador",
+        "func": "// SALIDA: msg.payload = datos fijos del aerogenerador (atributos de cliente)\n\nmsg.payload = {\n    fabricante:          \"AeroLab\",\n    modelo:              \"AL-5000\",\n    potencia_nominal_kw: 5000,\n    cut_in_mps:          3,\n    cut_out_mps:         25,\n    protocolo:           \"Modbus TCP\",\n    unit_id:             1\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 320,
+        "wires": [
+            [
+                "04b2bd2fea9e8a6c"
+            ]
+        ]
+    },
+    {
+        "id": "04b2bd2fea9e8a6c",
+        "type": "mqtt out",
+        "z": "0e818bb2030e9e24",
+        "name": "Atributos → ThingsBoard",
+        "topic": "v1/devices/me/attributes",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "75d97bd59c27e79d",
+        "x": 920,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "07766b3be42dea99",
+        "type": "comment",
+        "z": "0e818bb2030e9e24",
+        "name": "FASE 2 · Órdenes desde ThingsBoard (RPC)",
+        "info": "",
+        "x": 200,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "c63be186b3b8e3cc",
+        "type": "mqtt in",
+        "z": "0e818bb2030e9e24",
+        "name": "Órdenes de ThingsBoard",
+        "topic": "v1/devices/me/rpc/request/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "75d97bd59c27e79d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 480,
+        "wires": [
+            [
+                "122eefe6e67157f5",
+                "081d2de4e16b2a7a"
+            ]
+        ]
+    },
+    {
+        "id": "122eefe6e67157f5",
+        "type": "function",
+        "z": "0e818bb2030e9e24",
+        "name": "Órdenes desde ThingsBoard",
+        "func": "// ENTRADA: una orden (petición RPC) enviada desde un panel de ThingsBoard\n//   msg.topic   = \"v1/devices/me/rpc/request/15\"     (15 = número de petición)\n//   msg.payload = { \"method\": \"setLimite\", \"params\": 3000 }\n// SALIDAS: 1 marcha/paro (coil 0) · 2 rearme (coil 2)\n//          3 límite de potencia (holding register 4) · 4 respuesta a ThingsBoard\n\nconst id     = msg.topic.split(\"/\").pop();\nconst metodo = msg.payload.method;\nconst valor  = msg.payload.params;\n\nfunction respuesta(datos) {\n    return { topic: \"v1/devices/me/rpc/response/\" + id, payload: datos };\n}\n\nif (metodo === \"setMarcha\") {\n    const marcha = valor === true || valor === \"true\";\n    return [{ payload: marcha }, null, null, respuesta({ ok: true, marcha: marcha })];\n}\nif (metodo === \"rearmar\") {\n    return [null, { payload: true }, null, respuesta({ ok: true })];\n}\nif (metodo === \"setLimite\") {\n    const kw = Math.round(Number(valor));\n    if (!Number.isFinite(kw) || kw < 0 || kw > 5000) {\n        return [null, null, null, respuesta({ ok: false, error: \"Límite fuera de rango (0-5000 kW)\" })];\n    }\n    return [null, null, { payload: kw }, respuesta({ ok: true, limite_kw: kw })];\n}\nreturn [null, null, null, respuesta({ ok: false, error: \"Orden desconocida: \" + metodo })];",
+        "outputs": 4,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 480,
+        "wires": [
+            [
+                "de7d5f5b94a5418c"
+            ],
+            [
+                "ddc9479000179e2a"
+            ],
+            [
+                "6bac7004a3eadfbf"
+            ],
+            [
+                "3592debea9e758fe"
+            ]
+        ]
+    },
+    {
+        "id": "de7d5f5b94a5418c",
+        "type": "modbus-write",
+        "z": "0e818bb2030e9e24",
+        "name": "Marcha / paro (coil 0)",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "0",
+        "quantity": "1",
+        "server": "4027187683129f22",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 720,
+        "y": 420,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ddc9479000179e2a",
+        "type": "modbus-write",
+        "z": "0e818bb2030e9e24",
+        "name": "Rearme (coil 2)",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "2",
+        "quantity": "1",
+        "server": "4027187683129f22",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 720,
+        "y": 470,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "6bac7004a3eadfbf",
+        "type": "modbus-write",
+        "z": "0e818bb2030e9e24",
+        "name": "Límite potencia (HR 4)",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "4",
+        "quantity": "1",
+        "server": "4027187683129f22",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 720,
+        "y": 520,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "3592debea9e758fe",
+        "type": "mqtt out",
+        "z": "0e818bb2030e9e24",
+        "name": "Respuesta → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "75d97bd59c27e79d",
+        "x": 730,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "081d2de4e16b2a7a",
+        "type": "debug",
+        "z": "0e818bb2030e9e24",
+        "name": "Órdenes recibidas",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 630,
+        "wires": []
+    }
+]

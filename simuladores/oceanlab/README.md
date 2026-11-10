@@ -81,12 +81,15 @@ El broker acepta conexiones anónimas únicamente para facilitar la práctica de
 
 ## Práctica Node-RED + ThingsBoard
 
-El proyecto incluye una práctica completa para suscribirse a la flota, transformar la telemetría y enviarla a ThingsBoard:
+El repositorio incluye tres series de prácticas para suscribirse a la flota, transformar la telemetría y enviarla a ThingsBoard:
 
-- Guion del alumnado: [`practicas/02-oceanlab-mqtt/practica-node-red-thingsboard.md`](../../practicas/02-oceanlab-mqtt/practica-node-red-thingsboard.md).
-- Solución docente: [`practicas/02-oceanlab-mqtt/solucion-practica-node-red-thingsboard.md`](../../practicas/02-oceanlab-mqtt/solucion-practica-node-red-thingsboard.md).
-- Flujo inicial: [`practicas/02-oceanlab-mqtt/flows/oceanlab-starter-flow.json`](../../practicas/02-oceanlab-mqtt/flows/oceanlab-starter-flow.json).
-- Flujo resuelto: [`practicas/02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json`](../../practicas/02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json).
+- Serie 1 · Node-RED + Dashboard: [`practicas/1-dashboard/oceanlab`](../../practicas/1-dashboard/oceanlab/README.md).
+- Serie 2 · Node-RED + ThingsBoard: [`practicas/2-thingsboard/oceanlab`](../../practicas/2-thingsboard/oceanlab/README.md).
+- Serie 3 · Reto con rúbrica:
+  - Guion del alumnado: [`practicas/3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md`](../../practicas/3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md).
+  - Solución docente: [`practicas/3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md`](../../practicas/3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md).
+  - Flujo inicial: [`practicas/3-reto/oceanlab-mqtt/flows/oceanlab-starter-flow.json`](../../practicas/3-reto/oceanlab-mqtt/flows/oceanlab-starter-flow.json).
+  - Flujo resuelto: [`practicas/3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json`](../../practicas/3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json).
 
 ## Pruebas
 

@@ -19,11 +19,16 @@ DESTINO = Path(__file__).resolve().parent / "biblioteca"
 
 # (flujo de origen, carpeta de la biblioteca, nombre en la biblioteca)
 FLUJOS = [
-    ("01-aerolab-modbus/flows/aerolab-starter-flow.json", "alumnado", "01 AeroLab Modbus - inicial"),
-    ("02-oceanlab-mqtt/flows/oceanlab-starter-flow.json", "alumnado", "02 OceanLab MQTT - inicial"),
-    ("03-solarlab-opcua/flows/solarlab-thingsboard-flow.json", "alumnado", "03 SolarLab OPC UA - ThingsBoard"),
-    ("01-aerolab-modbus/flows/aerolab-thingsboard-flow.json", "soluciones", "01 AeroLab Modbus - solucion"),
-    ("02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json", "soluciones", "02 OceanLab MQTT - solucion"),
+    # Serie 3 · Reto: flujos de partida para el alumnado
+    ("3-reto/aerolab-modbus/flows/aerolab-starter-flow.json", "alumnado", "Reto AeroLab Modbus - inicial"),
+    ("3-reto/oceanlab-mqtt/flows/oceanlab-starter-flow.json", "alumnado", "Reto OceanLab MQTT - inicial"),
+    ("3-reto/solarlab-opcua/flows/solarlab-thingsboard-flow.json", "alumnado", "Reto SolarLab OPC UA - ThingsBoard"),
+    # Soluciones (solo con NODE_RED_INCLUIR_SOLUCIONES=true)
+    ("2-thingsboard/aerolab/flows/aerolab-thingsboard-solucion.json", "soluciones", "Serie 2 AeroLab - ThingsBoard"),
+    ("2-thingsboard/oceanlab/flows/oceanlab-thingsboard-solucion.json", "soluciones", "Serie 2 OceanLab - ThingsBoard"),
+    ("2-thingsboard/solarlab/flows/solarlab-thingsboard-solucion.json", "soluciones", "Serie 2 SolarLab - ThingsBoard"),
+    ("3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json", "soluciones", "Reto AeroLab Modbus - solucion"),
+    ("3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json", "soluciones", "Reto OceanLab MQTT - solucion"),
 ]
 
 
@@ -45,6 +50,8 @@ def adaptar(nodo: dict) -> dict:
 
 
 def main() -> None:
+    for vieja in DESTINO.glob("*/*.json"):
+        vieja.unlink()
     for origen, carpeta, nombre in FLUJOS:
         flujo = json.loads((RAIZ / "practicas" / origen).read_text(encoding="utf-8"))
         salida = DESTINO / carpeta / f"{nombre}.json"

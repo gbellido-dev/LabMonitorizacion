@@ -1,35 +1,59 @@
 # Prácticas
 
-| Nº | Carpeta | Guion del alumnado | Material docente | Flujos Node-RED |
+Las prácticas están organizadas en **tres series** que se pueden hacer en orden con cada simulador. Todas siguen el mismo esquema: una **Fase 1** de monitorización (leer, mostrar, histórico, incidencia, alarmas, pérdida de comunicación) y una **Fase 2** que amplía (órdenes a la máquina o varios equipos).
+
+| Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) |
 |---|---|---|---|---|
-| 01 | `01-aerolab-modbus` | [Modbus TCP → ThingsBoard](01-aerolab-modbus/practica-node-red-thingsboard.md) | [Solución](01-aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [inicial](01-aerolab-modbus/flows/aerolab-starter-flow.json) · [resuelto](01-aerolab-modbus/flows/aerolab-thingsboard-flow.json) |
-| 02 | `02-oceanlab-mqtt` | [MQTT → ThingsBoard](02-oceanlab-mqtt/practica-node-red-thingsboard.md) | [Solución](02-oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [inicial](02-oceanlab-mqtt/flows/oceanlab-starter-flow.json) · [resuelto](02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json) |
-| 03 | `03-solarlab-opcua` | [OPC UA → ThingsBoard](03-solarlab-opcua/practica-node-red-thingsboard.md) | incluido en el guion (reto y rúbrica) | [flujo](03-solarlab-opcua/flows/solarlab-thingsboard-flow.json) |
-| 04 | `04-solarlab-dashboard-node-red` | [OPC UA → Dashboard 2.0](04-solarlab-dashboard-node-red/README.md) ([.docx](04-solarlab-dashboard-node-red/Practica_SolarLab_NodeRED_ES.docx)) | — | se construye paso a paso |
+| **1 · Node-RED + Dashboard** | Adquirir datos con Node-RED y construir un dashboard con alarmas (Dashboard 2.0) | [guía](1-dashboard/aerolab/README.md) · [.docx](1-dashboard/aerolab/Practica_AeroLab_NodeRED_ES.docx) | [guía](1-dashboard/oceanlab/README.md) · [.docx](1-dashboard/oceanlab/Practica_OceanLab_NodeRED_ES.docx) | [guía](1-dashboard/solarlab/README.md) · [.docx](1-dashboard/solarlab/Practica_SolarLab_NodeRED_ES.docx) |
+| **2 · Node-RED + ThingsBoard** | Node-RED como pasarela: dispositivo, telemetría y atributos, panel, reglas de alarma, inactividad, RPC y API de gateway | [guía](2-thingsboard/aerolab/README.md) · [.docx](2-thingsboard/aerolab/Practica_AeroLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/oceanlab/README.md) · [.docx](2-thingsboard/oceanlab/Practica_OceanLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/solarlab/README.md) · [.docx](2-thingsboard/solarlab/Practica_SolarLab_ThingsBoard_ES.docx) |
+| **3 · Reto** | La misma integración, menos guiada, con criterios de evaluación y rúbrica | [guion](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) · [solución](3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) · [solución](3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) |
+
+## Serie 2 · Contenido de cada práctica
+
+| Parte | AeroLab | OceanLab | SolarLab |
+|---|---|---|---|
+| 1 | Leer y decodificar registros (FC 4) | Recibir la boya de Mosquitto | Suscripción OPC UA y agrupado |
+| 2 | Dispositivo y token en ThingsBoard | Dispositivo y token | Dispositivo y token |
+| 3 | Telemetría `{ts, values}` con claves planas | Telemetría con la hora de la boya | Telemetría con las claves del NodeId |
+| 4 | Publicar por MQTT (+ señales FC 2) | Publicar por MQTT: dos MQTT distintos | Publicar por MQTT |
+| 5 | Atributos: ficha de la máquina | Atributos: océano y posición | Atributos: ficha del parque |
+| 6 | Primer panel (Value cards) | Primer panel | Primer panel |
+| 7 | Histórico y agregación | Histórico | Histórico |
+| 8 | Incidencia: vibración | Incidencia: tormenta | Incidencia: disparo de inversor |
+| 9 | Regla de alarma con duración e histéresis | Regla de alarma (+ batería) | Regla de alarma de rendimiento |
+| 10 | Inactividad (`inactivityTimeout`) | Inactividad: boya desconectada | Inactividad |
+| 11 | Leer consignas (FC 3) | Pasarela: API de gateway | Zonas como dispositivos (gateway) |
+| 12 | Órdenes RPC → Modbus Write | Regla de alarma en el perfil `boya` | Regla en el perfil `zona-fv` y tabla de zonas |
+| 13 | Mandos en el panel (switch, botón, slider) | Panel de la flota (tabla, alarmas, mapa) | Consignas RPC → escritura OPC UA |
+
+Cada práctica de la serie 2 incluye el **flujo resuelto** (`flows/*-thingsboard-solucion.json`) y el **panel resuelto** de ThingsBoard (`thingsboard/panel-*.json`, se importa en **Dashboards → + → Import dashboard**; busca los dispositivos por nombre, así que hay que usar los nombres de la guía). El código de las guías es exactamente el de los flujos resueltos.
 
 ## Valores para el entorno Docker integrado
 
-Los guiones están escritos para instalaciones sueltas (`localhost`, `127.0.0.1`, `host.docker.internal`). Si Node-RED es el del `docker-compose.yml` del repositorio, usa estos valores en los nodos de configuración:
+Los guiones de las series 1 y 3 están escritos también para instalaciones sueltas (`localhost`, IP del equipo, `host.docker.internal`). Con el `docker-compose.yml` del repositorio usa estos valores:
 
 | Dónde | Valor |
 |---|---|
-| Nodo Modbus (práctica 01) | host `aerolab`, puerto `1502`, Unit ID `1` |
-| Broker MQTT de OceanLab (práctica 02) | host `mosquitto`, puerto `1883` (el broker único del laboratorio) |
-| Endpoint OPC UA SolarLab (prácticas 03 y 04) | `opc.tcp://solarlab:4840/solarlab/server/` |
+| Servidor Modbus (AeroLab) | host `aerolab`, puerto `1502`, Unit ID `1` |
+| Broker MQTT (OceanLab) | host `mosquitto`, puerto `1883`, el broker único del laboratorio |
+| Endpoint OPC UA SolarLab | `opc.tcp://solarlab:4840/solarlab/server/` |
 | Endpoint OPC UA Fundición (ampliación) | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
-| Broker ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
-| Web de ThingsBoard | `http://localhost:8080` (o la IP del equipo) |
+| MQTT de ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
+| Web de ThingsBoard | `http://localhost:8080` (`tenant@thingsboard.org` / `tenant`) |
 | Dashboard 2.0 | `http://localhost:1880/dashboard` |
+| Copias (snapshots) | `http://localhost:8090` |
 
 Los flujos de la biblioteca de Node-RED (**Import → Local → LabMonitorizacion**) ya traen estos hosts. Ningún flujo incluye tokens: cada grupo pega el suyo.
 
 ## Comprobación del entorno
 
-Con el compose levantado se ha verificado de extremo a extremo:
+Con el compose levantado y ThingsBoard 4.3.1 se ha verificado de extremo a extremo:
 
-- SolarLab → Node-RED (OPC UA, flujo 03) → ThingsBoard: 8 claves de telemetría en el dispositivo.
-- OceanLab → Mosquitto → Node-RED (solución 02) → ThingsBoard: 14 claves por boya.
-- Snapshot de Node-RED + ThingsBoard → borrar dispositivo y flujos → restaurar: el dispositivo, los flujos y el token vuelven y la telemetría sigue llegando.
-- OceanLab publica en Mosquitto (broker único) y Node-RED lo consume desde ahí.
-- Fundición: el puente WebSocket se suscribe a 144 variables del servidor OPC UA en `4841`.
-- AeroLab responde a lecturas FC04 en `1502`.
+- **Serie 2 completa**, con los tres flujos resueltos desplegados a la vez:
+  - telemetría y atributos de AeroLab (23 claves), BOY-001 (11) y SolarLab (11);
+  - API de gateway: BOY-001…BOY-008 con perfil `boya` y las cuatro zonas con perfil `zona-fv` se crean solas;
+  - reglas de alarma: vibración (con duración), rendimiento bajo, oleaje en el perfil `boya`, zona fuera de servicio en el perfil `zona-fv` y sin comunicación por `inactivityTimeout`. Todas se crean con la incidencia y se borran solas al quitarla;
+  - RPC: `setLimite`, `setMarcha` y `rearmar` llegan a AeroLab por Modbus; `setIrradiancia` y `setAveria` llegan a SolarLab por OPC UA; los valores fuera de rango se rechazan;
+  - paneles resueltos: el interruptor y el slider del panel de AeroLab paran y arrancan la máquina y cambian el límite de potencia.
+- Serie 3: SolarLab → Node-RED → ThingsBoard y OceanLab → Mosquitto → Node-RED → ThingsBoard.
+- Snapshot de Node-RED + ThingsBoard → borrar dispositivo y flujos → restaurar: todo vuelve y la telemetría sigue llegando.

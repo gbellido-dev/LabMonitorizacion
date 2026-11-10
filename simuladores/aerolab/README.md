@@ -102,12 +102,15 @@ También se puede usar QModMaster, Modbus Poll, Node-RED, un PLC o cualquier SCA
 
 ## Práctica Node-RED + ThingsBoard
 
-El proyecto incluye una práctica completa para convertir las variables Modbus del aerogenerador, publicarlas por MQTT y construir un dashboard con alarmas en ThingsBoard:
+El repositorio incluye tres series de prácticas para convertir las variables Modbus del aerogenerador, publicarlas por MQTT y construir un dashboard con alarmas en ThingsBoard:
 
-- Guion del alumnado: [`practicas/01-aerolab-modbus/practica-node-red-thingsboard.md`](../../practicas/01-aerolab-modbus/practica-node-red-thingsboard.md).
-- Solución docente: [`practicas/01-aerolab-modbus/solucion-practica-node-red-thingsboard.md`](../../practicas/01-aerolab-modbus/solucion-practica-node-red-thingsboard.md).
-- Flujo inicial: [`practicas/01-aerolab-modbus/flows/aerolab-starter-flow.json`](../../practicas/01-aerolab-modbus/flows/aerolab-starter-flow.json).
-- Flujo resuelto: [`practicas/01-aerolab-modbus/flows/aerolab-thingsboard-flow.json`](../../practicas/01-aerolab-modbus/flows/aerolab-thingsboard-flow.json).
+- Serie 1 · Node-RED + Dashboard: [`practicas/1-dashboard/aerolab`](../../practicas/1-dashboard/aerolab/README.md).
+- Serie 2 · Node-RED + ThingsBoard: [`practicas/2-thingsboard/aerolab`](../../practicas/2-thingsboard/aerolab/README.md).
+- Serie 3 · Reto con rúbrica:
+  - Guion del alumnado: [`practicas/3-reto/aerolab-modbus/practica-node-red-thingsboard.md`](../../practicas/3-reto/aerolab-modbus/practica-node-red-thingsboard.md).
+  - Solución docente: [`practicas/3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md`](../../practicas/3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md).
+  - Flujo inicial: [`practicas/3-reto/aerolab-modbus/flows/aerolab-starter-flow.json`](../../practicas/3-reto/aerolab-modbus/flows/aerolab-starter-flow.json).
+  - Flujo resuelto: [`practicas/3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json`](../../practicas/3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json).
 
 ## Pruebas
 

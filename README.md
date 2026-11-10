@@ -107,14 +107,15 @@ Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 
 ## Prácticas
 
-| Nº | Práctica | Protocolo | Simulador |
-|---|---|---|---|
-| 01 | [Del aerogenerador Modbus TCP a ThingsBoard con Node-RED](practicas/01-aerolab-modbus/practica-node-red-thingsboard.md) | Modbus TCP → MQTT | AeroLab |
-| 02 | [Red de boyas MQTT con Node-RED y ThingsBoard](practicas/02-oceanlab-mqtt/practica-node-red-thingsboard.md) | MQTT → MQTT | OceanLab |
-| 03 | [De OPC UA a ThingsBoard con Node-RED](practicas/03-solarlab-opcua/practica-node-red-thingsboard.md) | OPC UA → MQTT | SolarLab |
-| 04 | [SolarLab con Node-RED: OPC UA → Dashboard 2.0](practicas/04-solarlab-dashboard-node-red/README.md) | OPC UA | SolarLab |
+Tres series, cada una con AeroLab (Modbus TCP), OceanLab (MQTT) y SolarLab (OPC UA):
 
-Más detalles (soluciones, flujos y adaptación al entorno Docker) en [`practicas/README.md`](practicas/README.md).
+| Serie | Contenido |
+|---|---|
+| [1 · Node-RED + Dashboard](practicas/README.md) | Adquisición con Node-RED y dashboard con alarmas en Dashboard 2.0 (guías paso a paso, con .docx) |
+| [2 · Node-RED + ThingsBoard](practicas/README.md#serie-2--contenido-de-cada-práctica) | Node-RED como pasarela hacia ThingsBoard: telemetría, atributos, paneles, reglas de alarma, inactividad, órdenes RPC y API de gateway (guías paso a paso, con .docx, flujos y paneles resueltos) |
+| [3 · Reto](practicas/README.md) | La misma integración, menos guiada, con rúbrica de evaluación |
+
+Índice completo, valores para el entorno Docker y pruebas realizadas en [`practicas/README.md`](practicas/README.md).
 
 ## Desarrollo de un simulador por separado
 
