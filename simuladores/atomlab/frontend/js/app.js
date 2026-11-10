@@ -115,7 +115,7 @@ function pintar(s) {
   $("#sistemas").innerHTML = [
     bloque("Núcleo", [["Periodo", r.periodo_s >= 9999 ? "∞" : f(r.periodo_s, 1), "s", r.periodo_s > 0 && r.periodo_s < 60 ? "mal" : ""],
       ["Coef. vacío", f(r.coef_vacio_pcm_pct, 1), "pcm/%"], ["T UO₂", f(r.t_combustible_c, 0), "°C", r.t_combustible_c > 2000 ? "mal" : ""],
-      ["T grafito", f(r.t_grafito_c, 0), "°C"], ["Xe-135", f(r.xenon_rel, 2), "×"], ["Calor residual", f(r.calor_residual_mwt, 0), "MWt"]]),
+      ["T grafito", f(r.t_grafito_c, 0), "°C"], ["Pico potencia", f(r.pico_mwt, 0), "MWt", r.pico_mwt > 3520 ? "mal" : ""], ["Xe-135", f(r.xenon_rel, 2), "×"], ["Calor residual", f(r.calor_residual_mwt, 0), "MWt"]]),
     bloque("Circuito", [["Caudal", f(c.caudal_kgs / 1000, 2), "t/s", c.caudal_pct < 70 ? "mal" : ""], ["Subenfriam.", f(c.subenfriamiento_c, 1), "°C", c.subenfriamiento_c < 2 ? "aviso" : ""],
       ["Vacío", f(r.vacio_pct, 1), "%"], ["Presión", f(c.presion_mpa, 2), "MPa", c.presion_mpa > 7.5 ? "mal" : ""],
       ["Nivel sep.", f(c.nivel_separadores_pct, 0), "%", c.nivel_separadores_pct < 30 ? "mal" : ""], ["Vapor", f(c.vapor_kgs, 0), "kg/s"]]),

@@ -1,0 +1,1043 @@
+[
+    {
+        "id": "ee79a33f6cb46425",
+        "type": "tab",
+        "label": "AtomLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución de la práctica 2-thingsboard/atomlab. Pega los tokens en los dos brokers de ThingsBoard."
+    },
+    {
+        "id": "34e9d2ca81b53792",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://atomlab:4842/atomlab/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "33695fbeb1d74a42",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Central-AtomLab",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-atomlab",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "97917c5ceb2cdb9a",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Pasarela-Dosimetros (gateway)",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-pasarela-dosimetros",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "33470ec6faf57569",
+        "type": "comment",
+        "z": "ee79a33f6cb46425",
+        "name": "FASE 1 · Telemetría y atributos",
+        "info": "",
+        "x": 200,
+        "y": 30,
+        "wires": []
+    },
+    {
+        "id": "91cf55e04294f653",
+        "type": "inject",
+        "z": "ee79a33f6cb46425",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 343,
+        "wires": [
+            [
+                "c3aed2a6b2bac2f2",
+                "62d06364001540ba",
+                "7b9a564ca15cb32f",
+                "fc446d2ecb1eede7",
+                "82050599fa953fda",
+                "8d76dc860c350d2f",
+                "699e6d9feab69293",
+                "6dfcc31a3a3d8409",
+                "d8d249ec4c167484",
+                "1681fa68ebb3f158",
+                "dc651957bb36ad29",
+                "08204f3e54878650",
+                "27e3879926d42281",
+                "690ffa06604b0354",
+                "9cdbf743e1bdba76",
+                "4e4220bc626f2f5f",
+                "da00db63f9bc9019",
+                "c46002291cda0a75",
+                "68d96150b8eb7d20",
+                "162102f0ce05ccce",
+                "3db793aecf938a3c"
+            ]
+        ]
+    },
+    {
+        "id": "b4ed2b765ef0a854",
+        "type": "OpcUa-Client",
+        "z": "ee79a33f6cb46425",
+        "endpoint": "34e9d2ca81b53792",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (1 s)",
+        "x": 530,
+        "y": 343,
+        "wires": [
+            [
+                "fa2ec5a22c35dd8f"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c3aed2a6b2bac2f2",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.PotenciaTermica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia térmica",
+        "x": 320,
+        "y": 70,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "62d06364001540ba",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.Reactividad",
+        "datatype": "Double",
+        "value": "",
+        "name": "Reactividad",
+        "x": 320,
+        "y": 96,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "7b9a564ca15cb32f",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.Periodo",
+        "datatype": "Double",
+        "value": "",
+        "name": "Periodo",
+        "x": 320,
+        "y": 122,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "fc446d2ecb1eede7",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.ORM",
+        "datatype": "Double",
+        "value": "",
+        "name": "ORM",
+        "x": 320,
+        "y": 148,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "82050599fa953fda",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.TempCombustible",
+        "datatype": "Double",
+        "value": "",
+        "name": "T combustible",
+        "x": 320,
+        "y": 174,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "8d76dc860c350d2f",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.Vacio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Vacío",
+        "x": 320,
+        "y": 200,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "699e6d9feab69293",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.Xenon",
+        "datatype": "Double",
+        "value": "",
+        "name": "Xenón",
+        "x": 320,
+        "y": 226,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "6dfcc31a3a3d8409",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.ConsignaActual",
+        "datatype": "Double",
+        "value": "",
+        "name": "Consigna actual",
+        "x": 320,
+        "y": 252,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "d8d249ec4c167484",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=CircuitoPrimario.BombasEnMarcha",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Bombas en marcha",
+        "x": 320,
+        "y": 278,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "1681fa68ebb3f158",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=CircuitoPrimario.Caudal",
+        "datatype": "Double",
+        "value": "",
+        "name": "Caudal",
+        "x": 320,
+        "y": 304,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "dc651957bb36ad29",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=CircuitoPrimario.Presion",
+        "datatype": "Double",
+        "value": "",
+        "name": "Presión separadores",
+        "x": 320,
+        "y": 330,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "08204f3e54878650",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=CircuitoPrimario.NivelSeparadores",
+        "datatype": "Double",
+        "value": "",
+        "name": "Nivel separadores",
+        "x": 320,
+        "y": 356,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "27e3879926d42281",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Generador.PotenciaElectrica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia eléctrica",
+        "x": 320,
+        "y": 382,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "690ffa06604b0354",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Generador.Frecuencia",
+        "datatype": "Double",
+        "value": "",
+        "name": "Frecuencia",
+        "x": 320,
+        "y": 408,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "9cdbf743e1bdba76",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Radiacion.SalaCentral",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala central",
+        "x": 320,
+        "y": 434,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "4e4220bc626f2f5f",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Radiacion.SalaControl",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala control",
+        "x": 320,
+        "y": 460,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "da00db63f9bc9019",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Proteccion.Estado",
+        "datatype": "String",
+        "value": "",
+        "name": "Estado",
+        "x": 320,
+        "y": 486,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "c46002291cda0a75",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Proteccion.Scram",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "SCRAM",
+        "x": 320,
+        "y": 512,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "68d96150b8eb7d20",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Proteccion.ProteccionesActivas",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Protecciones activas",
+        "x": 320,
+        "y": 538,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "162102f0ce05ccce",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Proteccion.Motivo",
+        "datatype": "String",
+        "value": "",
+        "name": "Motivo del disparo",
+        "x": 320,
+        "y": 564,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "3db793aecf938a3c",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Servidor.Latido",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Latido",
+        "x": 320,
+        "y": 590,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "fa2ec5a22c35dd8f",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por sistema\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=2;s=Reactor.PotenciaTermica\"  →  [\"Reactor\", \"PotenciaTermica\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"central\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea Reactor, CircuitoPrimario...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"central\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 343,
+        "wires": [
+            [
+                "44b5d806231cb873"
+            ]
+        ]
+    },
+    {
+        "id": "44b5d806231cb873",
+        "type": "delay",
+        "z": "ee79a33f6cb46425",
+        "name": "1 mensaje/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 910,
+        "y": 343,
+        "wires": [
+            [
+                "fe9dbacaa4a583fb",
+                "bd7a6df560f32bf5"
+            ]
+        ]
+    },
+    {
+        "id": "fe9dbacaa4a583fb",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Preparar telemetría",
+        "func": "// ENTRADA: el estado de la central agrupado por sistema\n// SALIDA:  msg.payload = { ts, values } con claves planas para ThingsBoard\n\nconst r = msg.payload.Reactor || {};\nconst c = msg.payload.CircuitoPrimario || {};\nconst g = msg.payload.Generador || {};\nconst rad = msg.payload.Radiacion || {};\nconst pr = msg.payload.Proteccion || {};\n\nmsg.payload = {\n    ts: Date.now(),\n    values: {\n        potencia_mwt:      r.PotenciaTermica,\n        reactividad_beta:  r.Reactividad,\n        periodo_s:         r.Periodo,\n        orm_barras:        r.ORM,\n        t_combustible_c:   r.TempCombustible,\n        vacio_pct:         r.Vacio,\n        xenon_rel:         r.Xenon,\n        consigna_mwt:      r.ConsignaActual,\n        bombas:            c.BombasEnMarcha,\n        caudal_kgs:        c.Caudal,\n        presion_mpa:       c.Presion,\n        nivel_pct:         c.NivelSeparadores,\n        potencia_mwe:      g.PotenciaElectrica,\n        frecuencia_hz:     g.Frecuencia,\n        dosis_central_msvh: rad.SalaCentral,\n        estado:            pr.Estado,\n        scram:             pr.Scram,\n        protecciones:      pr.ProteccionesActivas\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 300,
+        "wires": [
+            [
+                "1a80a33420d5f3d0",
+                "b7cdfb78988c8bed"
+            ]
+        ]
+    },
+    {
+        "id": "1a80a33420d5f3d0",
+        "type": "mqtt out",
+        "z": "ee79a33f6cb46425",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "33695fbeb1d74a42",
+        "x": 1400,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "b7cdfb78988c8bed",
+        "type": "debug",
+        "z": "ee79a33f6cb46425",
+        "name": "Telemetría",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1380,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "a21462859b64403e",
+        "type": "inject",
+        "z": "ee79a33f6cb46425",
+        "name": "Al desplegar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 640,
+        "wires": [
+            [
+                "5473ec106b332e2c"
+            ]
+        ]
+    },
+    {
+        "id": "5473ec106b332e2c",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Ficha de la central",
+        "func": "// SALIDA: atributos de cliente (datos que casi no cambian)\n\nmsg.payload = {\n    tipo_reactor:        \"RBMK-1000\",\n    potencia_nominal_mwt: 3200,\n    potencia_nominal_mwe: 1000,\n    moderador:           \"grafito\",\n    refrigerante:        \"agua ligera en ebullición (circuito único)\",\n    endpoint_opcua:      \"opc.tcp://atomlab:4842/atomlab/\",\n    pasarela:            \"Node-RED\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 640,
+        "wires": [
+            [
+                "2aab63dced6c66d2"
+            ]
+        ]
+    },
+    {
+        "id": "2aab63dced6c66d2",
+        "type": "mqtt out",
+        "z": "ee79a33f6cb46425",
+        "name": "Atributos → ThingsBoard",
+        "topic": "v1/devices/me/attributes",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "33695fbeb1d74a42",
+        "x": 600,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "90c345a22b851a5d",
+        "type": "comment",
+        "z": "ee79a33f6cb46425",
+        "name": "FASE 2 · Dosímetros (API de gateway) y órdenes (RPC)",
+        "info": "",
+        "x": 230,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "bd7a6df560f32bf5",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Gateway dosímetros",
+        "func": "// ENTRADA: el estado de la central agrupado por sistema\n// SALIDA:  mensajes para la API de gateway de ThingsBoard (un dispositivo por dosímetro)\n\nconst DOSIMETROS = {\n    SalaCentral:  \"Dosimetro-SalaCentral\",\n    SalaControl:  \"Dosimetro-SalaControl\",\n    SalaTurbinas: \"Dosimetro-SalaTurbinas\",\n    Exterior:     \"Dosimetro-Exterior\"\n};\nconst rad = msg.payload.Radiacion || {};\nconst ahora = Date.now();\n\nconst telemetria = {};\nfor (const [zona, dispositivo] of Object.entries(DOSIMETROS)) {\n    if (rad[zona] === undefined) continue;          // aún no ha llegado esa zona\n    telemetria[dispositivo] = [{ ts: ahora, values: { dosis_msvh: rad[zona] } }];\n}\nif (Object.keys(telemetria).length === 0) return null;\n\nconst mensajes = [];\nif (!context.get(\"conectados\")) {                   // la primera vez: dar de alta los dosímetros\n    context.set(\"conectados\", true);\n    for (const dispositivo of Object.values(DOSIMETROS)) {\n        mensajes.push({ topic: \"v1/gateway/connect\", payload: { device: dispositivo, type: \"dosimetro\" } });\n    }\n}\nmensajes.push({ topic: \"v1/gateway/telemetry\", payload: telemetria });\nreturn [mensajes];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 370,
+        "wires": [
+            [
+                "6e37ff7ed51deb67"
+            ]
+        ]
+    },
+    {
+        "id": "6e37ff7ed51deb67",
+        "type": "mqtt out",
+        "z": "ee79a33f6cb46425",
+        "name": "Gateway → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "97917c5ceb2cdb9a",
+        "x": 1400,
+        "y": 370,
+        "wires": []
+    },
+    {
+        "id": "ca0717f9a00da2ff",
+        "type": "inject",
+        "z": "ee79a33f6cb46425",
+        "name": "Iniciar dosímetros",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 790,
+        "wires": [
+            [
+                "eafb6ab8719f3ebb",
+                "c9fc00b00c281eb2"
+            ]
+        ]
+    },
+    {
+        "id": "eafb6ab8719f3ebb",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Radiacion.SalaTurbinas",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis turbinas",
+        "x": 340,
+        "y": 770,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "c9fc00b00c281eb2",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Radiacion.Exterior",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis exterior",
+        "x": 340,
+        "y": 810,
+        "wires": [
+            [
+                "b4ed2b765ef0a854"
+            ]
+        ]
+    },
+    {
+        "id": "3e8aef09ea30b2ea",
+        "type": "mqtt in",
+        "z": "ee79a33f6cb46425",
+        "name": "Órdenes de ThingsBoard",
+        "topic": "v1/devices/me/rpc/request/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "33695fbeb1d74a42",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 880,
+        "wires": [
+            [
+                "213505c7479875fe",
+                "9801c4a3ec0f1279"
+            ]
+        ]
+    },
+    {
+        "id": "213505c7479875fe",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Órdenes desde ThingsBoard",
+        "func": "// ENTRADA: una orden (petición RPC) enviada desde el panel de ThingsBoard\n//   msg.topic   = \"v1/devices/me/rpc/request/7\"\n//   msg.payload = { \"method\": \"setPotencia\", \"params\": 2400 }\n// SALIDAS: 1 escritura OPC UA · 2 respuesta a ThingsBoard\n\nconst id     = msg.topic.split(\"/\").pop();\nconst metodo = msg.payload.method;\nconst valor  = msg.payload.params;\n\nfunction respuesta(datos) {\n    return { topic: \"v1/devices/me/rpc/response/\" + id, payload: datos };\n}\n\nif (metodo === \"setPotencia\") {\n    const mwt = Number(valor);\n    if (!Number.isFinite(mwt) || mwt < 0 || mwt > 3200) {\n        return [null, respuesta({ ok: false, error: \"Fuera de rango (0-3200 MWt)\" })];\n    }\n    return [{ topic: \"ns=2;s=Mandos.ConsignaPotencia\", datatype: \"Double\", payload: mwt },\n            respuesta({ ok: true, consigna_mwt: mwt })];\n}\nif (metodo === \"setBombas\") {\n    const n = Number(valor);\n    if (!Number.isInteger(n) || n < 0 || n > 8) {\n        return [null, respuesta({ ok: false, error: \"Bombas: de 0 a 8\" })];\n    }\n    return [{ topic: \"ns=2;s=Mandos.Bombas\", datatype: \"Int32\", payload: n },\n            respuesta({ ok: true, bombas: n })];\n}\nif (metodo === \"az5\") {\n    return [{ topic: \"ns=2;s=Mandos.AZ5\", datatype: \"Boolean\", payload: true },\n            respuesta({ ok: true, orden: \"AZ-5\" })];\n}\nreturn [null, respuesta({ ok: false, error: \"Orden desconocida: \" + metodo })];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 880,
+        "wires": [
+            [
+                "781386f137a67c17"
+            ],
+            [
+                "d3ef7ea9cbb5a0aa"
+            ]
+        ]
+    },
+    {
+        "id": "781386f137a67c17",
+        "type": "OpcUa-Client",
+        "z": "ee79a33f6cb46425",
+        "endpoint": "34e9d2ca81b53792",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 660,
+        "y": 860,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "d3ef7ea9cbb5a0aa",
+        "type": "mqtt out",
+        "z": "ee79a33f6cb46425",
+        "name": "Respuesta → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "33695fbeb1d74a42",
+        "x": 680,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "9801c4a3ec0f1279",
+        "type": "debug",
+        "z": "ee79a33f6cb46425",
+        "name": "Órdenes recibidas",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "a08e7f359cff5f50",
+        "type": "comment",
+        "z": "ee79a33f6cb46425",
+        "name": "FASE 2 · Registrador rápido: lotes con marca de tiempo",
+        "info": "",
+        "x": 230,
+        "y": 1010,
+        "wires": []
+    },
+    {
+        "id": "ab7640f0a29d4e58",
+        "type": "inject",
+        "z": "ee79a33f6cb46425",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 1070,
+        "wires": [
+            [
+                "331f2237b602a78d",
+                "ebe0c89d197f81c6"
+            ]
+        ]
+    },
+    {
+        "id": "331f2237b602a78d",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.PotenciaTermica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia térmica",
+        "x": 330,
+        "y": 1050,
+        "wires": [
+            [
+                "dca26dae2a3c08d4"
+            ]
+        ]
+    },
+    {
+        "id": "ebe0c89d197f81c6",
+        "type": "OpcUa-Item",
+        "z": "ee79a33f6cb46425",
+        "item": "ns=2;s=Reactor.Reactividad",
+        "datatype": "Double",
+        "value": "",
+        "name": "Reactividad",
+        "x": 330,
+        "y": 1090,
+        "wires": [
+            [
+                "dca26dae2a3c08d4"
+            ]
+        ]
+    },
+    {
+        "id": "dca26dae2a3c08d4",
+        "type": "OpcUa-Client",
+        "z": "ee79a33f6cb46425",
+        "endpoint": "34e9d2ca81b53792",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 250,
+        "timeUnit": "ms",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (250 ms)",
+        "x": 560,
+        "y": 1070,
+        "wires": [
+            [
+                "7315c0c8754db81f"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "52fdd79e2616efc1",
+        "type": "inject",
+        "z": "ee79a33f6cb46425",
+        "name": "Cada 2 s",
+        "props": [
+            {
+                "p": "enviar",
+                "v": "true",
+                "vt": "bool"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 560,
+        "y": 1140,
+        "wires": [
+            [
+                "7315c0c8754db81f"
+            ]
+        ]
+    },
+    {
+        "id": "7315c0c8754db81f",
+        "type": "function",
+        "z": "ee79a33f6cb46425",
+        "name": "Registrador",
+        "func": "// ENTRADA: PotenciaTermica y Reactividad suscritas cada 0,25 s\n// SALIDA:  cada 2 s, un lote con TODAS las muestras y su hora real\n//          [ { ts, values }, { ts, values }, ... ]  →  v1/devices/me/telemetry\n\nconst lote = context.get(\"lote\") || [];\n\nif (msg.enviar === true) {               // el inject de cada 2 s: enviar el lote\n    context.set(\"lote\", []);\n    if (lote.length === 0) return null;\n    node.status({ text: lote.length + \" muestras enviadas\" });\n    return { payload: lote };\n}\n\n// una muestra de OPC UA: guardarla con la hora en que llegó\nif (!String(msg.topic).startsWith(\"ns=\")) return null;   // no es un dato\nlet valor = msg.payload;\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) valor = valor.value;\nconst clave = String(msg.topic).endsWith(\"Reactividad\") ? \"rapida_reactividad_beta\" : \"rapida_potencia_mwt\";\nlote.push({ ts: Date.now(), values: { [clave]: valor } });\ncontext.set(\"lote\", lote);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 1100,
+        "wires": [
+            [
+                "a541b7f096386c6b"
+            ]
+        ]
+    },
+    {
+        "id": "a541b7f096386c6b",
+        "type": "mqtt out",
+        "z": "ee79a33f6cb46425",
+        "name": "Lote → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "33695fbeb1d74a42",
+        "x": 1040,
+        "y": 1100,
+        "wires": []
+    }
+]

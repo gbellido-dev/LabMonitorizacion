@@ -126,7 +126,7 @@ def test_servidor_opcua_lectura_escritura_y_metodos():
                 mandos = cli.get_node(f"ns={ns};s=Mandos")
                 hijos = await cli.nodes.objects.get_child([f"{ns}:AtomLab"])
                 nombres = {(await h.read_browse_name()).Name for h in await hijos.get_children()}
-                assert {"Reactor", "CircuitoPrimario", "Turbina", "Generador", "Condensador", "Refrigeracion", "Radiacion", "Proteccion", "Mandos"} <= nombres
+                assert {"Reactor", "CircuitoPrimario", "Turbina", "Generador", "Condensador", "Refrigeracion", "Radiacion", "Proteccion", "Mandos", "Servidor"} <= nombres
                 r = await mandos.call_method(f"{ns}:AZ5Pulsar")
                 assert r == "ok" and p.c.scram
                 await asyncio.sleep(0.6)

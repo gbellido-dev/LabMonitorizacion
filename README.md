@@ -1,6 +1,6 @@
 # LabMonitorizacion
 
-Banco de prácticas de la asignatura **Monitorización de Máquinas** (especialización en Digitalización del Mantenimiento). Reúne en un único repositorio cinco simuladores industriales, la plataforma IIoT con la que se trabaja en clase (**Node-RED**, **Mosquitto** y **ThingsBoard**) y las prácticas.
+Banco de prácticas de la asignatura **Monitorización de Máquinas** (especialización en Digitalización del Mantenimiento). Reúne en un único repositorio seis simuladores industriales, la plataforma IIoT con la que se trabaja en clase (**Node-RED**, **Mosquitto** y **ThingsBoard**) y las prácticas.
 
 ```mermaid
 flowchart LR
@@ -114,7 +114,7 @@ Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 
 ## Prácticas
 
-Tres series, con AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA) y, en las series 1 y 2, ReactorLab (protocolos web):
+Tres series, con AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA) y, en las series 1 y 2, ReactorLab (protocolos web) y AtomLab (central nuclear, OPC UA):
 
 | Serie | Contenido |
 |---|---|

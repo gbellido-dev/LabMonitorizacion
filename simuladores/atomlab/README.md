@@ -54,7 +54,7 @@ Espacio de direcciones (la tabla completa, con unidades, está en la web, tarjet
 
 | Carpeta | Variables (lectura) |
 |---|---|
-| `Reactor` | `PotenciaTermica` MWt, `PotenciaPct`, `CalorResidual`, `Reactividad` β, `ReactividadPcm`, `Periodo` s, `ORM`, `CoeficienteVacio`, `TempCombustible`, `TempGrafito`, `Xenon`, `Vacio` %, `ConsignaActual`, `RegulacionAuto` |
+| `Reactor` | `PotenciaTermica` MWt, `PotenciaPct`, `CalorResidual`, `Reactividad` β, `ReactividadPcm`, `Periodo` s, `ORM`, `CoeficienteVacio`, `TempCombustible`, `TempGrafito`, `Xenon`, `Vacio` %, `PicoPotencia` MWt, `ConsignaActual`, `RegulacionAuto` |
 | `Reactor/Barras` | `RR`, `AR`, `USP`, `AZ` (inserción %) — NodeId `Reactor.Barras.RR` |
 | `CircuitoPrimario` | `BombasEnMarcha`, `Caudal` kg/s, `CaudalPct`, `TempEntrada`, `Subenfriamiento`, `CalidadVapor`, `CaudalVapor`, `Presion` MPa, `NivelSeparadores`, `AguaAlimentacion` |
 | `Turbina` | `ValvulaAdmision` %, `Bypass` %, `Velocidad` rpm, `Disparada` |
@@ -62,6 +62,7 @@ Espacio de direcciones (la tabla completa, con unidades, está en la web, tarjet
 | `Condensador` | `Temperatura`, `Presion` kPa, `CalorEvacuado` MW |
 | `Refrigeracion` | `TempAguaFria`, `TempAguaCaliente`, `Penacho` % |
 | `Radiacion` | `SalaControl`, `SalaCentral`, `SalaTurbinas`, `Exterior` (mSv/h) |
+| `Servidor` | `Latido`: contador que cambia en cada ciclo (≈ 20 por segundo). OPC UA solo notifica los **cambios**: con la central estable muchas variables no cambian, y el latido permite saber que la comunicación sigue viva |
 | `Proteccion` | `Scram`, `Motivo`, `ProteccionesActivas`, `Danado`, `CombustibleFundido`, `AlarmasActivas`, `Estado` (`OPERACION`, `PARADA`, `SCRAM`, `ACCIDENTE`) |
 
 Mandos (escritura) en `Mandos`: `ConsignaPotencia` (0-3200 MWt), `RegulacionAuto`, `InsercionRR`, `InsercionUSP`, `InsercionAR` (solo en manual), `Bombas` (0-8), `Protecciones`, y los pulsadores `AZ5` y `DispararTurbina` (escribir `true`). Una escritura no válida se rechaza y el nodo vuelve a su valor real; el motivo aparece en *Accesos de clientes*.

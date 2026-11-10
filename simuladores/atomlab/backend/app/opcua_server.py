@@ -3,10 +3,11 @@
 Espacio de direcciones (namespace urn:atomlab:rbmk), NodeId de tipo cadena:
 
   AtomLab/
-    Reactor/            Reactor.PotenciaTermica ...  (+ Reactor/Barras/RR.Insercion ...)
+    Reactor/            Reactor.PotenciaTermica ...  (+ Reactor/Barras/RR ...)
     CircuitoPrimario/   Separadores de vapor y bombas de circulación (circuito único)
     Turbina/  Generador/  Condensador/  Refrigeracion/  Radiacion/  Proteccion/
     Mandos/             variables escribibles + métodos (AZ5, Rearmar, ...)
+    Servidor/           Latido: contador para detectar la pérdida de comunicación
 """
 
 from __future__ import annotations
@@ -52,6 +53,7 @@ LECTURAS: tuple[Nodo, ...] = (
     Nodo("Reactor", "TempGrafito", "Double", "°C", "reactor.t_grafito_c", "Temperatura del moderador de grafito"),
     Nodo("Reactor", "Xenon", "Double", "rel", "reactor.xenon_rel", "Xe-135 relativo al equilibrio a potencia nominal"),
     Nodo("Reactor", "Vacio", "Double", "%", "reactor.vacio_pct", "Fracción media de vapor en los canales"),
+    Nodo("Reactor", "PicoPotencia", "Double", "MWt", "reactor.pico_mwt", "Máxima potencia alcanzada desde el último reinicio"),
     Nodo("Reactor", "ConsignaActual", "Double", "MWt", "reactor.consigna_mwt", "Consigna del regulador automático"),
     Nodo("Reactor", "RegulacionAuto", "Boolean", "", "reactor.regulador_auto", "Regulador automático de potencia (AR) conectado"),
     Nodo("Reactor/Barras", "RR", "Double", "%", "reactor.barras.RR.insercion_pct", "Inserción de las 151 barras de regulación manual"),
@@ -93,6 +95,7 @@ LECTURAS: tuple[Nodo, ...] = (
     Nodo("Proteccion", "CombustibleFundido", "Double", "%", "proteccion.combustible_fundido_pct", "Fracción de combustible fundido"),
     Nodo("Proteccion", "AlarmasActivas", "Int32", "", "proteccion.alarmas_activas", "Número de alarmas activas"),
     Nodo("Proteccion", "Estado", "String", "", "estado", "OPERACION, PARADA, SCRAM o ACCIDENTE"),
+    Nodo("Servidor", "Latido", "Int32", "", "secuencia", "Contador que cambia en cada ciclo de la simulación (vigilar la comunicación)"),
 )
 
 # Mandos escribibles: (nodo, función que aplica el valor escrito)

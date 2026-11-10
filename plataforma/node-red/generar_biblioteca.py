@@ -29,6 +29,8 @@ FLUJOS = [
     ("2-thingsboard/solarlab/flows/solarlab-thingsboard-solucion.json", "soluciones", "Serie 2 SolarLab - ThingsBoard"),
     ("1-dashboard/reactorlab/flows/reactorlab-dashboard-solucion.json", "soluciones", "Serie 1 ReactorLab - Dashboard"),
     ("2-thingsboard/reactorlab/flows/reactorlab-thingsboard-solucion.json", "soluciones", "Serie 2 ReactorLab - ThingsBoard HTTP"),
+    ("1-dashboard/atomlab/flows/atomlab-dashboard-solucion.json", "soluciones", "Serie 1 AtomLab - Dashboard"),
+    ("2-thingsboard/atomlab/flows/atomlab-thingsboard-solucion.json", "soluciones", "Serie 2 AtomLab - ThingsBoard"),
     ("3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json", "soluciones", "Reto AeroLab Modbus - solucion"),
     ("3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json", "soluciones", "Reto OceanLab MQTT - solucion"),
 ]
