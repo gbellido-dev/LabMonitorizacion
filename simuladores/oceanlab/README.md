@@ -98,3 +98,14 @@ npm.cmd --prefix frontend run build
 ## Alcance
 
 El modelo es didáctico: reproduce relaciones plausibles entre variables y estados, pero no sustituye fuentes oceanográficas oficiales ni un sistema de seguridad marítima.
+
+## Broker MQTT externo
+
+Por defecto OceanLab arranca su propio broker MQTT (puertos `1883` y `8083`). Si se define `BUOYLAB_MQTT_EXTERNAL_HOST`, no lo arranca y publica como un cliente más en ese broker. Es lo que hace el entorno integrado del repositorio, donde el único broker es Mosquitto:
+
+| Variable | Uso |
+|---|---|
+| `BUOYLAB_MQTT_EXTERNAL_HOST` | host del broker externo (p. ej. `mosquitto`) |
+| `BUOYLAB_MQTT_EXTERNAL_PORT` | puerto del broker externo (`1883`) |
+| `BUOYLAB_MQTT_PUBLIC_HOST` / `_PORT` / `_WS_PORT` | lo que muestra la interfaz como dirección del broker |
+

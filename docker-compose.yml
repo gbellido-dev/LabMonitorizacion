@@ -1,16 +1,19 @@
 # LabMonitorizacion · entorno integrado de prácticas de Monitorización de Máquinas
 #
-#   docker compose up -d --build          (la primera vez, antes: scripts/thingsboard-init)
+#   docker compose up -d --build
+#
+# (ThingsBoard se instala solo en el primer arranque; tarda unos minutos.)
 #
 # Simuladores                                   Plataforma IIoT
 #   AeroLab    http://localhost:8010  Modbus 1502  Node-RED     http://localhost:1880
-#   OceanLab   http://localhost:8020  MQTT   1884  ThingsBoard  http://localhost:8080  MQTT 1885
-#   SolarLab   http://localhost:8000  OPC UA 4840  Mosquitto    mqtt://localhost:1883  WS 9001
+#   OceanLab   http://localhost:8020  (MQTT en     ThingsBoard  http://localhost:8080
+#                                     Mosquitto)   Mosquitto    mqtt://localhost:1883  WS 9001
+#   SolarLab   http://localhost:8000  OPC UA 4840  Copias       http://localhost:8090
 #   Fundición  http://localhost:3000  OPC UA 4841
 #
-# Dentro de la red de Docker cada servicio se alcanza por su nombre y su
-# puerto original (aerolab:1502, oceanlab:1883, solarlab:4840,
-# fundicion-opcua:4841, mosquitto:1883, thingsboard:1883 ...).
+# Dentro de la red de Docker cada servicio se alcanza por su nombre
+# (aerolab:1502, mosquitto:1883, solarlab:4840, fundicion-opcua:4841,
+# thingsboard:1883 ...).
 
 name: labmonitorizacion
 
@@ -30,10 +33,15 @@ services:
   oceanlab:
     build: simuladores/oceanlab
     image: labmonitorizacion/oceanlab
+    depends_on:
+      - mosquitto
+    environment:
+      # Publica en el broker único del laboratorio en lugar de su broker integrado
+      BUOYLAB_MQTT_EXTERNAL_HOST: mosquitto
+      BUOYLAB_MQTT_EXTERNAL_PORT: 1883
+      BUOYLAB_MQTT_PUBLIC_WS_PORT: 9001
     ports:
       - "8020:8020"   # web 3D + API
-      - "1884:1883"   # broker MQTT integrado (1883 del anfitrión = Mosquitto)
-      - "8083:8083"   # MQTT sobre WebSocket
     restart: unless-stopped
 
   solarlab:
@@ -80,8 +88,6 @@ services:
   # ------------------------------------------------------------- plataforma IIoT
   mosquitto:
     image: eclipse-mosquitto:2.0.22
-    depends_on:
-      - oceanlab
     volumes:
       - ./plataforma/mosquitto/config:/mosquitto/config:ro
       - mosquitto-data:/mosquitto/data
@@ -104,20 +110,25 @@ services:
     restart: unless-stopped
 
   thingsboard:
-    image: thingsboard/tb-node:4.3.1.8
+    # tb-node 4.3.1 + instalación automática de la base de datos en el primer arranque
+    build: plataforma/thingsboard
+    image: labmonitorizacion/thingsboard:4.3.1
     depends_on:
-      - tb-postgres
+      tb-postgres:
+        condition: service_healthy
     environment:
       TB_SERVICE_ID: tb-ce-node
       TB_QUEUE_TYPE: in-memory
       SPRING_DATASOURCE_URL: jdbc:postgresql://tb-postgres:5432/thingsboard
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${TB_DB_PASSWORD:-postgres}
+      TB_LOAD_DEMO: "true"   # cuentas tenant@thingsboard.org / customer@...
     volumes:
       - tb-logs:/var/log/thingsboard
     ports:
       - "8080:8080"   # web y API REST
-      - "1885:1883"   # MQTT de dispositivos (1883 del anfitrión = Mosquitto)
+      # Su MQTT (API de dispositivos, no un broker general) solo se usa dentro
+      # de Docker: Node-RED publica en thingsboard:1883.
     restart: unless-stopped
 
   tb-postgres:
@@ -127,6 +138,29 @@ services:
       POSTGRES_PASSWORD: ${TB_DB_PASSWORD:-postgres}
     volumes:
       - tb-postgres-data:/var/lib/postgresql/data
+      - copias-intercambio:/intercambio
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # ------------------------------------------------- copias de seguridad (web)
+  copias:
+    build: plataforma/copias
+    image: labmonitorizacion/copias
+    environment:
+      COMPOSE_PROJECT: labmonitorizacion
+    volumes:
+      # Necesita Docker para parar/arrancar servicios y lanzar pg_dump/pg_restore
+      - /var/run/docker.sock:/var/run/docker.sock
+      - copias:/snapshots
+      - nodered-data:/nodered-data
+      - copias-intercambio:/intercambio
+    ports:
+      # Solo accesible desde este equipo: quien la use puede borrar y restaurar
+      - "127.0.0.1:8090:8090"
     restart: unless-stopped
 
 volumes:
@@ -134,3 +168,5 @@ volumes:
   nodered-data:
   tb-logs:
   tb-postgres-data:
+  copias:
+  copias-intercambio:

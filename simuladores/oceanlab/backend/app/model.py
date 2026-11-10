@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import math
+import os
 import random
 
 
@@ -127,7 +128,11 @@ class OceanModel:
         return {
             "timestamp": datetime.now(timezone.utc).isoformat(), "running": self.running,
             "settings": {"publish_interval_s": self.publish_interval_s, "qos": self.qos, "retained": self.retained},
-            "broker": {"host": "localhost", "tcp_port": 1883, "ws_port": 8083, "topic_pattern": "oceanlab/buoys/{buoy_id}/telemetry"},
+            "broker": {
+                "host": os.getenv("BUOYLAB_MQTT_PUBLIC_HOST", "localhost"),
+                "tcp_port": int(os.getenv("BUOYLAB_MQTT_PUBLIC_PORT", "1883")),
+                "ws_port": int(os.getenv("BUOYLAB_MQTT_PUBLIC_WS_PORT", "8083")),
+                "topic_pattern": "oceanlab/buoys/{buoy_id}/telemetry"},
             "buoys": [asdict(buoy) for buoy in self.buoys],
         }
 

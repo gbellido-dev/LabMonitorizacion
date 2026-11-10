@@ -235,7 +235,7 @@
         "id": "oc20f00000000030",
         "type": "mqtt-broker",
         "name": "OceanLab MQTT",
-        "broker": "oceanlab",
+        "broker": "mosquitto",
         "port": "1883",
         "clientid": "oceanlab-nodered-solution",
         "autoConnect": true,

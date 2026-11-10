@@ -8,6 +8,7 @@ echo   OceanLab     http://localhost:8020
 echo   SolarLab     http://localhost:8000
 echo   Fundicion    http://localhost:3000
 echo   Node-RED     http://localhost:1880
-echo   ThingsBoard  http://localhost:8080   (tarda 1-2 min en arrancar)
+echo   ThingsBoard  http://localhost:8080   (1-2 min; la primera vez, hasta 3)
+echo   Copias       http://localhost:8090
 echo.
 pause

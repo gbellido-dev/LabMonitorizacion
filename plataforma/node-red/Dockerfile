@@ -12,6 +12,7 @@ RUN npm install --no-audit --no-fund --omit=dev \
 
 # Biblioteca de flujos (Menú → Import → Local) con los hosts del compose
 COPY --chown=node-red:node-red biblioteca /opt/lab/biblioteca
+COPY --chown=node-red:node-red settings.js /opt/lab/settings.js
 COPY --chown=node-red:node-red --chmod=755 entrypoint-lab.sh /opt/lab/entrypoint-lab.sh
 
 ENTRYPOINT ["/opt/lab/entrypoint-lab.sh"]

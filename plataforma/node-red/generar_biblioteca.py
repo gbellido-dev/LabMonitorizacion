@@ -37,7 +37,7 @@ def adaptar(nodo: dict) -> dict:
             nodo["broker"] = "thingsboard"
             nodo["port"] = "1883"
         elif "oceanlab" in nombre:
-            nodo["broker"] = "oceanlab"
+            nodo["broker"] = "mosquitto"
             nodo["port"] = "1883"
     elif tipo == "OpcUa-Endpoint":
         nodo["endpoint"] = nodo["endpoint"].replace("localhost", "solarlab").replace("127.0.0.1", "solarlab")

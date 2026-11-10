@@ -43,8 +43,36 @@ def record_event(kind: str, topic: str, payload: dict, qos: int = 0, retained: b
     del events[:-60]
 
 
+EXTERNAL_BROKER_HOST = os.getenv("BUOYLAB_MQTT_EXTERNAL_HOST", "").strip()
+EXTERNAL_BROKER_PORT = int(os.getenv("BUOYLAB_MQTT_EXTERNAL_PORT", "1883"))
+external_connected = False
+
+
+def _on_connect(_client, _userdata, _flags, reason_code, _properties=None) -> None:
+    global external_connected
+    external_connected = not reason_code.is_failure
+    if external_connected:
+        log.info("Conectado al broker MQTT externo %s:%s", EXTERNAL_BROKER_HOST, EXTERNAL_BROKER_PORT)
+
+
+def _on_disconnect(_client, _userdata, _flags, _reason_code, _properties=None) -> None:
+    global external_connected
+    external_connected = False
+
+
 async def start_mqtt() -> None:
     global broker, mqtt_client
+    if EXTERNAL_BROKER_HOST:
+        # Modo broker externo (p. ej. Mosquitto del laboratorio): no se arranca
+        # el broker integrado y el simulador publica como un cliente más.
+        mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="oceanlab-simulator")
+        mqtt_client.on_connect = _on_connect
+        mqtt_client.on_disconnect = _on_disconnect
+        mqtt_client.reconnect_delay_set(min_delay=1, max_delay=10)
+        mqtt_client.connect_async(EXTERNAL_BROKER_HOST, EXTERNAL_BROKER_PORT)
+        mqtt_client.loop_start()
+        log.info("Publicando en el broker externo %s:%s", EXTERNAL_BROKER_HOST, EXTERNAL_BROKER_PORT)
+        return
     config = {
         "listeners": {
             "default": {"type": "tcp", "bind": f"0.0.0.0:{os.getenv('BUOYLAB_MQTT_PORT', '1883')}"},
@@ -116,7 +144,8 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/api/health")
 def health() -> dict:
-    return {"status": "ok", "mqtt_broker": broker is not None, "buoys": len(model.buoys)}
+    mqtt_ok = external_connected if EXTERNAL_BROKER_HOST else broker is not None
+    return {"status": "ok", "mqtt_broker": mqtt_ok, "mqtt_mode": "externo" if EXTERNAL_BROKER_HOST else "integrado", "buoys": len(model.buoys)}
 
 
 @app.get("/api/snapshot")

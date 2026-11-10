@@ -1,7 +1,9 @@
 #!/bin/sh
-# Copia la biblioteca de flujos del laboratorio al directorio de usuario de
-# Node-RED (/data, volumen persistente) y arranca Node-RED con normalidad.
+# Prepara /data (volumen persistente de Node-RED) y arranca Node-RED.
+#  - settings.js del laboratorio (clave de credenciales fija -> snapshots portables)
+#  - biblioteca de flujos de las prácticas en Import -> Local
 set -e
+cp /opt/lab/settings.js /data/settings.js
 DEST=/data/lib/flows/LabMonitorizacion
 rm -rf "$DEST"
 mkdir -p "$DEST"

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copias · LabMonitorizacion</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --panel: #ffffff; --text: #17212b; --muted: #5d6b78; --line: #dde3e8;
+    --accent: #1f6feb; --accent-text: #ffffff; --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e;
+    --chip: #eef2f6; --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1419; --panel: #171e26; --text: #e6edf3; --muted: #94a3b3; --line: #2a3541;
+      --accent: #4493f8; --accent-text: #0b1117; --ok: #3fb950; --warn: #d29922; --bad: #f85149;
+      --chip: #212b36; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 22px; }
+  header p { margin: 4px 0 0; color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 8px 16px 40px; display: grid; gap: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+  .panel h2 { margin: 0 0 12px; font-size: 16px; }
+  .estado { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .servicio { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .servicio small { color: var(--muted); display: block; }
+  .punto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--muted); }
+  .punto.ok { background: var(--ok); } .punto.mal { background: var(--bad); }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .dos { grid-template-columns: 1fr; } }
+  label { display: block; font-weight: 600; margin: 8px 0 4px; }
+  input[type=text], textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+         background: var(--bg); color: var(--text); font: inherit; }
+  textarea { min-height: 54px; resize: vertical; }
+  .check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin: 6px 0; }
+  .check input { margin-top: 4px; }
+  .check small { color: var(--muted); display: block; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--chip); color: var(--text);
+           padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+  button.primario { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  button.peligro { color: var(--bad); }
+  button:disabled { opacity: .55; cursor: progress; }
+  .acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+  .soltar { border: 2px dashed var(--line); border-radius: 8px; padding: 22px; text-align: center; color: var(--muted); }
+  .soltar.encima { border-color: var(--accent); color: var(--text); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; border-top: 0; }
+  td small { color: var(--muted); }
+  .chip { display: inline-block; background: var(--chip); border-radius: 999px; padding: 1px 8px; font-size: 12px; margin: 2px 4px 2px 0; }
+  .vacio { color: var(--muted); padding: 16px 0; }
+  .aviso { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: min(92vw, 640px);
+           background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 8px; display: none; z-index: 10; }
+  .aviso.error { background: var(--bad); color: #fff; }
+  dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); max-width: 460px; width: 92vw; }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  .ocupado { color: var(--warn); font-weight: 600; }
+  @media (max-width: 640px) {
+    thead { display: none; }
+    tr, td { display: block; }
+    td { border-top: 0; padding: 4px 0; }
+    tr { border-top: 1px solid var(--line); padding: 10px 0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Copias de seguridad</h1>
+  <p>Snapshots de Node-RED y ThingsBoard: créalos, descárgalos, llévalos a otro equipo e impórtalos.</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>Estado <span id="ocupado" class="ocupado"></span></h2>
+    <div class="estado" id="estado"><div class="servicio">Cargando…</div></div>
+  </section>
+
+  <div class="dos">
+    <section class="panel">
+      <h2>Crear snapshot</h2>
+      <form id="crear">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" required maxlength="80" placeholder="p. ej. Práctica 01 terminada">
+        <label for="descripcion">Descripción (opcional)</label>
+        <textarea id="descripcion" maxlength="500"></textarea>
+        <label class="check"><input type="checkbox" id="c-nodered" checked><span>Node-RED<small>Flujos, credenciales, biblioteca y contexto</small></span></label>
+        <label class="check"><input type="checkbox" id="c-tb" checked><span>ThingsBoard<small>Dispositivos, tokens, paneles, alarmas, reglas y usuarios</small></span></label>
+        <label class="check"><input type="checkbox" id="c-telemetria"><span>Incluir histórico de telemetría<small>Los últimos valores se guardan siempre; el histórico puede ocupar mucho</small></span></label>
+        <div class="acciones" style="margin-top:10px"><button class="primario" type="submit">Crear snapshot</button></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Importar snapshot</h2>
+      <div class="soltar" id="soltar">
+        Arrastra aquí un archivo <code>.tar.gz</code> descargado de esta web<br><br>
+        <button type="button" id="elegir">Elegir archivo…</button>
+        <input type="file" id="archivo" accept=".gz,.tgz,application/gzip" hidden>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:0">Importar solo añade el snapshot a la lista; no cambia nada hasta que pulses <b>Restaurar</b>.</p>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Snapshots guardados</h2>
+    <table>
+      <thead><tr><th>Snapshot</th><th>Contenido</th><th>Fecha</th><th>Tamaño</th><th></th></tr></thead>
+      <tbody id="lista"></tbody>
+    </table>
+    <div class="vacio" id="vacio" hidden>Todavía no hay snapshots.</div>
+  </section>
+</main>
+
+<dialog id="dlg-restaurar">
+  <form method="dialog" id="form-restaurar">
+    <h2 style="margin-top:0;font-size:17px">Restaurar <span id="r-nombre"></span></h2>
+    <p style="color:var(--muted)">Se sustituirá lo que haya ahora en este equipo por el contenido del snapshot. Los servicios se reiniciarán.</p>
+    <label class="check"><input type="checkbox" id="r-nodered"><span>Node-RED</span></label>
+    <label class="check"><input type="checkbox" id="r-tb"><span>ThingsBoard</span></label>
+    <label class="check"><input type="checkbox" id="r-previa" checked><span>Hacer antes una copia automática del estado actual</span></label>
+    <div class="acciones" style="justify-content:flex-end;margin-top:14px">
+      <button value="cancelar">Cancelar</button>
+      <button class="primario" value="ok">Restaurar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="aviso" id="aviso"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const fmtTam = (b) => b > 1e9 ? (b / 1e9).toFixed(1) + " GB" : b > 1e6 ? (b / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1e3)) + " kB";
+const fmtFecha = (s) => s ? new Date(s).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "—";
+let ocupado = false;
+
+function aviso(texto, error = false, ms = 5000) {
+  const a = $("aviso");
+  a.textContent = texto; a.className = "aviso" + (error ? " error" : ""); a.style.display = "block";
+  clearTimeout(aviso.t); aviso.t = setTimeout(() => (a.style.display = "none"), ms);
+}
+
+async function api(ruta, opciones = {}) {
+  const r = await fetch(ruta, opciones);
+  if (!r.ok) {
+    let detalle = r.statusText;
+    try { detalle = (await r.json()).detail || detalle; } catch {}
+    throw new Error(detalle);
+  }
+  return r.status === 204 ? null : r.json();
+}
+
+function bloquear(si, texto = "") {
+  ocupado = si;
+  document.querySelectorAll("button").forEach((b) => (b.disabled = si));
+  $("ocupado").textContent = si ? "· " + texto : "";
+}
+
+async function cargarEstado() {
+  try {
+    const e = await api("/api/estado");
+    const nombres = { nodered: "Node-RED", thingsboard: "ThingsBoard", postgres: "PostgreSQL (ThingsBoard)" };
+    $("estado").innerHTML = "";
+    for (const [k, s] of Object.entries(e.servicios)) {
+      const ok = s.estado === "running";
+      const div = document.createElement("div");
+      div.className = "servicio";
+      div.innerHTML = `<span class="punto ${ok ? "ok" : "mal"}"></span><b></b><small></small>`;
+      div.querySelector("b").textContent = nombres[k] || k;
+      div.querySelector("small").textContent = (ok ? "En marcha" : s.estado) + (s.salud ? ` · ${s.salud}` : "") + (s.version ? ` · v${s.version}` : "");
+      $("estado").append(div);
+    }
+    const disco = document.createElement("div");
+    disco.className = "servicio";
+    disco.innerHTML = `<b>Espacio libre</b><small>${fmtTam(e.disco_libre)}</small>`;
+    $("estado").append(disco);
+    if (e.ocupado && !ocupado) $("ocupado").textContent = "· operación en curso";
+  } catch (err) {
+    $("estado").innerHTML = `<div class="servicio"><span class="punto mal"></span>${err.message}</div>`;
+  }
+}
+
+async function cargarLista() {
+  const lista = await api("/api/snapshots");
+  const tbody = $("lista");
+  tbody.innerHTML = "";
+  $("vacio").hidden = lista.length > 0;
+  for (const s of lista) {
+    const tr = document.createElement("tr");
+    const c = s.contenido || {};
+    const chips = [c.nodered && "Node-RED", c.thingsboard && "ThingsBoard", c.telemetria && "histórico", s.automatico && "automática"].filter(Boolean);
+    tr.innerHTML = `<td><b class="n"></b><br><small class="d"></small></td>
+      <td>${chips.map((t) => `<span class="chip">${t}</span>`).join("")}</td>
+      <td>${fmtFecha(s.creado)}</td><td>${fmtTam(s.tamano)}</td>
+      <td><div class="acciones"></div></td>`;
+    tr.querySelector(".n").textContent = s.nombre || s.id;
+    tr.querySelector(".d").textContent = s.error ? "⚠ " + s.error : (s.descripcion || (s.nodered_flujos != null ? `${s.nodered_flujos} pestaña(s) de flujos` : ""));
+    const acc = tr.querySelector(".acciones");
+    const boton = (texto, clase, fn) => { const b = document.createElement("button"); b.textContent = texto; if (clase) b.className = clase; b.onclick = fn; b.disabled = ocupado; acc.append(b); };
+    if (!s.error) {
+      boton("Descargar", "", () => (location.href = `/api/snapshots/${encodeURIComponent(s.id)}/descargar`));
+      boton("Restaurar", "primario", () => abrirRestaurar(s));
+    }
+    boton("Eliminar", "peligro", () => eliminar(s));
+    tbody.append(tr);
+  }
+}
+
+async function refrescar() { await Promise.all([cargarEstado(), cargarLista().catch((e) => aviso(e.message, true))]); }
+
+$("crear").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  bloquear(true, "creando snapshot…");
+  try {
+    const s = await api("/api/snapshots", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre: $("nombre").value, descripcion: $("descripcion").value,
+        nodered: $("c-nodered").checked, thingsboard: $("c-tb").checked, telemetria: $("c-telemetria").checked }),
+    });
+    aviso(`Snapshot «${s.nombre}» creado (${fmtTam(s.tamano)}).`);
+    $("crear").reset();
+  } catch (err) { aviso(err.message, true, 9000); }
+  bloquear(false); refrescar();
+});
+
+async function importar(archivo) {
+  if (!archivo) return;
+  const datos = new FormData();
+  datos.append("archivo", archivo);
+  bloquear(true, "importando…");
+  try {
+    const s = await api("/api/snapshots/importar", { method: "POST", body: datos });
+    aviso(`Importado «${s.nombre}». Pulsa Restaurar para aplicarlo.`);
+  } catch (err) { aviso(err.message, true, 9000); }
+  bloquear(false); refrescar();
+}
+$("elegir").onclick = () => $("archivo").click();
+$("archivo").onchange = (e) => { importar(e.target.files[0]); e.target.value = ""; };
+const zona = $("soltar");
+zona.addEventListener("dragover", (e) => { e.preventDefault(); zona.classList.add("encima"); });
+zona.addEventListener("dragleave", () => zona.classList.remove("encima"));
+zona.addEventListener("drop", (e) => { e.preventDefault(); zona.classList.remove("encima"); importar(e.dataTransfer.files[0]); });
+
+let aRestaurar = null;
+function abrirRestaurar(s) {
+  aRestaurar = s;
+  const c = s.contenido || {};
+  $("r-nombre").textContent = "«" + (s.nombre || s.id) + "»";
+  $("r-nodered").checked = !!c.nodered; $("r-nodered").disabled = !c.nodered;
+  $("r-tb").checked = !!c.thingsboard; $("r-tb").disabled = !c.thingsboard;
+  $("dlg-restaurar").showModal();
+}
+$("dlg-restaurar").addEventListener("close", async () => {
+  if ($("dlg-restaurar").returnValue !== "ok" || !aRestaurar) return;
+  bloquear(true, "restaurando… (puede tardar un par de minutos)");
+  try {
+    const r = await api(`/api/snapshots/${encodeURIComponent(aRestaurar.id)}/restaurar`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nodered: $("r-nodered").checked, thingsboard: $("r-tb").checked, copia_previa: $("r-previa").checked }),
+    });
+    aviso(["Restauración completada.", ...r.avisos].join(" "), false, 12000);
+  } catch (err) { aviso(err.message, true, 12000); }
+  bloquear(false); refrescar();
+});
+
+async function eliminar(s) {
+  if (!confirm(`¿Eliminar el snapshot «${s.nombre || s.id}»? No se puede deshacer.`)) return;
+  try { await api(`/api/snapshots/${encodeURIComponent(s.id)}`, { method: "DELETE" }); aviso("Snapshot eliminado."); }
+  catch (err) { aviso(err.message, true); }
+  refrescar();
+}
+
+refrescar();
+setInterval(cargarEstado, 10000);
+</script>
+</body>
+</html>

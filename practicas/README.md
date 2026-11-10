@@ -14,7 +14,7 @@ Los guiones están escritos para instalaciones sueltas (`localhost`, `127.0.0.1`
 | Dónde | Valor |
 |---|---|
 | Nodo Modbus (práctica 01) | host `aerolab`, puerto `1502`, Unit ID `1` |
-| Broker OceanLab (práctica 02) | host `oceanlab`, puerto `1883` (o `mosquitto:1883`, que recibe los mismos topics por puente) |
+| Broker MQTT de OceanLab (práctica 02) | host `mosquitto`, puerto `1883` (el broker único del laboratorio) |
 | Endpoint OPC UA SolarLab (prácticas 03 y 04) | `opc.tcp://solarlab:4840/solarlab/server/` |
 | Endpoint OPC UA Fundición (ampliación) | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
 | Broker ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
@@ -28,7 +28,8 @@ Los flujos de la biblioteca de Node-RED (**Import → Local → LabMonitorizacio
 Con el compose levantado se ha verificado de extremo a extremo:
 
 - SolarLab → Node-RED (OPC UA, flujo 03) → ThingsBoard: 8 claves de telemetría en el dispositivo.
-- OceanLab → Node-RED (MQTT, solución 02) → ThingsBoard: 14 claves por boya.
-- Mosquitto recibe `oceanlab/#` por el puente.
+- OceanLab → Mosquitto → Node-RED (solución 02) → ThingsBoard: 14 claves por boya.
+- Snapshot de Node-RED + ThingsBoard → borrar dispositivo y flujos → restaurar: el dispositivo, los flujos y el token vuelven y la telemetría sigue llegando.
+- OceanLab publica en Mosquitto (broker único) y Node-RED lo consume desde ahí.
 - Fundición: el puente WebSocket se suscribe a 144 variables del servidor OPC UA en `4841`.
 - AeroLab responde a lecturas FC04 en `1502`.
