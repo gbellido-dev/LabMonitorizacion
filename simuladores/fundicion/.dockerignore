@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.npm-cache
+.wrangler
+.vinext
+.next
+.openai/node_modules
+*.bat
+*.log
+Dockerfile
+compose.yaml
