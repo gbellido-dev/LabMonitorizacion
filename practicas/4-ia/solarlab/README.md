@@ -44,7 +44,15 @@ NORMAL = 0
 
 Ejecuta todo. Publica `solarlab-curva` y `solarlab-anomalias`.
 
-{{RESULTADOS_SOLAR}}
+Resultados obtenidos con una campaña de 892 filas (596 normales, 151 con suciedad y 145 con disparo de inversor):
+
+| | Sin avería | Suciedad | Disparo de inversor |
+|---|---|---|---|
+| Rendimiento medio respecto a la curva | 1,00 | 0,71 | 0,75 |
+| Filas con rendimiento < 0,9 | 1 % | **100 %** | **100 %** |
+| Filas marcadas por el Isolation Forest | 1 % | 3 % | 18 % |
+
+La curva aprendida (MAE ≈ 32 kW, R² = 0,998) detecta las dos averías; el detector de anomalías **sobre los datos en bruto** casi no las ve, porque una potencia baja es habitual… con otra irradiancia. Es la pregunta 1 del cuaderno.
 
 ### 3. Tiempo real y ThingsBoard
 

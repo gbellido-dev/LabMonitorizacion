@@ -75,13 +75,54 @@ El flujo hace tres cosas:
 La fila que se guarda:
 
 ```javascript
-{{PLANO}}
+// ENTRADA: el mensaje decodificado (bloques viento, rotor, produccion...)
+// SALIDA:  msg.payload = una fila plana: una columna por medida + la etiqueta
+
+const p = msg.payload;
+msg.payload = {
+    viento:             p.viento.velocidad_mps,
+    potencia:           p.produccion.potencia_kw,
+    rotor_rpm:          p.rotor.rpm,
+    pitch:              p.rotor.pitch_deg,
+    vibracion:          p.condicion.vibracion_mms,
+    temp_rodamiento:    p.condicion.temp_rodamiento_c,
+    temp_multiplicador: p.condicion.temp_multiplicador_c,
+    estado:             p.estado.codigo,
+    averia:             p.estado.averia_codigo,
+    // etiqueta: lo que está pasando DE VERDAD (lo fija el botón de escenario)
+    escenario:          flow.get("escenario") || "normal"
+};
+return msg;
 ```
 
 Los escenarios (escritura de *holding registers*):
 
 ```javascript
-{{ESCENARIO}}
+// ENTRADA: msg.payload = nombre del escenario (botones de la izquierda)
+// SALIDA:  escrituras Modbus (holding registers) para provocarlo
+//   HR0 modo (0 auto, 1 manual) · HR3 consigna de yaw (0,1°) · HR4 límite (kW) · HR5 avería
+
+const escenario = msg.payload;
+const PLANES = {
+    "normal":       { 0: 0, 4: 5000, 5: 0 },
+    // modo manual con la góndola fija 35° fuera del viento (235°): produce menos, sin alarma
+    "desalineada":  { 0: 1, 2: 200, 3: 2000, 4: 5000, 5: 0 },
+    // un operador de red limita la potencia (curtailment): cambio de régimen legítimo
+    "limitada":     { 0: 0, 4: 3000, 5: 0 },
+    "averia-vibracion":  { 0: 0, 4: 5000, 5: 2 },
+    "averia-rodamiento": { 0: 0, 4: 5000, 5: 1 }
+};
+const plan = PLANES[escenario];
+if (!plan) {
+    node.warn("Escenario desconocido: " + escenario);
+    return null;
+}
+flow.set("escenario", escenario);
+node.status({ fill: escenario === "normal" ? "green" : "orange", shape: "dot", text: escenario });
+
+return [Object.entries(plan).map(([adr, valor]) => ({
+    payload: { value: valor, fc: 6, unitid: 1, address: Number(adr), quantity: 1 }
+}))];
 ```
 
 > **Por qué la etiqueta.** En una planta real casi nunca se sabe con certeza qué pasaba en cada instante.
@@ -121,9 +162,29 @@ Abre **02-aerolab-entrenar.ipynb**. Entrenarás con los datos **normales**:
 | `aerolab-curva` | regresión (red neuronal 32 + 32) | `viento` | ¿Cuánto debería producir con este viento? |
 | `aerolab-anomalias` | anomalías (Isolation Forest) | `viento`, `potencia`, `vibracion`, `temp_rodamiento` | ¿Es habitual esta combinación? |
 
-Resultados obtenidos con una campaña de {{FILAS}} filas:
+Resultados obtenidos con una campaña de 1722 filas:
 
-{{RESULTADOS}}
+| Modelo | Resultado (datos de prueba) |
+|---|---|
+| Curva: recta | MAE = 516 kW, R² = 0,87 |
+| Curva: **red neuronal** | **MAE = 223 kW, R² = 0,97** |
+| Detector de anomalías | 1,1 % de falsas alarmas |
+
+| Escenario | Desviación mediana respecto a la curva | Filas marcadas por el detector de anomalías |
+|---|---|---|
+| Normal | +7 kW | 1 % |
+| Góndola desalineada | **−1240 kW** | **0 %** |
+| Límite 3000 kW | −75 kW | 0 % |
+| Avería: vibración | −4365 kW | 100 % |
+| Avería: rodamiento | −924 kW | 100 % |
+
+Las dos herramientas se **complementan**: el detector de anomalías ve las averías (vibración y temperatura fuera de lo
+habitual) pero no la góndola desalineada, porque cada valor por separado es normal; la curva sí la ve, porque
+compara la potencia con lo que *debería* ser. El límite de potencia solo se nota con vientos altos.
+
+<img src="img/entrenamiento.png" style="width:6.3in" />
+
+*Curva aprendida (izquierda) y desviación por escenario (derecha), del cuaderno 02.*
 
 La función `guardar(...)` **publica** el modelo: queda en `modelos/` con una ficha (tipo, entradas, métricas,
 versión). Compruébalo en <http://localhost:8100/modelos>.
@@ -136,14 +197,41 @@ Añade al flujo, a la salida de **Fila plana**:
 2. Una *function* que compara lo real con lo esperado:
 
    ```javascript
-   {{ESPERADA}}
+   // ENTRADA: la fila plana + msg.prediccion (lo que el modelo espera producir)
+   // SALIDA:  la fila con la potencia esperada y la desviación
+
+   const p = msg.payload;
+   p.potencia_esperada = Math.max(0, Math.round(msg.prediccion.prediccion));
+   p.desviacion_kw     = Math.round(p.potencia - p.potencia_esperada);
+   // rendimiento solo tiene sentido si se espera producir algo
+   p.rendimiento_pct   = p.potencia_esperada > 200
+       ? Math.round(1000 * p.potencia / p.potencia_esperada) / 10
+       : null;
+   return msg;
    ```
 
 3. Otro **ia predecir** con modelo `aerolab-anomalias`.
 4. Una *function* que prepara la telemetría:
 
    ```javascript
-   {{TELEMETRIA_IA}}
+   // ENTRADA: la fila con las predicciones de los dos modelos
+   // SALIDA:  { ts, values } para ThingsBoard
+
+   const p = msg.payload;
+   msg.payload = {
+       ts: Date.now(),
+       values: {
+           viento:              p.viento,
+           potencia:            p.potencia,
+           potencia_esperada:   p.potencia_esperada,
+           desviacion_kw:       p.desviacion_kw,
+           rendimiento_pct:     p.rendimiento_pct,
+           anomalia:            msg.prediccion.anomalia,
+           puntuacion_anomalia: msg.prediccion.puntuacion,
+           escenario:           p.escenario
+       }
+   };
+   return msg;
    ```
 
 5. Un **mqtt out** a ThingsBoard (`v1/devices/me/telemetry`) con el token de un dispositivo nuevo,
@@ -165,7 +253,7 @@ El estado de cada **ia predecir** muestra el modelo, su versión y el último re
 | Regla | Condición | Se borra | Gravedad |
 |---|---|---|---|
 | Producción por debajo de lo esperado | `desviacion_kw` < −600 durante 30 s | > −200 durante 10 s | Major |
-| Comportamiento anómalo | `anomalia` = true durante 15 s | false durante 30 s | Warning |
+| Comportamiento anómalo | `anomalia` = true durante 30 s | false durante 30 s | Warning |
 
 3. Prueba cada escenario y rellena:
 
@@ -198,7 +286,21 @@ nuevos.
 4. Una *function* de telemetría y el **mqtt out** a ThingsBoard:
 
    ```javascript
-   {{TELEMETRIA_CONTINUO}}
+   // ENTRADA: la fila + el resultado del modelo continuo (msg.prediccion)
+   // SALIDA:  { ts, values } para ThingsBoard
+
+   const r = msg.prediccion;
+   msg.payload = {
+       ts: Date.now(),
+       values: {
+           continuo_prediccion: r.prediccion,
+           continuo_mae:        r.mae,
+           continuo_deriva:     r.deriva,
+           continuo_derivas:    r.derivas,
+           continuo_aprendidas: r.aprendidas
+       }
+   };
+   return msg;
    ```
 
 5. Una regla más en ThingsBoard: **Deriva del modelo continuo** cuando `continuo_deriva` = true; se borra tras
@@ -206,12 +308,30 @@ nuevos.
 
 ### Parte 8 — Provocar una deriva
 
-1. Deja que aprenda en **Normal** unos 10 minutos (el estado del nodo muestra lecturas aprendidas y MAE).
+1. Deja que aprenda en **Normal** unos 12 minutos (vigila la deriva a partir de 600 lecturas) (el estado del nodo muestra lecturas aprendidas y MAE).
 2. Pulsa **Límite 3000 kW** y observa en el panel: el MAE sube, salta la **deriva**, y el modelo se adapta.
 3. Repite con **Góndola desalineada**.
 4. Abre **03-aerolab-deriva.ipynb** y compara el modelo continuo con el modelo fijo de Jupyter.
 
-{{DERIVA}}
+Lo que se obtuvo en el laboratorio (12 minutos de aprendizaje en normal y después los escenarios):
+
+| Momento | Deriva detectada | Alarma «Producción por debajo de lo esperado» (modelo fijo) |
+|---|---|---|
+| 12 min en normal | ninguna | ninguna |
+| Góndola desalineada | a los 72 s | a los 73 s |
+| Vuelta a normal | a los 36 s | se borra |
+| Límite 3000 kW | a los 14 s | a los 30 s |
+
+<img src="img/deriva.png" style="width:6.3in" />
+
+*Arriba, error medio de los dos modelos; abajo, la potencia. En rojo, las derivas (cuaderno 03).*
+
+Fíjate en la gráfica de arriba: durante la desalineación el error del **modelo fijo** se dispara y se queda alto,
+porque compara siempre con la máquina sana; el del **modelo continuo** sube un momento y vuelve a bajar, porque
+**aprende la avería como si fuera lo normal**. La deriva avisa del cambio, pero después el modelo continuo ya no lo ve.
+
+> La deriva se vigila sobre el error **con signo** (real − predicho): si la máquina empieza a producir
+> sistemáticamente menos (o más) de lo que el modelo espera, salta, aunque el error medio absoluto apenas cambie.
 
 ### Parte 9 — Anomalías que se aprenden solas (ampliación)
 

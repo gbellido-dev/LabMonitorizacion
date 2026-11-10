@@ -160,13 +160,13 @@
         "id": "45b723546c8e100d",
         "type": "inject",
         "z": "d62cd6fa4f520b35",
-        "name": "Cada 45 s",
+        "name": "Cada 20 s",
         "props": [
             {
                 "p": "payload"
             }
         ],
-        "repeat": "45",
+        "repeat": "20",
         "crontab": "",
         "once": true,
         "onceDelay": "2",
@@ -186,7 +186,7 @@
         "type": "function",
         "z": "d62cd6fa4f520b35",
         "name": "Campaña de viento",
-        "func": "// ENTRADA: un pulso cada 45 s\n// SALIDA:  viento y turbulencia nuevos (HR1 en 0,1 m/s · HR6 en 0,1 %)\n// Así la recogida recorre toda la curva de potencia y no solo el viento de hoy.\n\nconst viento      = 3 + Math.random() * 15;        // 3-18 m/s\nconst turbulencia = 2 + Math.random() * 10;        // 2-12 %\nnode.status({ text: `viento ${viento.toFixed(1)} m/s · turbulencia ${turbulencia.toFixed(0)} %` });\nreturn [[\n    { payload: { value: Math.round(viento * 10),      fc: 6, unitid: 1, address: 1, quantity: 1 } },\n    { payload: { value: Math.round(turbulencia * 10), fc: 6, unitid: 1, address: 6, quantity: 1 } }\n]];",
+        "func": "// ENTRADA: un pulso cada 20 s\n// SALIDA:  viento y turbulencia nuevos (HR1 en 0,1 m/s · HR6 en 0,1 %)\n// Así la recogida recorre toda la curva de potencia y no solo el viento de hoy.\n\nconst viento      = 3 + Math.random() * 15;        // 3-18 m/s\nconst turbulencia = 2 + Math.random() * 10;        // 2-12 %\nnode.status({ text: `viento ${viento.toFixed(1)} m/s · turbulencia ${turbulencia.toFixed(0)} %` });\nreturn [[\n    { payload: { value: Math.round(viento * 10),      fc: 6, unitid: 1, address: 1, quantity: 1 } },\n    { payload: { value: Math.round(turbulencia * 10), fc: 6, unitid: 1, address: 6, quantity: 1 } }\n]];",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
