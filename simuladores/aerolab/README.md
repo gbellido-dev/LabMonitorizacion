@@ -104,10 +104,10 @@ También se puede usar QModMaster, Modbus Poll, Node-RED, un PLC o cualquier SCA
 
 El proyecto incluye una práctica completa para convertir las variables Modbus del aerogenerador, publicarlas por MQTT y construir un dashboard con alarmas en ThingsBoard:
 
-- Guion del alumnado: `docs/practica-node-red-thingsboard.md`.
-- Solución docente: `docs/solucion-practica-node-red-thingsboard.md`.
-- Flujo inicial: `integrations/node-red/aerolab-starter-flow.json`.
-- Flujo resuelto: `integrations/node-red/aerolab-thingsboard-flow.json`.
+- Guion del alumnado: [`practicas/01-aerolab-modbus/practica-node-red-thingsboard.md`](../../practicas/01-aerolab-modbus/practica-node-red-thingsboard.md).
+- Solución docente: [`practicas/01-aerolab-modbus/solucion-practica-node-red-thingsboard.md`](../../practicas/01-aerolab-modbus/solucion-practica-node-red-thingsboard.md).
+- Flujo inicial: [`practicas/01-aerolab-modbus/flows/aerolab-starter-flow.json`](../../practicas/01-aerolab-modbus/flows/aerolab-starter-flow.json).
+- Flujo resuelto: [`practicas/01-aerolab-modbus/flows/aerolab-thingsboard-flow.json`](../../practicas/01-aerolab-modbus/flows/aerolab-thingsboard-flow.json).
 
 ## Pruebas
 

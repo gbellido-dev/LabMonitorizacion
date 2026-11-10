@@ -4,8 +4,8 @@
 
 - `aerolab-starter-flow.json`: punto de partida para el alumnado; solo contiene las lecturas Modbus y la depuración de datos crudos.
 - `aerolab-thingsboard-flow.json`: solución completa con decodificación, MQTT y mandos Modbus didácticos.
-- `../../docs/practica-node-red-thingsboard.md`: guion de la práctica.
-- `../../docs/solucion-practica-node-red-thingsboard.md`: solución y notas para el profesorado.
+- `../practica-node-red-thingsboard.md`: guion de la práctica.
+- `../solucion-practica-node-red-thingsboard.md`: solución y notas para el profesorado.
 
 ## Uso en cinco pasos
 

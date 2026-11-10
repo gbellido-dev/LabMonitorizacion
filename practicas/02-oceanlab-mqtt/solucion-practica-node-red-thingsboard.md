@@ -1,6 +1,6 @@
 # Solución docente: OceanLab, Node-RED y ThingsBoard
 
-Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo está en `integrations/node-red/oceanlab-thingsboard-flow.json`.
+Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo está en `flows/oceanlab-thingsboard-flow.json`.
 
 ## Preparación del aula
 

@@ -46,7 +46,7 @@ Al terminar, el alumnado será capaz de:
 - Node-RED 4 o 5.
 - El módulo `node-red-contrib-opcua`.
 - Una instancia de ThingsBoard CE o ThingsBoard Cloud.
-- El flujo importable [solarlab-thingsboard-flow.json](../../node-red/solarlab-thingsboard-flow.json).
+- El flujo importable [solarlab-thingsboard-flow.json](flows/solarlab-thingsboard-flow.json).
 - Puertos disponibles: `4840` para OPC UA, `1883` para MQTT y `8080` para ThingsBoard local.
 
 > Para una instalación local, ThingsBoard recomienda al menos 4 GB de RAM para un entorno de desarrollo o prueba de concepto.
@@ -179,7 +179,7 @@ El mensaje que se espera publicar tendrá esta forma:
 ### 3.2 Importar el flujo
 
 1. Menú principal → **Import**.
-2. Seleccionar el archivo `node-red/solarlab-thingsboard-flow.json`.
+2. Seleccionar el archivo `flows/solarlab-thingsboard-flow.json`.
 3. Importarlo como una pestaña nueva.
 4. Antes de desplegar, revisar todos los nodos marcados con un triángulo rojo.
 

@@ -36,7 +36,7 @@ Al terminar, el alumnado será capaz de:
 - OceanLab en ejecución.
 - Node-RED con los nodos MQTT incluidos de serie.
 - Una instancia de ThingsBoard y permiso para crear dispositivos y dashboards.
-- Flujo inicial `integrations/node-red/oceanlab-starter-flow.json`.
+- Flujo inicial `flows/oceanlab-starter-flow.json`.
 
 Anota antes de comenzar:
 

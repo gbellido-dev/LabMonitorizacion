@@ -83,10 +83,10 @@ El broker acepta conexiones anónimas únicamente para facilitar la práctica de
 
 El proyecto incluye una práctica completa para suscribirse a la flota, transformar la telemetría y enviarla a ThingsBoard:
 
-- Guion del alumnado: `docs/practica-node-red-thingsboard.md`.
-- Solución docente: `docs/solucion-practica-node-red-thingsboard.md`.
-- Flujo inicial: `integrations/node-red/oceanlab-starter-flow.json`.
-- Flujo resuelto: `integrations/node-red/oceanlab-thingsboard-flow.json`.
+- Guion del alumnado: [`practicas/02-oceanlab-mqtt/practica-node-red-thingsboard.md`](../../practicas/02-oceanlab-mqtt/practica-node-red-thingsboard.md).
+- Solución docente: [`practicas/02-oceanlab-mqtt/solucion-practica-node-red-thingsboard.md`](../../practicas/02-oceanlab-mqtt/solucion-practica-node-red-thingsboard.md).
+- Flujo inicial: [`practicas/02-oceanlab-mqtt/flows/oceanlab-starter-flow.json`](../../practicas/02-oceanlab-mqtt/flows/oceanlab-starter-flow.json).
+- Flujo resuelto: [`practicas/02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json`](../../practicas/02-oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json).
 
 ## Pruebas
 

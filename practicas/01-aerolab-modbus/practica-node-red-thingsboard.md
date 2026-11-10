@@ -35,7 +35,7 @@ Al terminar, el alumnado será capaz de:
 - AeroLab en ejecución y accesible por red.
 - Node-RED con el paquete `node-red-contrib-modbus` instalado.
 - Una instancia de ThingsBoard y una cuenta con permiso para crear dispositivos y paneles.
-- Flujo inicial: `integrations/node-red/aerolab-starter-flow.json`.
+- Flujo inicial: `flows/aerolab-starter-flow.json`.
 
 Anota antes de comenzar:
 

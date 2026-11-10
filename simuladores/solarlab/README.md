@@ -119,7 +119,7 @@ Lectura y escritura de una consigna:
 
 ## Propuesta de prácticas
 
-La práctica completa **OPC UA → Node-RED → ThingsBoard**, con flujo importable, dashboard, alarmas, reto y rúbrica, está disponible en [docs/practicas/03-node-red-thingsboard.md](docs/practicas/03-node-red-thingsboard.md).
+La práctica completa **OPC UA → Node-RED → ThingsBoard**, con flujo importable, dashboard, alarmas, reto y rúbrica, está disponible en [practicas/03-solarlab-opcua](../../practicas/03-solarlab-opcua/practica-node-red-thingsboard.md). La guía paso a paso con Dashboard 2.0 está en [practicas/04-solarlab-dashboard-node-red](../../practicas/04-solarlab-dashboard-node-red/README.md).
 
 ### 1. Descubrimiento y navegación
 

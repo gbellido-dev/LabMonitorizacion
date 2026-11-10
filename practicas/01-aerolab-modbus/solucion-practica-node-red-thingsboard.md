@@ -1,6 +1,6 @@
 # Solución docente: Node-RED y ThingsBoard
 
-Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo importable está en `integrations/node-red/aerolab-thingsboard-flow.json`.
+Este documento acompaña a `practica-node-red-thingsboard.md`. El flujo completo importable está en `flows/aerolab-thingsboard-flow.json`.
 
 ## Preparación rápida del aula
 
