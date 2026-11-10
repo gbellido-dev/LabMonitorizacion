@@ -1,0 +1,115 @@
+[
+    {
+        "id": "9d20671b031baf97",
+        "type": "tab",
+        "label": "Reto ReactorLab - inicial",
+        "disabled": false,
+        "info": "Flujo de partida del reto ReactorLab: una lectura REST de prueba. Decide tú el mecanismo definitivo."
+    },
+    {
+        "id": "0bdca811f27f223e",
+        "type": "comment",
+        "z": "9d20671b031baf97",
+        "name": "Prueba de lectura REST (sustitúyela por el mecanismo que elijas)",
+        "info": "",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "6c8b438810f2e424",
+        "type": "inject",
+        "z": "9d20671b031baf97",
+        "name": "Cada 5 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 100,
+        "wires": [
+            [
+                "8d02fea6e6816c7b"
+            ]
+        ]
+    },
+    {
+        "id": "8d02fea6e6816c7b",
+        "type": "http request",
+        "z": "9d20671b031baf97",
+        "name": "GET /api/v1/proceso",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://reactorlab:8030/api/v1/proceso",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "ac8b5637e7441079"
+            ]
+        ]
+    },
+    {
+        "id": "ac8b5637e7441079",
+        "type": "debug",
+        "z": "9d20671b031baf97",
+        "name": "Respuesta",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "5b9324375bcefc12",
+        "type": "comment",
+        "z": "9d20671b031baf97",
+        "name": "1 · Adquisición y telemetría   →  complétalo tú",
+        "info": "",
+        "x": 200,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "4eba12f1647e514c",
+        "type": "comment",
+        "z": "9d20671b031baf97",
+        "name": "2 · Eventos de la planta   →  complétalo tú",
+        "info": "",
+        "x": 180,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "da91484ec91df992",
+        "type": "comment",
+        "z": "9d20671b031baf97",
+        "name": "3 · Órdenes seguras y auditoría   →  complétalo tú",
+        "info": "",
+        "x": 200,
+        "y": 300,
+        "wires": []
+    }
+]

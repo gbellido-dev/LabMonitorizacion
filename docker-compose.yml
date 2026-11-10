@@ -94,7 +94,7 @@ services:
     command: ["npm", "run", "opcua"]
     environment:
       OPCUA_PORT: 4841   # 4840 lo usa SolarLab
-      OPCUA_ALTERNATE_HOSTNAME: ${LAB_PUBLIC_HOST:-localhost}
+      OPCUA_ALTERNATE_HOSTNAME: ${LAB_PUBLIC_HOST:-localhost},fundicion-opcua   # nombres que anuncia el endpoint
     ports:
       - "4841:4841"   # OPC UA  opc.tcp://localhost:4841/UA/Fundicion
     restart: unless-stopped

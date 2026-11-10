@@ -1,0 +1,504 @@
+[
+    {
+        "id": "8d39d2fae155a051",
+        "type": "tab",
+        "label": "Reto ReactorLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución del reto 3-reto/reactorlab-web. Variables de entorno de la pestaña: REACTORLAB_KEY (credencial). Pega el token del dispositivo Reactor-Reto en el broker de ThingsBoard.",
+        "env": [
+            {
+                "name": "REACTORLAB_KEY",
+                "value": "",
+                "type": "cred"
+            }
+        ]
+    },
+    {
+        "id": "8585abae163850b8",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Reactor-Reto",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-reto-reactor",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "09d95b002c5d8eee",
+        "type": "comment",
+        "z": "8d39d2fae155a051",
+        "name": "1 · Adquisición en tiempo real (WebSocket) → telemetría MQTT",
+        "info": "",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "a074c2c628e281a0",
+        "type": "websocket-client",
+        "path": "ws://reactorlab:8030/ws",
+        "tls": "",
+        "wholemsg": "false",
+        "hb": "0",
+        "subprotocol": "",
+        "headers": []
+    },
+    {
+        "id": "aebb26e5312a52db",
+        "type": "websocket in",
+        "z": "8d39d2fae155a051",
+        "name": "ws://reactorlab:8030/ws",
+        "server": "",
+        "client": "a074c2c628e281a0",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "b1b7af2b476978a5"
+            ]
+        ]
+    },
+    {
+        "id": "b1b7af2b476978a5",
+        "type": "json",
+        "z": "8d39d2fae155a051",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 330,
+        "y": 100,
+        "wires": [
+            [
+                "e6d1d9e771be71a7"
+            ]
+        ]
+    },
+    {
+        "id": "e6d1d9e771be71a7",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Comprobar respuesta",
+        "func": "// ENTRADA: la respuesta de ReactorLab (por HTTP o, más adelante, por WebSocket)\n//   msg.statusCode = código HTTP (200 = correcto). Por WebSocket no existe.\n//   msg.payload    = el estado de la planta en JSON\n// SALIDA:  el mismo mensaje, solo si la respuesta es correcta\n\nif (msg.statusCode !== undefined && msg.statusCode !== 200) {\n    node.status({ fill: \"red\", shape: \"dot\", text: \"HTTP \" + msg.statusCode });\n    return null;                          // 404, 500, ECONNREFUSED... no seguimos\n}\nif (typeof msg.payload !== \"object\" || !msg.payload.medidas) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"respuesta no válida\" });\n    return null;\n}\nnode.status({ fill: \"green\", shape: \"dot\", text: \"secuencia \" + msg.payload.secuencia });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 100,
+        "wires": [
+            [
+                "d0c08f1d8a1692e8"
+            ]
+        ]
+    },
+    {
+        "id": "d0c08f1d8a1692e8",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Telemetría",
+        "func": "// ENTRADA: estado completo de ReactorLab (por WebSocket, ya comprobado)\n// SALIDA:  { ts, values } con claves planas; ts = hora de la PLANTA\n\nconst p = msg.payload, m = p.medidas, v = p.valvulas, c = p.consignas, e = p.estado;\nmsg.payload = {\n    ts: Date.parse(p.timestamp),\n    values: {\n        presion_kpa: m.presion_kpa,          nivel_pct: m.nivel_pct,\n        caudal_f1_kmolh: m.caudal_kmolh.f1,  caudal_f2_kmolh: m.caudal_kmolh.f2,\n        caudal_purga_kmolh: m.caudal_kmolh.purga, caudal_producto_kmolh: m.caudal_kmolh.producto,\n        a_purga_pct: m.composicion_purga_pct.A, coste_relativo: m.coste_relativo,\n        valvula_f1_pct: v.f1.posicion_pct,   valvula_f2_pct: v.f2.posicion_pct,\n        valvula_purga_pct: v.purga.posicion_pct, valvula_producto_pct: v.producto.posicion_pct,\n        sp_presion_kpa: c.presion_kpa,       sp_produccion_kmolh: c.caudal_producto_kmolh,\n        sp_a_purga_pct: c.a_purga_pct,       sp_nivel_pct: c.nivel_pct,\n        modo: e.modo, en_marcha: e.en_marcha, paro_emergencia: e.paro_emergencia,\n        alarmas_activas: e.alarmas_activas,  secuencia: p.secuencia\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 100,
+        "wires": [
+            [
+                "fe19740bb6824b91"
+            ]
+        ]
+    },
+    {
+        "id": "fe19740bb6824b91",
+        "type": "mqtt out",
+        "z": "8d39d2fae155a051",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8585abae163850b8",
+        "x": 960,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "c30b631ef0f45146",
+        "type": "inject",
+        "z": "8d39d2fae155a051",
+        "name": "Al desplegar y cada 10 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 170,
+        "wires": [
+            [
+                "abdd2dfb1dc466fe"
+            ]
+        ]
+    },
+    {
+        "id": "abdd2dfb1dc466fe",
+        "type": "http request",
+        "z": "8d39d2fae155a051",
+        "name": "GET /api/v1/info",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://reactorlab:8030/api/v1/info",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 360,
+        "y": 170,
+        "wires": [
+            [
+                "76602ed10ee6345b"
+            ]
+        ]
+    },
+    {
+        "id": "76602ed10ee6345b",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Ficha",
+        "func": "// ENTRADA: GET /api/v1/info de ReactorLab\n// SALIDA:  atributos de cliente para ThingsBoard\n\nif (msg.statusCode !== 200) { node.status({ fill: \"red\", shape: \"dot\", text: \"info HTTP \" + msg.statusCode }); return null; }\nconst i = msg.payload;\nmsg.payload = {\n    planta: i.planta, descripcion: i.descripcion, version: i.version,\n    escala_tiempo: i.escala_tiempo, api: \"http://reactorlab:8030/docs\", pasarela: \"Node-RED\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 170,
+        "wires": [
+            [
+                "878a5ab81f2990a6"
+            ]
+        ]
+    },
+    {
+        "id": "878a5ab81f2990a6",
+        "type": "mqtt out",
+        "z": "8d39d2fae155a051",
+        "name": "Atributos → ThingsBoard",
+        "topic": "v1/devices/me/attributes",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8585abae163850b8",
+        "x": 780,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "3d910154613c729d",
+        "type": "comment",
+        "z": "8d39d2fae155a051",
+        "name": "2 · Eventos de la planta (webhook)",
+        "info": "",
+        "x": 200,
+        "y": 250,
+        "wires": []
+    },
+    {
+        "id": "cdaa3a46b024d3f5",
+        "type": "inject",
+        "z": "8d39d2fae155a051",
+        "name": "Al desplegar y cada 10 min",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "600",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "4",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 300,
+        "wires": [
+            [
+                "890d75a2a4a6a6f3"
+            ]
+        ]
+    },
+    {
+        "id": "890d75a2a4a6a6f3",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Alta del webhook",
+        "func": "// SALIDA: alta (idempotente) del webhook que avisa a este Node-RED\n// La clave NO está en el código: variable de entorno REACTORLAB_KEY de la pestaña (tipo credencial)\n\nmsg.method  = \"POST\";\nmsg.url     = \"http://reactorlab:8030/api/v1/webhooks\";\nmsg.headers = { \"X-API-Key\": env.get(\"REACTORLAB_KEY\"), \"Content-Type\": \"application/json\" };\nmsg.payload = {\n    url: \"http://nodered:1880/reto/reactorlab/eventos\",\n    eventos: [\"alarma\", \"averia\", \"consigna\", \"estado\"]\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 300,
+        "wires": [
+            [
+                "2657fc902b1f8d2a"
+            ]
+        ]
+    },
+    {
+        "id": "2657fc902b1f8d2a",
+        "type": "http request",
+        "z": "8d39d2fae155a051",
+        "name": "POST /api/v1/webhooks",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 560,
+        "y": 300,
+        "wires": [
+            [
+                "25cf44b1cdd84481"
+            ]
+        ]
+    },
+    {
+        "id": "25cf44b1cdd84481",
+        "type": "debug",
+        "z": "8d39d2fae155a051",
+        "name": "Alta webhook",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "2d4bc5941085c39c",
+        "type": "http in",
+        "z": "8d39d2fae155a051",
+        "name": "",
+        "url": "/reto/reactorlab/eventos",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 370,
+        "wires": [
+            [
+                "5b836b08125bada3",
+                "2b59e37b4c81291c"
+            ]
+        ]
+    },
+    {
+        "id": "5b836b08125bada3",
+        "type": "http response",
+        "z": "8d39d2fae155a051",
+        "name": "Responder 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 410,
+        "y": 410,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2b59e37b4c81291c",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Evento → telemetría",
+        "func": "// ENTRADA: aviso de ReactorLab (webhook) · SALIDA: telemetría de evento con la hora del evento\n\nconst ev = msg.payload;\nlet detalle = \"\";\nif (ev.alarma)           detalle = ev.alarma.codigo + \" · \" + ev.alarma.texto;\nelse if (ev.consignas)   detalle = JSON.stringify(ev.consignas);\nelse if (ev.modo)        detalle = \"modo \" + ev.modo;\nelse if (\"activo\" in ev) detalle = ev.activo ? \"paro de emergencia\" : \"paro rearmado\";\nelse if (\"en_marcha\" in ev) detalle = ev.en_marcha ? \"planta en marcha\" : \"planta parada\";\nelse if (ev.averia)      detalle = ev.averia.tipo + \" \" + (ev.averia.objetivo || \"\");\n\nreturn { payload: { ts: Date.parse(ev.timestamp), values: { evento: ev.evento, evento_detalle: detalle } } };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 370,
+        "wires": [
+            [
+                "fe19740bb6824b91"
+            ]
+        ]
+    },
+    {
+        "id": "9ed8bb4e26e58bee",
+        "type": "comment",
+        "z": "8d39d2fae155a051",
+        "name": "3 · Órdenes seguras desde ThingsBoard (RPC por MQTT) con auditoría",
+        "info": "",
+        "x": 200,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "8ce8c6221d8dee26",
+        "type": "mqtt in",
+        "z": "8d39d2fae155a051",
+        "name": "Órdenes de ThingsBoard",
+        "topic": "v1/devices/me/rpc/request/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "8585abae163850b8",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 520,
+        "wires": [
+            [
+                "9b87521fd06883a4"
+            ]
+        ]
+    },
+    {
+        "id": "9b87521fd06883a4",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Validar orden",
+        "func": "// ENTRADA: petición RPC de ThingsBoard (v1/devices/me/rpc/request/{id})\n// SALIDA 1: petición HTTP para ReactorLab · SALIDA 2: respuesta de rechazo para ThingsBoard\n\nconst id = msg.topic.split(\"/\").pop();\nconst metodo = msg.payload.method, valor = msg.payload.params;\nconst LIMITES = { setPresion: [\"presion_kpa\", 2500, 2950], setProduccion: [\"caudal_producto_kmolh\", 60, 110] };\n\nfunction rechazo(motivo) {\n    return [null, { topic: \"v1/devices/me/rpc/response/\" + id, payload: { ok: false, error: motivo } }];\n}\nconst base = { rpcId: id, rpcMetodo: metodo, rpcValor: valor,\n               headers: { \"X-API-Key\": env.get(\"REACTORLAB_KEY\"), \"Content-Type\": \"application/json\" } };\n\nif (LIMITES[metodo]) {\n    const [clave, min, max] = LIMITES[metodo];\n    const x = Number(valor);\n    if (!Number.isFinite(x) || x < min || x > max) return rechazo(`Fuera de rango (${min}-${max})`);\n    return [Object.assign(base, { method: \"PUT\", url: \"http://reactorlab:8030/api/v1/consignas\",\n                                  payload: { [clave]: x } }), null];\n}\nif (metodo === \"paroEmergencia\") {\n    if (typeof valor !== \"boolean\") return rechazo(\"El parámetro debe ser true o false\");\n    return [Object.assign(base, { method: \"POST\", url: \"http://reactorlab:8030/api/v1/paro-emergencia\",\n                                  payload: { activo: valor } }), null];\n}\nreturn rechazo(\"Orden desconocida: \" + metodo);",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 520,
+        "wires": [
+            [
+                "f0c6f3a1e518ab02"
+            ],
+            [
+                "d8652af63237062d"
+            ]
+        ]
+    },
+    {
+        "id": "f0c6f3a1e518ab02",
+        "type": "http request",
+        "z": "8d39d2fae155a051",
+        "name": "Llamar a ReactorLab",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 620,
+        "y": 500,
+        "wires": [
+            [
+                "0980bc294c361980"
+            ]
+        ]
+    },
+    {
+        "id": "0980bc294c361980",
+        "type": "function",
+        "z": "8d39d2fae155a051",
+        "name": "Responder y auditar",
+        "func": "// ENTRADA: respuesta de ReactorLab a la orden\n// SALIDA 1: respuesta RPC a ThingsBoard · SALIDA 2: registro de auditoría (telemetría)\n\nconst ok = msg.statusCode === 200;\nconst resultado = ok ? \"aceptada\" : \"rechazada HTTP \" + msg.statusCode;\nreturn [\n    { topic: \"v1/devices/me/rpc/response/\" + msg.rpcId,\n      payload: ok ? { ok: true } : { ok: false, http: msg.statusCode, error: msg.payload && msg.payload.detail } },\n    { payload: { ts: Date.now(), values: {\n        orden_metodo: msg.rpcMetodo, orden_valor: JSON.stringify(msg.rpcValor), orden_resultado: resultado } } }\n];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 500,
+        "wires": [
+            [
+                "d8652af63237062d"
+            ],
+            [
+                "fe19740bb6824b91"
+            ]
+        ]
+    },
+    {
+        "id": "d8652af63237062d",
+        "type": "mqtt out",
+        "z": "8d39d2fae155a051",
+        "name": "Respuesta → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8585abae163850b8",
+        "x": 1080,
+        "y": 540,
+        "wires": []
+    }
+]

@@ -1,0 +1,236 @@
+[
+    {
+        "id": "22d825188fa24430",
+        "type": "tab",
+        "label": "Fundición → ThingsBoard",
+        "disabled": false,
+        "info": "Solución de la práctica 2-thingsboard/fundicion. Pega el token del dispositivo Pasarela-Fundicion (marcado como gateway) en el broker de ThingsBoard."
+    },
+    {
+        "id": "d8a056bc7f466c73",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "6c3554a50b29e8d7",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Pasarela-Fundicion (gateway)",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-pasarela-fundicion",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "564ceb8526209a7f",
+        "type": "comment",
+        "z": "22d825188fa24430",
+        "name": "FASE 1 · Toda la planta: un dispositivo por activo (API de gateway)",
+        "info": "",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "89710f5e63430c74",
+        "type": "inject",
+        "z": "22d825188fa24430",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "7664e42d7649522a"
+            ]
+        ]
+    },
+    {
+        "id": "7664e42d7649522a",
+        "type": "function",
+        "z": "22d825188fa24430",
+        "name": "Suscribir planta",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  una suscripción por variable de proceso de los 11 activos, sus estados y los KPI\n\nconst VARIABLES = {\n    \"IF-01\": [\"TemperaturaMetal\", \"PotenciaBobina\", \"Vibracion\", \"Presion\", \"OEE\", \"NivelCarga\", \"Fase\"],\n    \"IF-02\": [\"TemperaturaMetal\", \"PotenciaBobina\", \"Vibracion\", \"Presion\", \"OEE\", \"NivelCarga\", \"Fase\"],\n    \"MP-01\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"OEE\"],\n    \"MP-02\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"OEE\"],\n    \"ROB-03\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"OEE\", \"MachosColocados\"],\n    \"COL-01\": [\"TemperaturaColada\", \"TiempoCiclo\", \"Potencia\", \"Vibracion\", \"PesoCuchara\", \"CaudalColada\", \"NivelLlenado\", \"OEE\", \"Colando\", \"MoldeEnPosicion\"],\n    \"ROB-01\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"VelocidadTCP\", \"OEE\"],\n    \"ENF-01\": [\"TemperaturaMolde\", \"TiempoResidencia\", \"Potencia\", \"Vibracion\", \"Presion\", \"VelocidadVentiladores\", \"OEE\"],\n    \"DES-01\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"FrecuenciaVibracion\", \"OEE\", \"Marcha\"],\n    \"ROB-02\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"CargaUtil\", \"PiezasManipuladas\", \"OEE\"],\n    \"QC-01\": [\"TiempoCiclo\", \"Temperatura\", \"Potencia\", \"Vibracion\", \"Presion\", \"DesviacionEscaneo\", \"PiezasConformes\", \"OEE\"]\n};\nconst KPIS = [\"OEEPlanta\", \"ProduccionTurno\", \"PiezasConformes\", \"EnergiaEspecifica\", \"CO2Estimado\", \"VelocidadLinea\"];\nconst TEXTO = [\"Fase\"], BOOL = [\"Colando\", \"MoldeEnPosicion\", \"Marcha\"];\n\nconst m = [];\nfor (const k of KPIS) m.push({ topic: \"ns=1;s=KPIs.\" + k, datatype: \"Double\" });\nfor (const [activo, vars] of Object.entries(VARIABLES)) {\n    for (const v of vars) {\n        const tipo = TEXTO.includes(v) ? \"String\" : BOOL.includes(v) ? \"Boolean\" : \"Double\";\n        m.push({ topic: \"ns=1;s=\" + activo + \".\" + v, datatype: tipo });\n    }\n    m.push({ topic: \"ns=1;s=\" + activo + \".Estado\", datatype: \"String\" });\n}\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 100,
+        "wires": [
+            [
+                "1f5d42f38314c64c"
+            ]
+        ]
+    },
+    {
+        "id": "1f5d42f38314c64c",
+        "type": "OpcUa-Client",
+        "z": "22d825188fa24430",
+        "endpoint": "d8a056bc7f466c73",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (1 s)",
+        "x": 570,
+        "y": 100,
+        "wires": [
+            [
+                "a5981529087e250e"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "a5981529087e250e",
+        "type": "function",
+        "z": "22d825188fa24430",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 100,
+        "wires": [
+            [
+                "0b58acc345a93c04"
+            ]
+        ]
+    },
+    {
+        "id": "0b58acc345a93c04",
+        "type": "delay",
+        "z": "22d825188fa24430",
+        "name": "1 mensaje cada 2 s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "2",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 940,
+        "y": 100,
+        "wires": [
+            [
+                "7faa8263be0123d2"
+            ]
+        ]
+    },
+    {
+        "id": "7faa8263be0123d2",
+        "type": "function",
+        "z": "22d825188fa24430",
+        "name": "Gateway activos",
+        "func": "// ENTRADA: la planta agrupada por activo (1 mensaje/s)\n// SALIDA:  mensajes de la API de gateway de ThingsBoard: un dispositivo por activo\n\nconst TIPOS = {\"IF\": \"horno\", \"MP\": \"prensa\", \"ROB\": \"robot\", \"COL\": \"colada\", \"ENF\": \"tunel\", \"DES\": \"desmoldeo\", \"QC\": \"calidad\"};      // prefijo del activo → perfil de dispositivo\nconst FICHA = {\n    \"IF-01\": [\"Horno de inducción 01\", \"Fusion\", \"PLC-FUS-01 · S7-1515\"],  \"IF-02\": [\"Horno de inducción 02\", \"Fusion\", \"PLC-FUS-01 · S7-1515\"],\n    \"MP-01\": [\"Prensa de moldeo superior\", \"Moldeo\", \"PLC-MOL-01 · S7-1512\"], \"MP-02\": [\"Prensa de moldeo inferior\", \"Moldeo\", \"PLC-MOL-01 · S7-1512\"],\n    \"ROB-03\": [\"Robot posicionador de machos\", \"Moldeo\", \"PLC-MOL-01 · S7-1512\"], \"COL-01\": [\"Estación de colada automática\", \"Colada\", \"PLC-COL-01 · S7-1516F\"],\n    \"ROB-01\": [\"Robot de inoculación y escoriado\", \"Colada\", \"PLC-COL-01 · S7-1516F\"], \"ENF-01\": [\"Túnel de enfriamiento\", \"Enfriamiento\", \"PLC-LIN-01 · ET200SP\"],\n    \"DES-01\": [\"Desmoldeo vibratorio\", \"Acabado\", \"PLC-ACA-01 · S7-1512\"], \"ROB-02\": [\"Robot de manipulación de piezas\", \"Acabado\", \"PLC-ACA-01 · S7-1512\"],\n    \"QC-01\": [\"Célula de calidad 3D\", \"Calidad\", \"PLC-QA-01 · S7-1500\"]\n};\nconst p = msg.payload, ahora = Date.now();\nconst disp = a => \"Fundicion \" + a;                // nombre del dispositivo en ThingsBoard\n\nconst telemetria = {};\nfor (const a of Object.keys(FICHA)) {\n    if (!p[a]) continue;\n    telemetria[disp(a)] = [{ ts: ahora, values: p[a] }];\n}\nif (p.KPIs) telemetria[\"Fundicion Planta Norte\"] = [{ ts: ahora, values: p.KPIs }];\nif (Object.keys(telemetria).length === 0) return null;\n\nconst mensajes = [];\nif (!context.get(\"conectados\")) {                  // la primera vez: alta con su perfil y su ficha\n    context.set(\"conectados\", true);\n    const atributos = {};\n    for (const [a, [nombre, zona, plc]] of Object.entries(FICHA)) {\n        mensajes.push({ topic: \"v1/gateway/connect\", payload: { device: disp(a), type: TIPOS[a.split(\"-\")[0]] } });\n        atributos[disp(a)] = { nombre, zona, plc, activo: a };\n    }\n    mensajes.push({ topic: \"v1/gateway/connect\", payload: { device: \"Fundicion Planta Norte\", type: \"planta\" } });\n    mensajes.push({ topic: \"v1/gateway/attributes\", payload: atributos });\n}\nmensajes.push({ topic: \"v1/gateway/telemetry\", payload: telemetria });\nreturn [mensajes];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 100,
+        "wires": [
+            [
+                "272fc1a16f1ee7c9",
+                "7c3a54c31a594e39"
+            ]
+        ]
+    },
+    {
+        "id": "272fc1a16f1ee7c9",
+        "type": "mqtt out",
+        "z": "22d825188fa24430",
+        "name": "Gateway → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "6c3554a50b29e8d7",
+        "x": 1360,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "7c3a54c31a594e39",
+        "type": "debug",
+        "z": "22d825188fa24430",
+        "name": "Gateway",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1340,
+        "y": 160,
+        "wires": []
+    }
+]

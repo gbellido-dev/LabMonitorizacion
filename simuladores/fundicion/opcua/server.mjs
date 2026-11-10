@@ -12,7 +12,7 @@
 //
 // Seguridad: pensado para simulación. Acepta conexiones anónimas y sin
 // cifrado (SecurityPolicy None) además de las políticas seguras por defecto.
-import { OPCUAServer, Variant, DataType } from "node-opcua";
+import { OPCUAServer, Variant, DataType, StatusCodes } from "node-opcua";
 import { assets, kpis, loteActivo, zones } from "./plant-model.mjs";
 
 const PORT = Number(process.env.OPCUA_PORT ?? 4840);
@@ -23,7 +23,8 @@ const ALT_HOSTNAME = process.env.OPCUA_ALTERNATE_HOSTNAME;
 
 const server = new OPCUAServer({
   port: PORT,
-  ...(ALT_HOSTNAME ? { alternateHostname: [ALT_HOSTNAME] } : {}),
+  // admite varios nombres separados por comas (p. ej. "localhost,fundicion-opcua")
+  ...(ALT_HOSTNAME ? { alternateHostname: ALT_HOSTNAME.split(",").map(h => h.trim()).filter(Boolean) } : {}),
   resourcePath: "/UA/Fundicion",
   buildInfo: {
     productName: "Ferrovia Digital Foundry OPC UA",
@@ -74,7 +75,7 @@ function addSimVariable(parent, spec, nodeIdSuffix) {
     minimumSamplingInterval: 250,
   });
   node.setValueFromSource(new Variant({ dataType: DataType.Double, value: spec.v }));
-  const entry = { node, spec, value: spec.v };
+  const entry = { node, spec, value: spec.v, key: nodeIdSuffix };
   simVars.push(entry);
   varIndex.set(nodeIdSuffix, entry);
   if (spec.unit) addStaticString(node, "Unidad", spec.unit, `${nodeIdSuffix}.Unidad`);
@@ -225,7 +226,7 @@ function processTick() {
     setFlag("COL-01.MoldeEnPosicion", false);
   }
   // la grúa repone la cuchara por lotes cuando baja de 400 kg (y no se cuela)
-  if (lineSt.state !== "FILLING" && peso.value < 400) peso.value = Math.min(1450, peso.value + 130);
+  if (lineSt.state !== "FILLING" && peso.value < 400 && fault.code !== 3) peso.value = Math.min(1450, peso.value + 130);
   peso.node.setValueFromSource(new Variant({ dataType: DataType.Double, value: Math.round(peso.value) }));
   const nivelVar = varIndex.get("COL-01.NivelLlenado");
   nivelVar.value = lineSt.nivel;
@@ -248,12 +249,74 @@ function processTick() {
   setNum("DES-01.Potencia", shakeSt.marcha ? 110 : 12, 0.3, shakeSt.marcha ? 5 : 1);
 }
 
+/* ---- mantenimiento: inyección de averías (para las prácticas) ----
+ * ns=1;s=Mantenimiento.Averia (Int32, escribible) y ns=1;s=Mantenimiento.AveriaNombre (String).
+ *   0 sin avería
+ *   1 rodamiento del desmoldeo DES-01: la vibración crece poco a poco y sube la temperatura
+ *   2 extracción de humos del horno IF-02: la presión del recinto pasa de depresión a sobrepresión
+ *   3 retraso de la grúa: la cuchara no se repone, la línea espera metal y la producción se para
+ *   4 deriva del escáner 3D QC-01: crece la desviación y bajan las piezas conformes */
+const AVERIAS = ["Sin avería", "Rodamiento del desmoldeo DES-01", "Extracción de humos IF-02",
+                 "Retraso de la grúa de cuchara", "Deriva del escáner 3D QC-01"];
+const fault = { code: 0, t: 0 };
+const maint = ns.addObject({ organizedBy: objects, browseName: "Mantenimiento", nodeId: "s=Mantenimiento" });
+const faultName = ns.addVariable({
+  componentOf: maint, browseName: "AveriaNombre", nodeId: "s=Mantenimiento.AveriaNombre", dataType: "String",
+  accessLevel: "CurrentRead", value: { dataType: DataType.String, value: AVERIAS[0] },
+});
+ns.addVariable({
+  componentOf: maint, browseName: "Averia", nodeId: "s=Mantenimiento.Averia", dataType: "Int32",
+  accessLevel: "CurrentRead | CurrentWrite", userAccessLevel: "CurrentRead | CurrentWrite",
+  description: "Código de avería inyectada (0-4)", minimumSamplingInterval: 500,
+  value: {
+    get: () => new Variant({ dataType: DataType.Int32, value: fault.code }),
+    set: (variant) => {
+      const v = Number(variant.value);
+      if (!Number.isInteger(v) || v < 0 || v >= AVERIAS.length) return StatusCodes.BadOutOfRange;
+      if (v !== fault.code) { fault.code = v; fault.t = 0; console.log(`Avería inyectada: ${v} · ${AVERIAS[v]}`); }
+      faultName.setValueFromSource(new Variant({ dataType: DataType.String, value: AVERIAS[v] }));
+      return StatusCodes.Good;
+    },
+  },
+});
+// variables que la avería gobierna (el paseo aleatorio no las toca mientras dure)
+const FAULT_VARS = {
+  1: ["DES-01.Temperatura"], 2: ["IF-02.Presion"], 3: ["KPIs.OEEPlanta"],
+  4: ["QC-01.DesviacionEscaneo", "QC-01.PiezasConformes", "KPIs.PiezasConformes"],
+};
+const overridden = () => new Set(FAULT_VARS[fault.code] ?? []);
+
+function faultTick() {
+  fault.t += 1;
+  const T = fault.t;
+  // estados de los activos afectados (se restablecen al quitar la avería)
+  setEstado("IF-02", fault.code === 2 ? "ALARM" : "WARN");
+  setEstado("QC-01", fault.code === 4 && T > 60 ? "WARN" : "RUN");
+  if (fault.code === 1) {
+    const extra = Math.min(9, T * 0.03);                     // +0,03 mm/s cada segundo, hasta +9
+    setNum("DES-01.Vibracion", (shakeSt.marcha ? 8.6 : 0.5) + extra * (shakeSt.marcha ? 1 : 0.4), 0.4, 0.4);
+    setNum("DES-01.Temperatura", 88 + Math.min(40, T * 0.12), 0.1, 0.8);
+    if (extra > 4 && shakeSt.marcha) setEstado("DES-01", "WARN");
+  }
+  if (fault.code === 2) setNum("IF-02.Presion", 6, 0.08, 1.2);
+  if (fault.code === 3) setNum("KPIs.OEEPlanta", 61, 0.03, 0.4);
+  if (fault.code === 4) {
+    setNum("QC-01.DesviacionEscaneo", 0.08 + Math.min(0.5, T * 0.002), 0.2, 0.01);
+    setNum("QC-01.PiezasConformes", 98.4 - Math.min(14, T * 0.05), 0.2, 0.2);
+    setNum("KPIs.PiezasConformes", 98.4 - Math.min(14, T * 0.05), 0.2, 0.15);
+  }
+}
+
 /* ---- dinámica de la simulación (1 s) ---- */
 const timer = setInterval(() => {
   processTick();
+  faultTick();
+  const gobernadas = overridden();
   for (const sv of simVars) {
     const { spec } = sv;
     if (spec.kind === "managed") continue; // la fija processTick()
+    if (gobernadas.has(sv.key)) continue;  // la fija faultTick()
+    if (fault.code === 3 && sv.key === "KPIs.ProduccionTurno" && lineSt.state === "WAIT_METAL") continue;
     if (spec.kind === "counter") {
       sv.value += spec.rate ?? 1;
       sv.node.setValueFromSource(new Variant({ dataType: DataType.Double, value: Number(sv.value.toFixed(spec.dp ?? 0)) }));

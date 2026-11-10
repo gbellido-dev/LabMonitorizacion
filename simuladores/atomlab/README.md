@@ -65,7 +65,7 @@ Espacio de direcciones (la tabla completa, con unidades, está en la web, tarjet
 | `Servidor` | `Latido`: contador que cambia en cada ciclo (≈ 20 por segundo). OPC UA solo notifica los **cambios**: con la central estable muchas variables no cambian, y el latido permite saber que la comunicación sigue viva |
 | `Proteccion` | `Scram`, `Motivo`, `ProteccionesActivas`, `Danado`, `CombustibleFundido`, `AlarmasActivas`, `Estado` (`OPERACION`, `PARADA`, `SCRAM`, `ACCIDENTE`) |
 
-Mandos (escritura) en `Mandos`: `ConsignaPotencia` (0-3200 MWt), `RegulacionAuto`, `InsercionRR`, `InsercionUSP`, `InsercionAR` (solo en manual), `Bombas` (0-8), `Protecciones`, y los pulsadores `AZ5` y `DispararTurbina` (escribir `true`). Una escritura no válida se rechaza y el nodo vuelve a su valor real; el motivo aparece en *Accesos de clientes*.
+Mandos (escritura) en `Mandos`: `ConsignaPotencia` (0-3200 MWt), `RegulacionAuto`, `InsercionRR`, `InsercionUSP`, `InsercionAR` (solo en manual), `Bombas` (0-8), `Protecciones`, y los pulsadores `AZ5`, `DispararTurbina` y `PruebaInercia` (escribir `true`). Una escritura no válida se rechaza y el nodo vuelve a su valor real; el motivo aparece en *Accesos de clientes*.
 
 Métodos en `Mandos` (devuelven `ok` o `rechazado: motivo`): `AZ5Pulsar`, `Rearmar`, `DispararTurbinaMetodo`, `RearmarTurbina`, `PruebaTurbina`, `EscenarioNormal`, `EscenarioChernobil`.
 

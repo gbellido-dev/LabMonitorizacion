@@ -1,0 +1,527 @@
+[
+    {
+        "id": "ca7bbd3dce7b2136",
+        "type": "tab",
+        "label": "Reto AtomLab - inicial",
+        "disabled": false,
+        "info": "Flujo de partida del reto AtomLab: la suscripción OPC UA y el agrupado de la serie 1. Completa el resto."
+    },
+    {
+        "id": "33e743d1e7cebbd0",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://atomlab:4842/atomlab/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "23a79ec013a18f49",
+        "type": "comment",
+        "z": "ca7bbd3dce7b2136",
+        "name": "1 · Vigilancia: suscripción y agrupado (hecho)  →  añade los indicadores",
+        "info": "",
+        "x": 230,
+        "y": 30,
+        "wires": []
+    },
+    {
+        "id": "4a87f7c98811699e",
+        "type": "inject",
+        "z": "ca7bbd3dce7b2136",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 343,
+        "wires": [
+            [
+                "071bad6b035d9cb4",
+                "69784016c59da0ab",
+                "e75241b3722ea7e3",
+                "0c06bf3e7878fd8e",
+                "19ac20186a7a1005",
+                "e075f1830a5cedbc",
+                "b0ea91f3ce4001f9",
+                "f1bf7daeb63409b1",
+                "65e3f3a82a53e26a",
+                "e4d19c5dac72c5f4",
+                "fce08e89cf45b285",
+                "2f6821c2deca17de",
+                "bb686e92e44e0de8",
+                "29d23aaf6fcccf26",
+                "daef930afc4cb4e4",
+                "884d802930e0119f",
+                "0461d4f36e44e635",
+                "8e9b694828001aaf",
+                "a2421c65f953272e",
+                "7dd2d867320a4601",
+                "6bd44f04bed1cf3f"
+            ]
+        ]
+    },
+    {
+        "id": "29f9217f495c9a4a",
+        "type": "OpcUa-Client",
+        "z": "ca7bbd3dce7b2136",
+        "endpoint": "33e743d1e7cebbd0",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (1 s)",
+        "x": 530,
+        "y": 343,
+        "wires": [
+            [
+                "d062d53ece4b4b34"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "071bad6b035d9cb4",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.PotenciaTermica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia térmica",
+        "x": 320,
+        "y": 70,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "69784016c59da0ab",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.Reactividad",
+        "datatype": "Double",
+        "value": "",
+        "name": "Reactividad",
+        "x": 320,
+        "y": 96,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "e75241b3722ea7e3",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.Periodo",
+        "datatype": "Double",
+        "value": "",
+        "name": "Periodo",
+        "x": 320,
+        "y": 122,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "0c06bf3e7878fd8e",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.ORM",
+        "datatype": "Double",
+        "value": "",
+        "name": "ORM",
+        "x": 320,
+        "y": 148,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "19ac20186a7a1005",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.TempCombustible",
+        "datatype": "Double",
+        "value": "",
+        "name": "T combustible",
+        "x": 320,
+        "y": 174,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "e075f1830a5cedbc",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.Vacio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Vacío",
+        "x": 320,
+        "y": 200,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "b0ea91f3ce4001f9",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.Xenon",
+        "datatype": "Double",
+        "value": "",
+        "name": "Xenón",
+        "x": 320,
+        "y": 226,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "f1bf7daeb63409b1",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Reactor.ConsignaActual",
+        "datatype": "Double",
+        "value": "",
+        "name": "Consigna actual",
+        "x": 320,
+        "y": 252,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "65e3f3a82a53e26a",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=CircuitoPrimario.BombasEnMarcha",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Bombas en marcha",
+        "x": 320,
+        "y": 278,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "e4d19c5dac72c5f4",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=CircuitoPrimario.Caudal",
+        "datatype": "Double",
+        "value": "",
+        "name": "Caudal",
+        "x": 320,
+        "y": 304,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "fce08e89cf45b285",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=CircuitoPrimario.Presion",
+        "datatype": "Double",
+        "value": "",
+        "name": "Presión separadores",
+        "x": 320,
+        "y": 330,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "2f6821c2deca17de",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=CircuitoPrimario.NivelSeparadores",
+        "datatype": "Double",
+        "value": "",
+        "name": "Nivel separadores",
+        "x": 320,
+        "y": 356,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "bb686e92e44e0de8",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Generador.PotenciaElectrica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia eléctrica",
+        "x": 320,
+        "y": 382,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "29d23aaf6fcccf26",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Generador.Frecuencia",
+        "datatype": "Double",
+        "value": "",
+        "name": "Frecuencia",
+        "x": 320,
+        "y": 408,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "daef930afc4cb4e4",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Radiacion.SalaCentral",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala central",
+        "x": 320,
+        "y": 434,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "884d802930e0119f",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Radiacion.SalaControl",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala control",
+        "x": 320,
+        "y": 460,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "0461d4f36e44e635",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Proteccion.Estado",
+        "datatype": "String",
+        "value": "",
+        "name": "Estado",
+        "x": 320,
+        "y": 486,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "8e9b694828001aaf",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Proteccion.Scram",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "SCRAM",
+        "x": 320,
+        "y": 512,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "a2421c65f953272e",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Proteccion.ProteccionesActivas",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Protecciones activas",
+        "x": 320,
+        "y": 538,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "7dd2d867320a4601",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Proteccion.Motivo",
+        "datatype": "String",
+        "value": "",
+        "name": "Motivo del disparo",
+        "x": 320,
+        "y": 564,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "6bd44f04bed1cf3f",
+        "type": "OpcUa-Item",
+        "z": "ca7bbd3dce7b2136",
+        "item": "ns=2;s=Servidor.Latido",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Latido",
+        "x": 320,
+        "y": 590,
+        "wires": [
+            [
+                "29f9217f495c9a4a"
+            ]
+        ]
+    },
+    {
+        "id": "d062d53ece4b4b34",
+        "type": "function",
+        "z": "ca7bbd3dce7b2136",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por sistema\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=2;s=Reactor.PotenciaTermica\"  →  [\"Reactor\", \"PotenciaTermica\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"central\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea Reactor, CircuitoPrimario...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"central\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 343,
+        "wires": [
+            [
+                "8b8468c47c4cd831"
+            ]
+        ]
+    },
+    {
+        "id": "8b8468c47c4cd831",
+        "type": "delay",
+        "z": "ca7bbd3dce7b2136",
+        "name": "1 mensaje/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 910,
+        "y": 343,
+        "wires": [
+            [
+                "b7c2bbf3c239f8d7"
+            ]
+        ]
+    },
+    {
+        "id": "b7c2bbf3c239f8d7",
+        "type": "debug",
+        "z": "ca7bbd3dce7b2136",
+        "name": "Central agrupada",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 330,
+        "wires": []
+    },
+    {
+        "id": "a95d3772d9d1fe6d",
+        "type": "comment",
+        "z": "ca7bbd3dce7b2136",
+        "name": "2 · Caja negra con disparo   →  complétalo tú",
+        "info": "",
+        "x": 230,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "606c7ab170476074",
+        "type": "comment",
+        "z": "ca7bbd3dce7b2136",
+        "name": "3 · Órdenes con enclavamientos y auditoría   →  complétalo tú",
+        "info": "",
+        "x": 230,
+        "y": 720,
+        "wires": []
+    }
+]

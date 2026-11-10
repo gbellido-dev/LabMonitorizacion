@@ -1,0 +1,2494 @@
+[
+    {
+        "id": "1432a64cf8d8a504",
+        "type": "tab",
+        "label": "Fundición · Dashboard",
+        "disabled": false,
+        "info": "Solución de la práctica 1-dashboard/fundicion (OPC UA + Dashboard 2.0)."
+    },
+    {
+        "id": "cc3ffb2cd3ddbf47",
+        "type": "ui-base",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false,
+        "name": "LabMonitorizacion"
+    },
+    {
+        "id": "8db9101cf4fa6dc2",
+        "type": "ui-theme",
+        "name": "Tema LabMonitorizacion",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "7a14fce6f0f5a0c4",
+        "type": "ui-page",
+        "name": "Planta",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/fundicion",
+        "icon": "factory",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "a782d02be21c2913",
+        "type": "ui-page",
+        "name": "Exploración",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/fundicion-explorar",
+        "icon": "account_tree",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "2580f30f368249c7",
+        "type": "ui-page",
+        "name": "Mantenimiento",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/fundicion-mantenimiento",
+        "icon": "build",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 3,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "1361be576cfca85e",
+        "type": "ui-group",
+        "name": "PLANTA",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "68c949fc92f521a6",
+        "type": "ui-group",
+        "name": "HORNOS",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "f4712a278543bff9",
+        "type": "ui-group",
+        "name": "COLADA Y LÍNEA",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "a7313e976cfbac86",
+        "type": "ui-group",
+        "name": "ACABADO Y CALIDAD",
+        "width": "6",
+        "height": "1",
+        "order": 4,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "60569a299450fdef",
+        "type": "ui-group",
+        "name": "ESTADO DE LOS ACTIVOS",
+        "width": "6",
+        "height": "1",
+        "order": 5,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "8d9dc4d9b3d647c7",
+        "type": "ui-group",
+        "name": "ALARMAS",
+        "width": "6",
+        "height": "1",
+        "order": 6,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "34947e913dbf20e1",
+        "type": "ui-group",
+        "name": "HISTÓRICO",
+        "width": "12",
+        "height": "1",
+        "order": 7,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "7a14fce6f0f5a0c4"
+    },
+    {
+        "id": "7a95229ee4386f88",
+        "type": "ui-group",
+        "name": "NAVEGADOR OPC UA",
+        "width": "12",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "a782d02be21c2913"
+    },
+    {
+        "id": "75cf939ab399eebd",
+        "type": "ui-group",
+        "name": "INVENTARIO AUTOMÁTICO",
+        "width": "12",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "a782d02be21c2913"
+    },
+    {
+        "id": "8163159b19f9302f",
+        "type": "ui-group",
+        "name": "AVERÍAS (PROFESORADO)",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "2580f30f368249c7"
+    },
+    {
+        "id": "2ff44cf4c2291435",
+        "type": "ui-group",
+        "name": "PRODUCCIÓN CALCULADA",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "2580f30f368249c7"
+    },
+    {
+        "id": "a33796ecf5cfc275",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "b611e36995aa4ad5",
+        "type": "comment",
+        "z": "1432a64cf8d8a504",
+        "name": "FASE 1 · Explorar el espacio de direcciones (BROWSE)",
+        "info": "",
+        "x": 200,
+        "y": 30,
+        "wires": []
+    },
+    {
+        "id": "d7d2de99baf2c9a3",
+        "type": "ui-dropdown",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Nodo que explorar",
+        "tooltip": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "passthru": false,
+        "multiple": false,
+        "chips": false,
+        "clearable": false,
+        "options": [
+            {
+                "label": "PlantaNorte",
+                "value": "PlantaNorte",
+                "type": "str"
+            },
+            {
+                "label": "KPIs",
+                "value": "KPIs",
+                "type": "str"
+            },
+            {
+                "label": "Zona.Fusion",
+                "value": "Zona.Fusion",
+                "type": "str"
+            },
+            {
+                "label": "Zona.Colada",
+                "value": "Zona.Colada",
+                "type": "str"
+            },
+            {
+                "label": "IF-01",
+                "value": "IF-01",
+                "type": "str"
+            },
+            {
+                "label": "COL-01",
+                "value": "COL-01",
+                "type": "str"
+            },
+            {
+                "label": "DES-01",
+                "value": "DES-01",
+                "type": "str"
+            },
+            {
+                "label": "Mantenimiento",
+                "value": "Mantenimiento",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "typeIsComboBox": true,
+        "msgTrigger": "onChange",
+        "group": "7a95229ee4386f88",
+        "placeholder": "Elige…",
+        "x": 150,
+        "y": 80,
+        "wires": [
+            [
+                "1c759f6cbc1addc0"
+            ]
+        ]
+    },
+    {
+        "id": "1c759f6cbc1addc0",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Pedir browse",
+        "func": "// ENTRADA: el nodo elegido en el desplegable (por ejemplo \"PlantaNorte\" o \"IF-01\")\n// SALIDA:  una petición BROWSE para el OpcUa-Client\n\nmsg.topic = \"ns=1;s=\" + msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 80,
+        "wires": [
+            [
+                "842bf718c7d2247d"
+            ]
+        ]
+    },
+    {
+        "id": "842bf718c7d2247d",
+        "type": "OpcUa-Client",
+        "z": "1432a64cf8d8a504",
+        "endpoint": "a33796ecf5cfc275",
+        "action": "browse",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Explorar",
+        "x": 580,
+        "y": 80,
+        "wires": [
+            [
+                "e5e225f4bc651f38"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "e5e225f4bc651f38",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Tabla del navegador",
+        "func": "// ENTRADA: la respuesta del BROWSE (msg.payload = lista de referencias)\n// SALIDA:  filas para la tabla del dashboard\n\nconst CLASES = { 1: \"Objeto\", 2: \"Variable\", 4: \"Método\", 8: \"Tipo de objeto\" };\nconst refs = (msg.payload || []).map(r => r.item || r);     // cada referencia llega como { item: … }\nmsg.payload = refs.map(r => ({\n    Nombre: r.browseName && r.browseName.name || String(r.browseName),\n    Clase:  CLASES[r.nodeClass] || r.nodeClass,\n    NodeId: String(r.nodeId),\n    Valor:  r.value === undefined || r.value === null ? \"\" : (typeof r.value === \"object\" ? \"…\" : r.value),\n    Tipo:   r.dataType || \"\"\n}));\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 80,
+        "wires": [
+            [
+                "59e49ba4737d6799"
+            ]
+        ]
+    },
+    {
+        "id": "59e49ba4737d6799",
+        "type": "ui-table",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Hijos del nodo",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "maxrows": 15,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "group": "7a95229ee4386f88",
+        "x": 1020,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "82ed40bbc7682c00",
+        "type": "comment",
+        "z": "1432a64cf8d8a504",
+        "name": "FASE 1 · Suscripción a la planta y panel",
+        "info": "",
+        "x": 200,
+        "y": 150,
+        "wires": []
+    },
+    {
+        "id": "10cbf3e37b2bc436",
+        "type": "inject",
+        "z": "1432a64cf8d8a504",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 200,
+        "wires": [
+            [
+                "5dab54e2e019ea8e"
+            ]
+        ]
+    },
+    {
+        "id": "5dab54e2e019ea8e",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Suscribir planta",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  un mensaje por cada variable a suscribir (msg.topic = NodeId, msg.datatype = tipo)\n\nconst KPIS = [\"OEEPlanta\", \"ProduccionTurno\", \"PiezasConformes\", \"EnergiaEspecifica\", \"CO2Estimado\", \"VelocidadLinea\"];\nconst VARIABLES = {\n    \"IF-01\":  [\"TemperaturaMetal\", \"PotenciaBobina\", \"Presion\"],\n    \"IF-02\":  [\"TemperaturaMetal\", \"PotenciaBobina\", \"Presion\"],\n    \"COL-01\": [\"PesoCuchara\", \"CaudalColada\", \"NivelLlenado\"],\n    \"DES-01\": [\"Vibracion\", \"Temperatura\"],\n    \"QC-01\":  [\"DesviacionEscaneo\", \"PiezasConformes\"]\n};\nconst SENALES = { \"IF-01.Fase\": \"String\", \"IF-02.Fase\": \"String\", \"COL-01.Colando\": \"Boolean\",\n                  \"COL-01.MoldeEnPosicion\": \"Boolean\", \"DES-01.Marcha\": \"Boolean\",\n                  \"Mantenimiento.AveriaNombre\": \"String\" };\nconst ACTIVOS = [\"IF-01\", \"IF-02\", \"MP-01\", \"MP-02\", \"ROB-03\", \"COL-01\", \"ROB-01\", \"ENF-01\", \"DES-01\", \"ROB-02\", \"QC-01\"];\n\nconst m = [];\nfor (const k of KPIS) m.push({ topic: \"ns=1;s=KPIs.\" + k, datatype: \"Double\" });\nfor (const [activo, vars] of Object.entries(VARIABLES))\n    for (const v of vars) m.push({ topic: \"ns=1;s=\" + activo + \".\" + v, datatype: \"Double\" });\nfor (const [nodo, tipo] of Object.entries(SENALES)) m.push({ topic: \"ns=1;s=\" + nodo, datatype: tipo });\nfor (const a of ACTIVOS) {                        // estado y OEE de los 11 activos\n    m.push({ topic: \"ns=1;s=\" + a + \".Estado\", datatype: \"String\" });\n    m.push({ topic: \"ns=1;s=\" + a + \".OEE\", datatype: \"Double\" });\n}\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 200,
+        "wires": [
+            [
+                "1732cd870407dbfc"
+            ]
+        ]
+    },
+    {
+        "id": "1732cd870407dbfc",
+        "type": "OpcUa-Client",
+        "z": "1432a64cf8d8a504",
+        "endpoint": "a33796ecf5cfc275",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (1 s)",
+        "x": 560,
+        "y": 200,
+        "wires": [
+            [
+                "04ec8a160e86b66b"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "04ec8a160e86b66b",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 200,
+        "wires": [
+            [
+                "4ee4ad2ef7e99346"
+            ]
+        ]
+    },
+    {
+        "id": "4ee4ad2ef7e99346",
+        "type": "delay",
+        "z": "1432a64cf8d8a504",
+        "name": "1 mensaje/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 930,
+        "y": 200,
+        "wires": [
+            [
+                "37869c4944ed55c2",
+                "3493246ca9dd80e5",
+                "227949f23d2434cc",
+                "82239ee34a12087d",
+                "d67f01c39652a903",
+                "0a8ccd91360d5339",
+                "eb2ccb74f5e56ff0",
+                "1148deecc538fc38",
+                "9f061cb07fde7741",
+                "95d2ae73c530b6d1",
+                "248297f8178ea66c",
+                "9af65160e065f2e2",
+                "581708d5e1e7a361",
+                "4521d6b851081949",
+                "352ce38f42861ec2",
+                "476902982bb8dca0",
+                "c9a909c87f8655d2",
+                "6396e49b9674d000",
+                "dc41d90f51010e94",
+                "f47738e36cee4d05",
+                "5b700249ff764995",
+                "15259c9ab93f56c8",
+                "eb9c8ca1462070fb",
+                "626318b587fa185a",
+                "d02b6e0da3379a5e",
+                "de25ec8541a29eb7"
+            ]
+        ]
+    },
+    {
+        "id": "37869c4944ed55c2",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "OEE planta",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.KPIs.OEEPlanta",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 260,
+        "wires": [
+            [
+                "e16e270545be8e27"
+            ]
+        ]
+    },
+    {
+        "id": "e16e270545be8e27",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "OEE de planta",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "%",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 0,
+                "color": "#ea5353"
+            },
+            {
+                "from": 75,
+                "color": "#ffc800"
+            },
+            {
+                "from": 85,
+                "color": "#5cd65c"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "1361be576cfca85e",
+        "min": 0,
+        "max": 100,
+        "x": 1420,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3493246ca9dd80e5",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Piezas conformes",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.KPIs.PiezasConformes",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 300,
+        "wires": [
+            [
+                "226e1ff84578f1aa"
+            ]
+        ]
+    },
+    {
+        "id": "226e1ff84578f1aa",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 2,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Piezas conformes",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "%",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 80,
+                "color": "#ea5353"
+            },
+            {
+                "from": 95,
+                "color": "#ffc800"
+            },
+            {
+                "from": 97,
+                "color": "#5cd65c"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "1361be576cfca85e",
+        "min": 80,
+        "max": 100,
+        "x": 1420,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "227949f23d2434cc",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Producción",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.KPIs.ProduccionTurno",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 340,
+        "wires": [
+            [
+                "c97e1fe8b30f90ec"
+            ]
+        ]
+    },
+    {
+        "id": "c97e1fe8b30f90ec",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Producción del turno (t)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "1361be576cfca85e",
+        "x": 1420,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "82239ee34a12087d",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Energía",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.KPIs.EnergiaEspecifica",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 380,
+        "wires": [
+            [
+                "763dec35c776001f"
+            ]
+        ]
+    },
+    {
+        "id": "763dec35c776001f",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Energía específica (kWh/t)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "1361be576cfca85e",
+        "x": 1420,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "d67f01c39652a903",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Velocidad línea",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.KPIs.VelocidadLinea",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 420,
+        "wires": [
+            [
+                "bcd7694a07cf35d0"
+            ]
+        ]
+    },
+    {
+        "id": "bcd7694a07cf35d0",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 5,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Velocidad de la línea (m/min)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "1361be576cfca85e",
+        "x": 1420,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "0a8ccd91360d5339",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-01 temperatura",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-01'].TemperaturaMetal",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 460,
+        "wires": [
+            [
+                "6b32188d184840fc"
+            ]
+        ]
+    },
+    {
+        "id": "6b32188d184840fc",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "IF-01 metal",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "°C",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 1200,
+                "color": "#4fa8ff"
+            },
+            {
+                "from": 1450,
+                "color": "#5cd65c"
+            },
+            {
+                "from": 1520,
+                "color": "#ea5353"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "68c949fc92f521a6",
+        "min": 1200,
+        "max": 1600,
+        "x": 1420,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "eb2ccb74f5e56ff0",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-02 temperatura",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-02'].TemperaturaMetal",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 500,
+        "wires": [
+            [
+                "77a7d19ef7b3e79c"
+            ]
+        ]
+    },
+    {
+        "id": "77a7d19ef7b3e79c",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 2,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "IF-02 metal",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "°C",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 1200,
+                "color": "#4fa8ff"
+            },
+            {
+                "from": 1450,
+                "color": "#5cd65c"
+            },
+            {
+                "from": 1520,
+                "color": "#ea5353"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "68c949fc92f521a6",
+        "min": 1200,
+        "max": 1600,
+        "x": 1420,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "1148deecc538fc38",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-01 fase",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-01'].Fase",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 540,
+        "wires": [
+            [
+                "156ef77160208cd0"
+            ]
+        ]
+    },
+    {
+        "id": "156ef77160208cd0",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "IF-01 fase",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "68c949fc92f521a6",
+        "x": 1420,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "9f061cb07fde7741",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-02 fase",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-02'].Fase",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 580,
+        "wires": [
+            [
+                "d343c5593370284e"
+            ]
+        ]
+    },
+    {
+        "id": "d343c5593370284e",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "IF-02 fase",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "68c949fc92f521a6",
+        "x": 1420,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "95d2ae73c530b6d1",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-02 presión",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-02'].Presion",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 620,
+        "wires": [
+            [
+                "a334e606aecb3df3"
+            ]
+        ]
+    },
+    {
+        "id": "a334e606aecb3df3",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 5,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "IF-02 presión del recinto (Pa)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "68c949fc92f521a6",
+        "x": 1420,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "248297f8178ea66c",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Peso cuchara",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['COL-01'].PesoCuchara",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 660,
+        "wires": [
+            [
+                "87ba1147193ff460"
+            ]
+        ]
+    },
+    {
+        "id": "87ba1147193ff460",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Cuchara",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "kg",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 0,
+                "color": "#ea5353"
+            },
+            {
+                "from": 150,
+                "color": "#ffc800"
+            },
+            {
+                "from": 400,
+                "color": "#5cd65c"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "f4712a278543bff9",
+        "min": 0,
+        "max": 1500,
+        "x": 1420,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "9af65160e065f2e2",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Caudal colada",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['COL-01'].CaudalColada",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 700,
+        "wires": [
+            [
+                "170af1301993fc0e"
+            ]
+        ]
+    },
+    {
+        "id": "170af1301993fc0e",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Caudal de colada (kg/s)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "f4712a278543bff9",
+        "x": 1420,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "581708d5e1e7a361",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Colando",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['COL-01'].Colando",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 740,
+        "wires": [
+            [
+                "336fec7cd315b41e"
+            ]
+        ]
+    },
+    {
+        "id": "336fec7cd315b41e",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Colando",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "f4712a278543bff9",
+        "x": 1420,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "4521d6b851081949",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Molde en posición",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['COL-01'].MoldeEnPosicion",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 780,
+        "wires": [
+            [
+                "cfa06f1fc6fc1895"
+            ]
+        ]
+    },
+    {
+        "id": "cfa06f1fc6fc1895",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Molde en posición",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "f4712a278543bff9",
+        "x": 1420,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "352ce38f42861ec2",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Vibración desmoldeo",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['DES-01'].Vibracion",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 820,
+        "wires": [
+            [
+                "37326251412af0d5"
+            ]
+        ]
+    },
+    {
+        "id": "37326251412af0d5",
+        "type": "ui-gauge",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Vibración DES-01",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "mm/s",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": 0,
+                "color": "#5cd65c"
+            },
+            {
+                "from": 12,
+                "color": "#ffc800"
+            },
+            {
+                "from": 15,
+                "color": "#ea5353"
+            }
+        ],
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "group": "a7313e976cfbac86",
+        "min": 0,
+        "max": 20,
+        "x": 1420,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "476902982bb8dca0",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Desmoldeo en marcha",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['DES-01'].Marcha",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 860,
+        "wires": [
+            [
+                "8e3a7f441264b070"
+            ]
+        ]
+    },
+    {
+        "id": "8e3a7f441264b070",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Desmoldeo en marcha",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "a7313e976cfbac86",
+        "x": 1420,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "c9a909c87f8655d2",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Desviación escáner",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['QC-01'].DesviacionEscaneo",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 900,
+        "wires": [
+            [
+                "751726092d25b3a5"
+            ]
+        ]
+    },
+    {
+        "id": "751726092d25b3a5",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Desviación del escáner (mm)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "a7313e976cfbac86",
+        "x": 1420,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "6396e49b9674d000",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Avería inyectada",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.Mantenimiento.AveriaNombre",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 940,
+        "wires": [
+            [
+                "4b1e182fe26341b8"
+            ]
+        ]
+    },
+    {
+        "id": "4b1e182fe26341b8",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Avería activa",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "8163159b19f9302f",
+        "x": 1420,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "dc41d90f51010e94",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Tabla de activos",
+        "func": "// ENTRADA: la planta agrupada · SALIDA: filas para la tabla, los activos con problemas primero\n\nconst NOMBRES = { \"IF-01\": \"Horno de inducción 01\", \"IF-02\": \"Horno de inducción 02\", \"MP-01\": \"Prensa de moldeo superior\",\n    \"MP-02\": \"Prensa de moldeo inferior\", \"ROB-03\": \"Robot de machos\", \"COL-01\": \"Colada automática\",\n    \"ROB-01\": \"Robot de inoculación\", \"ENF-01\": \"Túnel de enfriamiento\", \"DES-01\": \"Desmoldeo vibratorio\",\n    \"ROB-02\": \"Robot de manipulación\", \"QC-01\": \"Célula de calidad 3D\" };\nconst ORDEN = { ALARM: 0, WARN: 1, IDLE: 2, RUN: 3 };\nconst p = msg.payload;\nconst filas = Object.keys(NOMBRES).filter(a => p[a]).map(a => ({\n    Activo: a, Nombre: NOMBRES[a], Estado: p[a].Estado || \"?\", \"OEE (%)\": p[a].OEE\n}));\nfilas.sort((x, y) => (ORDEN[x.Estado] ?? 9) - (ORDEN[y.Estado] ?? 9) || x[\"OEE (%)\"] - y[\"OEE (%)\"]);\nmsg.payload = filas;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1010,
+        "wires": [
+            [
+                "628a24c5d54f7c47"
+            ]
+        ]
+    },
+    {
+        "id": "628a24c5d54f7c47",
+        "type": "ui-table",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Activos",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "maxrows": 12,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "group": "60569a299450fdef",
+        "x": 1420,
+        "y": 1010,
+        "wires": []
+    },
+    {
+        "id": "f47738e36cee4d05",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-01 gráfica",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-01'].TemperaturaMetal",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "IF-01 (°C)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 1060,
+        "wires": [
+            [
+                "f88699febd0bdeb6"
+            ]
+        ]
+    },
+    {
+        "id": "f88699febd0bdeb6",
+        "type": "ui-chart",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Temperatura del metal en los hornos",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "°C",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 0,
+        "showLegend": true,
+        "removeOlder": 15,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095FF",
+            "#FF0000",
+            "#FF7F0E",
+            "#2CA02C",
+            "#A347E1",
+            "#D62728",
+            "#FF9896",
+            "#9467BD",
+            "#C5B0D5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 6,
+        "className": "",
+        "interpolation": "linear",
+        "group": "34947e913dbf20e1",
+        "x": 1420,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "5b700249ff764995",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "IF-02 gráfica",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['IF-02'].TemperaturaMetal",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "IF-02 (°C)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 1100,
+        "wires": [
+            [
+                "f88699febd0bdeb6"
+            ]
+        ]
+    },
+    {
+        "id": "15259c9ab93f56c8",
+        "type": "change",
+        "z": "1432a64cf8d8a504",
+        "name": "Cuchara gráfica",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload['COL-01'].PesoCuchara",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Cuchara (kg)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1180,
+        "y": 1140,
+        "wires": [
+            [
+                "8d72c33c0e13b1d7"
+            ]
+        ]
+    },
+    {
+        "id": "8d72c33c0e13b1d7",
+        "type": "ui-chart",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Peso de la cuchara",
+        "order": 2,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "kg",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 0,
+        "showLegend": true,
+        "removeOlder": 15,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095FF",
+            "#FF0000",
+            "#FF7F0E",
+            "#2CA02C",
+            "#A347E1",
+            "#D62728",
+            "#FF9896",
+            "#9467BD",
+            "#C5B0D5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 6,
+        "className": "",
+        "interpolation": "linear",
+        "group": "34947e913dbf20e1",
+        "x": 1420,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "eb9c8ca1462070fb",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Alarma desmoldeo",
+        "func": "// ENTRADA: la planta agrupada · SALIDA: \"NORMAL\" o \"ALARMA\"\n// En marcha el desmoldeo vibra MUCHO (≈ 8,6 mm/s): el límite depende del estado.\n\nconst LIMITE_MARCHA = 12;   // mm/s con el desmoldeo en marcha\nconst LIMITE_PARO = 3;      // mm/s con el desmoldeo parado\n\nconst d = msg.payload[\"DES-01\"] || {};\nconst limite = d.Marcha ? LIMITE_MARCHA : LIMITE_PARO;\nmsg.payload = d.Vibracion > limite ? \"ALARMA\" : \"NORMAL\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1200,
+        "wires": [
+            [
+                "fbaa9992f7317813"
+            ]
+        ]
+    },
+    {
+        "id": "fbaa9992f7317813",
+        "type": "ui-template",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "head": "",
+        "noerr": 0,
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "group": "8d9dc4d9b3d647c7",
+        "format": "<template>\n  <div :style=\"{ background: color, color: 'white', padding: '12px',\n                 textAlign: 'center', fontSize: '1.6em',\n                 fontWeight: 'bold', borderRadius: '8px' }\">\n    {{ msg?.payload || 'SIN DATOS' }}\n  </div>\n</template>\n\n<script>\nexport default {\n  computed: {\n    color() {\n      const colores = { 'NORMAL': '#2e7d32', 'ATENCIÓN': '#f9a825', 'ALARMA': '#c62828' };\n      return colores[this.msg?.payload] || '#757575';\n    }\n  }\n}\n</script>",
+        "x": 1420,
+        "y": 1200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "626318b587fa185a",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Estado de la planta",
+        "func": "// ENTRADA: la planta agrupada · SALIDA 1: NORMAL / ATENCIÓN / ALARMA · SALIDA 2: motivo\n\n// ---- UMBRALES ----\nconst OEE_MIN = 75;            // % de planta\nconst CONFORMES_MIN = 95;      // % de piezas conformes\nconst PRESION_HORNO_MAX = 0;   // Pa: los hornos trabajan en depresión\n// -------------------\n\nconst p = msg.payload;\nlet nivel = 0; const motivos = [];\nconst avisar = (n, t) => { if (n > nivel) nivel = n; motivos.push(t); };\n\nconst ACTIVOS = [\"IF-01\", \"IF-02\", \"MP-01\", \"MP-02\", \"ROB-03\", \"COL-01\", \"ROB-01\", \"ENF-01\", \"DES-01\", \"ROB-02\", \"QC-01\"];\nfor (const a of ACTIVOS) {\n    const e = p[a] && p[a].Estado;\n    if (e === \"ALARM\") avisar(2, a + \" en ALARMA\");\n}\nconst k = p.KPIs || {};\nif (k.OEEPlanta < OEE_MIN) avisar(1, \"OEE de planta \" + k.OEEPlanta + \" %\");\nif (k.PiezasConformes < CONFORMES_MIN) avisar(1, \"Piezas conformes \" + k.PiezasConformes + \" %\");\nfor (const h of [\"IF-01\", \"IF-02\"]) if (p[h] && p[h].Presion > PRESION_HORNO_MAX) avisar(2, h + \": sobrepresión \" + p[h].Presion + \" Pa\");\nconst d = p[\"DES-01\"] || {};\nif (d.Vibracion > (d.Marcha ? 12 : 3)) avisar(1, \"Vibración del desmoldeo \" + d.Vibracion + \" mm/s\");\n\nconst estados = [\"NORMAL\", \"ATENCIÓN\", \"ALARMA\"];\nreturn [{ payload: estados[nivel] }, { payload: motivos.length ? motivos.join(\" · \") : \"Sin incidencias\" }];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1250,
+        "wires": [
+            [
+                "ff17fb2e9b0cdb31"
+            ],
+            [
+                "35113ffbeb9e6672"
+            ]
+        ]
+    },
+    {
+        "id": "ff17fb2e9b0cdb31",
+        "type": "ui-template",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "head": "",
+        "noerr": 0,
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "group": "8d9dc4d9b3d647c7",
+        "format": "<template>\n  <div :style=\"{ background: color, color: 'white', padding: '12px',\n                 textAlign: 'center', fontSize: '1.6em',\n                 fontWeight: 'bold', borderRadius: '8px' }\">\n    {{ msg?.payload || 'SIN DATOS' }}\n  </div>\n</template>\n\n<script>\nexport default {\n  computed: {\n    color() {\n      const colores = { 'NORMAL': '#2e7d32', 'ATENCIÓN': '#f9a825', 'ALARMA': '#c62828' };\n      return colores[this.msg?.payload] || '#757575';\n    }\n  }\n}\n</script>",
+        "x": 1420,
+        "y": 1240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "35113ffbeb9e6672",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 3,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Motivo",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "8d9dc4d9b3d647c7",
+        "x": 1420,
+        "y": 1280,
+        "wires": []
+    },
+    {
+        "id": "d02b6e0da3379a5e",
+        "type": "trigger",
+        "z": "1432a64cf8d8a504",
+        "name": "Sin datos 10 s",
+        "op1": "",
+        "op2": "ALARMA",
+        "op1type": "nul",
+        "op2type": "str",
+        "duration": "10",
+        "extend": true,
+        "overrideDelay": false,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 1180,
+        "y": 1310,
+        "wires": [
+            [
+                "ff17fb2e9b0cdb31"
+            ]
+        ]
+    },
+    {
+        "id": "613d69feb9b90f84",
+        "type": "comment",
+        "z": "1432a64cf8d8a504",
+        "name": "FASE 2 · Averías, descubrimiento automático y producción calculada",
+        "info": "",
+        "x": 200,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "2935c904c6b5ade9",
+        "type": "ui-dropdown",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Inyectar avería",
+        "tooltip": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "passthru": false,
+        "multiple": false,
+        "chips": false,
+        "clearable": false,
+        "options": [
+            {
+                "label": "0 · Sin avería",
+                "value": 0,
+                "type": "num"
+            },
+            {
+                "label": "1 · Rodamiento del desmoldeo",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "2 · Extracción de humos IF-02",
+                "value": 2,
+                "type": "num"
+            },
+            {
+                "label": "3 · Retraso de la grúa de cuchara",
+                "value": 3,
+                "type": "num"
+            },
+            {
+                "label": "4 · Deriva del escáner 3D",
+                "value": 4,
+                "type": "num"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "typeIsComboBox": true,
+        "msgTrigger": "onChange",
+        "group": "8163159b19f9302f",
+        "placeholder": "Elige…",
+        "x": 160,
+        "y": 1230,
+        "wires": [
+            [
+                "df53b51a60822c80"
+            ]
+        ]
+    },
+    {
+        "id": "df53b51a60822c80",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Orden de avería",
+        "func": "// ENTRADA: el código elegido en el desplegable (0-4)\n// SALIDA:  una escritura OPC UA en Mantenimiento.Averia\n\nmsg.topic    = \"ns=1;s=Mantenimiento.Averia\";\nmsg.datatype = \"Int32\";\nmsg.payload  = Number(msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 1230,
+        "wires": [
+            [
+                "1179aca1c0483bf3"
+            ]
+        ]
+    },
+    {
+        "id": "1179aca1c0483bf3",
+        "type": "OpcUa-Client",
+        "z": "1432a64cf8d8a504",
+        "endpoint": "a33796ecf5cfc275",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 600,
+        "y": 1230,
+        "wires": [
+            [
+                "1db85040c2c5b8e4"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "1db85040c2c5b8e4",
+        "type": "debug",
+        "z": "1432a64cf8d8a504",
+        "name": "Resultado escritura",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 1230,
+        "wires": []
+    },
+    {
+        "id": "5e46d8b2f93b6c6c",
+        "type": "inject",
+        "z": "1432a64cf8d8a504",
+        "name": "Descubrir",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "10",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 1300,
+        "wires": [
+            [
+                "2a9f70eeaaf5b928"
+            ]
+        ]
+    },
+    {
+        "id": "2a9f70eeaaf5b928",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Pedir zonas",
+        "func": "// ENTRADA: el inject \"Descubrir\"\n// SALIDA:  una petición BROWSE por cada zona de la planta\n\nconst ZONAS = [\"Fusion\", \"Moldeo\", \"Colada\", \"Enfriamiento\", \"Acabado\", \"Calidad\"];\nflow.set(\"inventario\", []);\nreturn [ZONAS.map(z => ({ topic: \"ns=1;s=Zona.\" + z, nivel: \"zona\", zona: z }))];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 1300,
+        "wires": [
+            [
+                "ead626471ea5b1cd"
+            ]
+        ]
+    },
+    {
+        "id": "92bc671e33f0527f",
+        "type": "OpcUa-Client",
+        "z": "1432a64cf8d8a504",
+        "endpoint": "a33796ecf5cfc275",
+        "action": "browse",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Explorar (inventario)",
+        "x": 560,
+        "y": 1300,
+        "wires": [
+            [
+                "ce09d9b2f182984d"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ce09d9b2f182984d",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Inventario",
+        "func": "// ENTRADA: respuestas del BROWSE (de una zona o de un activo)\n// SALIDA 1: nuevas peticiones BROWSE (los activos de la zona)\n// SALIDA 2: el inventario completo, para la tabla\n\nconst refs = (msg.payload || []).map(r => r.item || r);     // cada referencia llega como { item: … }\nconst nombre = r => (r.browseName && r.browseName.name) || String(r.browseName);\nif (msg.nivel === \"zona\") {                       // en una zona: cada objeto es un activo\n    const activos = refs.filter(r => r.nodeClass === 1);\n    return [activos.map(r => ({ topic: \"ns=1;s=\" + nombre(r), nivel: \"activo\", zona: msg.zona, activo: nombre(r) })), null];\n}\n// en un activo: sus variables (las carpetas como TagsS7 se ignoran)\nconst inv = flow.get(\"inventario\") || [];\nfor (const r of refs.filter(r => r.nodeClass === 2)) {\n    inv.push({ Zona: msg.zona, Activo: msg.activo, Variable: nombre(r), Tipo: r.dataType || \"\",\n               Valor: typeof r.value === \"number\" ? Math.round(r.value * 100) / 100 : r.value });\n}\nflow.set(\"inventario\", inv);\nnode.status({ text: inv.length + \" variables\" });\nreturn [null, { payload: inv }];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 1300,
+        "wires": [
+            [
+                "ead626471ea5b1cd"
+            ],
+            [
+                "678cb3c72d8da7aa"
+            ]
+        ]
+    },
+    {
+        "id": "678cb3c72d8da7aa",
+        "type": "ui-table",
+        "z": "1432a64cf8d8a504",
+        "name": "",
+        "label": "Variables encontradas",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "maxrows": 15,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "group": "75cf939ab399eebd",
+        "x": 1020,
+        "y": 1320,
+        "wires": []
+    },
+    {
+        "id": "ead626471ea5b1cd",
+        "type": "delay",
+        "z": "1432a64cf8d8a504",
+        "name": "De uno en uno",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "2",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 450,
+        "y": 1360,
+        "wires": [
+            [
+                "92bc671e33f0527f"
+            ]
+        ]
+    },
+    {
+        "id": "de25ec8541a29eb7",
+        "type": "function",
+        "z": "1432a64cf8d8a504",
+        "name": "Ciclos de colada",
+        "func": "// ENTRADA: la planta agrupada (1 mensaje/s)\n// SALIDA:  moldes colados y moldes por hora (últimos 10 min), calculados en Node-RED\n\nconst colando = (msg.payload[\"COL-01\"] || {}).Colando;\nconst antes = context.get(\"colando\");\nconst fin = context.get(\"fines\") || [];\nconst ahora = Date.now();\nif (antes === true && colando === false) fin.push(ahora);       // termina el llenado de un molde\ncontext.set(\"colando\", colando);\nconst recientes = fin.filter(t => ahora - t < 600000);\ncontext.set(\"fines\", recientes);\nconst total = (context.get(\"total\") || 0) + (antes === true && colando === false ? 1 : 0);\ncontext.set(\"total\", total);\nconst minutos = Math.min(10, (ahora - (context.get(\"inicio\") || (context.set(\"inicio\", ahora), ahora))) / 60000);\nreturn [{ payload: total }, { payload: minutos > 1 ? Math.round(recientes.length / minutos * 60) : 0 }];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1380,
+        "wires": [
+            [
+                "a0c20bec26cf9885"
+            ],
+            [
+                "4c320dcf40ab96f2"
+            ]
+        ]
+    },
+    {
+        "id": "a0c20bec26cf9885",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Moldes colados desde el arranque",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "2ff44cf4c2291435",
+        "x": 1420,
+        "y": 1370,
+        "wires": []
+    },
+    {
+        "id": "4c320dcf40ab96f2",
+        "type": "ui-text",
+        "z": "1432a64cf8d8a504",
+        "order": 2,
+        "width": "0",
+        "height": "0",
+        "name": "",
+        "label": "Moldes por hora (últimos 10 min)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "Helvetica",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "group": "2ff44cf4c2291435",
+        "x": 1420,
+        "y": 1410,
+        "wires": []
+    }
+]

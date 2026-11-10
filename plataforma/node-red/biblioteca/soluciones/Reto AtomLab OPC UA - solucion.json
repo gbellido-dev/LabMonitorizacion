@@ -1,0 +1,798 @@
+[
+    {
+        "id": "e7945b844be188cf",
+        "type": "tab",
+        "label": "Reto AtomLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución del reto 3-reto/atomlab-opcua. Pega el token del dispositivo Central-Reto en el broker de ThingsBoard."
+    },
+    {
+        "id": "a7842fc3a4316e73",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://atomlab:4842/atomlab/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "79d07707da9f56f7",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Central-Reto",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-reto-atomlab",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "79619a3844356267",
+        "type": "comment",
+        "z": "e7945b844be188cf",
+        "name": "1 · Vigilancia: suscripción, agrupado e indicadores anticipados",
+        "info": "",
+        "x": 230,
+        "y": 30,
+        "wires": []
+    },
+    {
+        "id": "cc00467fb20e2964",
+        "type": "inject",
+        "z": "e7945b844be188cf",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 343,
+        "wires": [
+            [
+                "1fd30fdef460481f",
+                "e48175f41a4b6142",
+                "105ca8cbbbd6aa3b",
+                "03b1bdbbff8c69bd",
+                "cc12b0a1f7c865f0",
+                "36eea35423dc45ae",
+                "ca545c160af33744",
+                "60e5462cb16375b8",
+                "5f36a1cba4d6ecac",
+                "49d06f9a33ec80b0",
+                "d3f736c61492655e",
+                "4a9bb160d928d8b9",
+                "7624956d2a910e5c",
+                "552f8a485feff8f5",
+                "8e000d5f1ccd4caa",
+                "aa9845481228485d",
+                "4d786558a8e08722",
+                "fe15aad9109d2511",
+                "9794177d57b1042e",
+                "ccdd90ee243df067",
+                "23e8b2a17f276219"
+            ]
+        ]
+    },
+    {
+        "id": "8adc915fba8d079e",
+        "type": "OpcUa-Client",
+        "z": "e7945b844be188cf",
+        "endpoint": "a7842fc3a4316e73",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (1 s)",
+        "x": 530,
+        "y": 343,
+        "wires": [
+            [
+                "4405b6c4740aff56"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "1fd30fdef460481f",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.PotenciaTermica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia térmica",
+        "x": 320,
+        "y": 70,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "e48175f41a4b6142",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.Reactividad",
+        "datatype": "Double",
+        "value": "",
+        "name": "Reactividad",
+        "x": 320,
+        "y": 96,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "105ca8cbbbd6aa3b",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.Periodo",
+        "datatype": "Double",
+        "value": "",
+        "name": "Periodo",
+        "x": 320,
+        "y": 122,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "03b1bdbbff8c69bd",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.ORM",
+        "datatype": "Double",
+        "value": "",
+        "name": "ORM",
+        "x": 320,
+        "y": 148,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "cc12b0a1f7c865f0",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.TempCombustible",
+        "datatype": "Double",
+        "value": "",
+        "name": "T combustible",
+        "x": 320,
+        "y": 174,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "36eea35423dc45ae",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.Vacio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Vacío",
+        "x": 320,
+        "y": 200,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "ca545c160af33744",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.Xenon",
+        "datatype": "Double",
+        "value": "",
+        "name": "Xenón",
+        "x": 320,
+        "y": 226,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "60e5462cb16375b8",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.ConsignaActual",
+        "datatype": "Double",
+        "value": "",
+        "name": "Consigna actual",
+        "x": 320,
+        "y": 252,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "5f36a1cba4d6ecac",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=CircuitoPrimario.BombasEnMarcha",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Bombas en marcha",
+        "x": 320,
+        "y": 278,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "49d06f9a33ec80b0",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=CircuitoPrimario.Caudal",
+        "datatype": "Double",
+        "value": "",
+        "name": "Caudal",
+        "x": 320,
+        "y": 304,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "d3f736c61492655e",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=CircuitoPrimario.Presion",
+        "datatype": "Double",
+        "value": "",
+        "name": "Presión separadores",
+        "x": 320,
+        "y": 330,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "4a9bb160d928d8b9",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=CircuitoPrimario.NivelSeparadores",
+        "datatype": "Double",
+        "value": "",
+        "name": "Nivel separadores",
+        "x": 320,
+        "y": 356,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "7624956d2a910e5c",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Generador.PotenciaElectrica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia eléctrica",
+        "x": 320,
+        "y": 382,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "552f8a485feff8f5",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Generador.Frecuencia",
+        "datatype": "Double",
+        "value": "",
+        "name": "Frecuencia",
+        "x": 320,
+        "y": 408,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "8e000d5f1ccd4caa",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Radiacion.SalaCentral",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala central",
+        "x": 320,
+        "y": 434,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "aa9845481228485d",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Radiacion.SalaControl",
+        "datatype": "Double",
+        "value": "",
+        "name": "Dosis sala control",
+        "x": 320,
+        "y": 460,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "4d786558a8e08722",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Proteccion.Estado",
+        "datatype": "String",
+        "value": "",
+        "name": "Estado",
+        "x": 320,
+        "y": 486,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "fe15aad9109d2511",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Proteccion.Scram",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "SCRAM",
+        "x": 320,
+        "y": 512,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "9794177d57b1042e",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Proteccion.ProteccionesActivas",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "Protecciones activas",
+        "x": 320,
+        "y": 538,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "ccdd90ee243df067",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Proteccion.Motivo",
+        "datatype": "String",
+        "value": "",
+        "name": "Motivo del disparo",
+        "x": 320,
+        "y": 564,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "23e8b2a17f276219",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Servidor.Latido",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Latido",
+        "x": 320,
+        "y": 590,
+        "wires": [
+            [
+                "8adc915fba8d079e"
+            ]
+        ]
+    },
+    {
+        "id": "4405b6c4740aff56",
+        "type": "function",
+        "z": "e7945b844be188cf",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por sistema\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=2;s=Reactor.PotenciaTermica\"  →  [\"Reactor\", \"PotenciaTermica\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"central\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea Reactor, CircuitoPrimario...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"central\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 343,
+        "wires": [
+            [
+                "9090576cdda40d0e"
+            ]
+        ]
+    },
+    {
+        "id": "9090576cdda40d0e",
+        "type": "delay",
+        "z": "e7945b844be188cf",
+        "name": "1 mensaje/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 910,
+        "y": 343,
+        "wires": [
+            [
+                "50cdc995149b5ae9"
+            ]
+        ]
+    },
+    {
+        "id": "50cdc995149b5ae9",
+        "type": "function",
+        "z": "e7945b844be188cf",
+        "name": "Indicadores",
+        "func": "// ENTRADA: estado de la central agrupado por sistemas (1 mensaje/s)\n// SALIDA:  telemetría con medidas e INDICADORES ANTICIPADOS calculados en la pasarela\n\nconst r = msg.payload.Reactor || {}, c = msg.payload.CircuitoPrimario || {};\nconst g = msg.payload.Generador || {}, pr = msg.payload.Proteccion || {};\nconst ahora = Date.now();\n\n// Tendencia del ORM: recta de mínimos cuadrados con los últimos 3 minutos (barras por minuto)\nconst enMarcha = pr.Estado === \"OPERACION\";\nlet hist = (context.get(\"orm\") || []).filter(m => ahora - m.t < 180000);\nif (!enMarcha) hist = [];                                         // tras un disparo o un reinicio, se empieza de cero\nelse if (typeof r.ORM === \"number\") hist.push({ t: ahora, v: r.ORM });\ncontext.set(\"orm\", hist);\nlet pendiente = 0;\nif (hist.length > 20) {\n    const n = hist.length, mt = hist.reduce((a, m) => a + m.t, 0) / n, mv = hist.reduce((a, m) => a + m.v, 0) / n;\n    const num = hist.reduce((a, m) => a + (m.t - mt) * (m.v - mv), 0), den = hist.reduce((a, m) => a + (m.t - mt) ** 2, 0);\n    pendiente = den > 0 ? (num / den) * 60000 : 0;                 // barras / minuto (de reloj)\n}\nconst minutosHasta15 = enMarcha && pendiente < -0.01 && r.ORM > 15 ? (r.ORM - 15) / -pendiente : 9999;\n\nmsg.payload = { ts: ahora, values: {\n    potencia_mwt: r.PotenciaTermica, potencia_mwe: g.PotenciaElectrica, reactividad_beta: r.Reactividad,\n    periodo_s: r.Periodo, orm_barras: r.ORM, xenon_rel: r.Xenon, vacio_pct: r.Vacio,\n    caudal_kgs: c.Caudal, presion_mpa: c.Presion, nivel_pct: c.NivelSeparadores, bombas: c.BombasEnMarcha,\n    estado: pr.Estado, scram: pr.Scram, protecciones: pr.ProteccionesActivas,\n    // indicadores\n    rendimiento_pct: r.PotenciaTermica > 50 ? Math.round(1000 * g.PotenciaElectrica / r.PotenciaTermica) / 10 : 0,\n    orm_tendencia_barras_min: Math.round(pendiente * 100) / 100,\n    minutos_hasta_orm15: Math.round(minutosHasta15 * 10) / 10,\n    zona_inestable: enMarcha && r.PotenciaTermica < 700\n}};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 330,
+        "wires": [
+            [
+                "d7388fed9990039e"
+            ]
+        ]
+    },
+    {
+        "id": "d7388fed9990039e",
+        "type": "mqtt out",
+        "z": "e7945b844be188cf",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "79d07707da9f56f7",
+        "x": 1400,
+        "y": 330,
+        "wires": []
+    },
+    {
+        "id": "f7415dcca98192cb",
+        "type": "comment",
+        "z": "e7945b844be188cf",
+        "name": "2 · Caja negra con disparo (250 ms, 10 s antes y 10 s después)",
+        "info": "",
+        "x": 230,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "f1062f3e30a6e711",
+        "type": "inject",
+        "z": "e7945b844be188cf",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 740,
+        "wires": [
+            [
+                "39a9c13fcfe707a1",
+                "603ad670f29252b0",
+                "ced18d26cbe1f881"
+            ]
+        ]
+    },
+    {
+        "id": "be35742631b701a0",
+        "type": "OpcUa-Client",
+        "z": "e7945b844be188cf",
+        "endpoint": "a7842fc3a4316e73",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 250,
+        "timeUnit": "ms",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir (250 ms)",
+        "x": 600,
+        "y": 740,
+        "wires": [
+            [
+                "e602a1a915016d4c"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "39a9c13fcfe707a1",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.PotenciaTermica",
+        "datatype": "Double",
+        "value": "",
+        "name": "Potencia térmica",
+        "x": 340,
+        "y": 700,
+        "wires": [
+            [
+                "be35742631b701a0"
+            ]
+        ]
+    },
+    {
+        "id": "603ad670f29252b0",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Reactor.Reactividad",
+        "datatype": "Double",
+        "value": "",
+        "name": "Reactividad",
+        "x": 340,
+        "y": 740,
+        "wires": [
+            [
+                "be35742631b701a0"
+            ]
+        ]
+    },
+    {
+        "id": "ced18d26cbe1f881",
+        "type": "OpcUa-Item",
+        "z": "e7945b844be188cf",
+        "item": "ns=2;s=Proteccion.Estado",
+        "datatype": "String",
+        "value": "",
+        "name": "Estado",
+        "x": 340,
+        "y": 780,
+        "wires": [
+            [
+                "be35742631b701a0"
+            ]
+        ]
+    },
+    {
+        "id": "e602a1a915016d4c",
+        "type": "function",
+        "z": "e7945b844be188cf",
+        "name": "Caja negra",
+        "func": "// ENTRADA: PotenciaTermica, Reactividad y Proteccion.Estado suscritas cada 250 ms\n// SALIDA:  cuando la central dispara (SCRAM o ACCIDENTE), un lote con 10 s ANTES y 10 s DESPUÉS\n//          del disparo, cada muestra con su hora  →  v1/devices/me/telemetry\n\nif (!String(msg.topic).startsWith(\"ns=\")) return null;\nlet valor = msg.payload;\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) valor = valor.value;\nconst variable = String(msg.topic).split(\".\").pop();\nconst ahora = Date.now();\n\nconst buf = (context.get(\"buf\") || []).filter(m => ahora - m.ts < 20000);   // memoria circular de 20 s\nlet estado = context.get(\"estado\") || {};\n\nif (variable === \"Estado\") {\n    const disparo = (valor === \"SCRAM\" || valor === \"ACCIDENTE\") && estado.ultimo === \"OPERACION\";\n    estado.ultimo = valor;\n    if (disparo && !estado.t) { estado.t = ahora; estado.tipo = valor; node.status({ fill: \"red\", shape: \"dot\", text: \"grabando \" + valor }); }\n    if (valor === \"ACCIDENTE\") estado.tipo = \"ACCIDENTE\";\n} else {\n    buf.push({ ts: ahora, values: { [variable === \"Reactividad\" ? \"caja_reactividad_beta\" : \"caja_potencia_mwt\"]: valor } });\n}\ncontext.set(\"buf\", buf);\n\nif (estado.t && ahora - estado.t > 10000) {                 // 10 s después del disparo: enviar\n    const lote = buf.filter(m => m.ts >= estado.t - 10000);\n    lote.push({ ts: estado.t, values: { suceso: estado.tipo, suceso_muestras: lote.length } });\n    node.status({ fill: \"green\", shape: \"dot\", text: lote.length + \" muestras enviadas\" });\n    estado = { ultimo: estado.ultimo };\n    context.set(\"estado\", estado);\n    return { payload: lote };\n}\ncontext.set(\"estado\", estado);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 740,
+        "wires": [
+            [
+                "d7388fed9990039e"
+            ]
+        ]
+    },
+    {
+        "id": "736c1d51cdf6c6c0",
+        "type": "comment",
+        "z": "e7945b844be188cf",
+        "name": "3 · Órdenes con enclavamientos y auditoría",
+        "info": "",
+        "x": 230,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "db94ca5aed45f1da",
+        "type": "mqtt in",
+        "z": "e7945b844be188cf",
+        "name": "Órdenes de ThingsBoard",
+        "topic": "v1/devices/me/rpc/request/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "79d07707da9f56f7",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 900,
+        "wires": [
+            [
+                "35ef6b5f4e5c762c"
+            ]
+        ]
+    },
+    {
+        "id": "35ef6b5f4e5c762c",
+        "type": "function",
+        "z": "e7945b844be188cf",
+        "name": "Enclavamientos",
+        "func": "// ENTRADA: petición RPC de ThingsBoard · ENCLAVAMIENTOS antes de escribir en la central\n// SALIDA 1: escritura OPC UA · SALIDA 2: respuesta RPC · SALIDA 3: auditoría\n\nconst id = msg.topic.split(\"/\").pop(), metodo = msg.payload.method, valor = msg.payload.params;\nconst central = flow.get(\"central\") || {};\nconst r = central.Reactor || {}, pr = central.Proteccion || {};\n\nfunction respuesta(ok, texto, escritura) {\n    return [escritura || null,\n            { topic: \"v1/devices/me/rpc/response/\" + id, payload: ok ? { ok: true, orden: texto } : { ok: false, error: texto } },\n            { payload: { ts: Date.now(), values: { orden_metodo: metodo, orden_valor: JSON.stringify(valor ?? null),\n                                                   orden_resultado: ok ? \"aceptada\" : \"rechazada: \" + texto } } }];\n}\n\nif (metodo === \"az5\") {                                     // la parada de emergencia NUNCA se bloquea\n    return respuesta(true, \"AZ-5\", { topic: \"ns=2;s=Mandos.AZ5\", datatype: \"Boolean\", payload: true });\n}\nif (metodo === \"setPotencia\") {\n    const mwt = Number(valor);\n    if (!Number.isFinite(mwt) || mwt < 0 || mwt > 3200) return respuesta(false, \"Fuera de rango (0-3200 MWt)\");\n    if (mwt > 0 && mwt < 700) return respuesta(false, \"Por debajo de 700 MWt el RBMK es inestable: no se permite operar ahí\");\n    if (r.ORM < 15 && mwt > r.ConsignaActual) return respuesta(false, \"ORM < 15: no se permite subir potencia\");\n    return respuesta(true, \"consigna \" + mwt + \" MWt\", { topic: \"ns=2;s=Mandos.ConsignaPotencia\", datatype: \"Double\", payload: mwt });\n}\nif (metodo === \"pruebaInercia\") {\n    const faltan = [];\n    if (pr.Estado !== \"OPERACION\") faltan.push(\"central en operación\");\n    if (!(r.PotenciaTermica >= 700)) faltan.push(\"potencia ≥ 700 MWt\");\n    if (!(r.ORM >= 15)) faltan.push(\"ORM ≥ 15\");\n    if (pr.ProteccionesActivas !== true) faltan.push(\"protecciones activas\");\n    if (faltan.length) return respuesta(false, \"Enclavamiento: falta \" + faltan.join(\", \"));\n    return respuesta(true, \"prueba de inercia\", { topic: \"ns=2;s=Mandos.PruebaInercia\", datatype: \"Boolean\", payload: true });\n}\nreturn respuesta(false, \"Orden desconocida: \" + metodo);",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 900,
+        "wires": [
+            [
+                "77f4c269ffe4646c"
+            ],
+            [
+                "c4b27b2402b19940"
+            ],
+            [
+                "d7388fed9990039e"
+            ]
+        ]
+    },
+    {
+        "id": "77f4c269ffe4646c",
+        "type": "OpcUa-Client",
+        "z": "e7945b844be188cf",
+        "endpoint": "a7842fc3a4316e73",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 660,
+        "y": 880,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c4b27b2402b19940",
+        "type": "mqtt out",
+        "z": "e7945b844be188cf",
+        "name": "Respuesta → ThingsBoard",
+        "topic": "",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "79d07707da9f56f7",
+        "x": 680,
+        "y": 940,
+        "wires": []
+    }
+]

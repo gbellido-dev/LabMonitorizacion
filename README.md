@@ -115,13 +115,13 @@ Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 
 ## Prácticas
 
-Tres series, con AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA) y, en las series 1 y 2, ReactorLab (protocolos web) y AtomLab (central nuclear, OPC UA):
+Tres series para los seis simuladores: AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA), ReactorLab (protocolos web), AtomLab (central nuclear, OPC UA) y, en las series 1 y 2, la Fundición (planta con 11 activos, OPC UA):
 
 | Serie | Contenido |
 |---|---|
 | [1 · Node-RED + Dashboard](practicas/README.md) | Adquisición con Node-RED y dashboard con alarmas en Dashboard 2.0 (guías paso a paso, con .docx) |
 | [2 · Node-RED + ThingsBoard](practicas/README.md#serie-2--contenido-de-cada-práctica) | Node-RED como pasarela hacia ThingsBoard: telemetría, atributos, paneles, reglas de alarma, inactividad, órdenes RPC y API de gateway (guías paso a paso, con .docx, flujos y paneles resueltos) |
-| [3 · Reto](practicas/README.md) | La misma integración, menos guiada, con rúbrica de evaluación |
+| [3 · Reto](practicas/README.md#retos-serie-3) | La misma integración, menos guiada, con flujo inicial, solución y rúbrica de evaluación (AeroLab, OceanLab, SolarLab, ReactorLab y AtomLab) |
 
 Índice completo, valores para el entorno Docker y pruebas realizadas en [`practicas/README.md`](practicas/README.md).
 

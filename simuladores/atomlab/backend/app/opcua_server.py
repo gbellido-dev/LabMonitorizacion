@@ -109,6 +109,7 @@ MANDOS: tuple[Nodo, ...] = (
     Nodo("Mandos", "Protecciones", "Boolean", "", "proteccion.protecciones_activas", "Habilitar los disparos automáticos"),
     Nodo("Mandos", "AZ5", "Boolean", "", "", "Escribir true = pulsar AZ-5 (vuelve a false)"),
     Nodo("Mandos", "DispararTurbina", "Boolean", "", "", "Escribir true = disparar la turbina"),
+    Nodo("Mandos", "PruebaInercia", "Boolean", "", "", "Escribir true = prueba de inercia del turbogenerador"),
 )
 
 TIPOS = {"Double": ua.VariantType.Double, "Int32": ua.VariantType.Int32,
@@ -272,6 +273,9 @@ class ServidorOpcUa:
             case "DispararTurbina":
                 if valor:
                     p.turbina(True)
+            case "PruebaInercia":
+                if valor:
+                    p.prueba_turbina()
 
     def espacio(self) -> list[dict]:
         filas = []

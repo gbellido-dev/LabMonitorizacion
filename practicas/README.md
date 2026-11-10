@@ -2,11 +2,11 @@
 
 Las prácticas están organizadas en **tres series** que se pueden hacer en orden con cada simulador. Todas siguen el mismo esquema: una **Fase 1** de monitorización (leer, mostrar, histórico, incidencia, alarmas, pérdida de comunicación) y una **Fase 2** que amplía (órdenes a la máquina o varios equipos).
 
-| Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) | ReactorLab (protocolos web) | AtomLab (OPC UA) |
-|---|---|---|---|---|---|---|
-| **1 · Node-RED + Dashboard** | Adquirir datos con Node-RED y construir un dashboard con alarmas (Dashboard 2.0) | [guía](1-dashboard/aerolab/README.md) · [.docx](1-dashboard/aerolab/Practica_AeroLab_NodeRED_ES.docx) | [guía](1-dashboard/oceanlab/README.md) · [.docx](1-dashboard/oceanlab/Practica_OceanLab_NodeRED_ES.docx) | [guía](1-dashboard/solarlab/README.md) · [.docx](1-dashboard/solarlab/Practica_SolarLab_NodeRED_ES.docx) | [guía](1-dashboard/reactorlab/README.md) · [.docx](1-dashboard/reactorlab/Practica_ReactorLab_NodeRED_ES.docx) | [guía](1-dashboard/atomlab/README.md) · [.docx](1-dashboard/atomlab/Practica_AtomLab_NodeRED_ES.docx) |
-| **2 · Node-RED + ThingsBoard** | Node-RED como pasarela: dispositivo, telemetría y atributos, panel, reglas de alarma, inactividad, RPC y API de gateway | [guía](2-thingsboard/aerolab/README.md) · [.docx](2-thingsboard/aerolab/Practica_AeroLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/oceanlab/README.md) · [.docx](2-thingsboard/oceanlab/Practica_OceanLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/solarlab/README.md) · [.docx](2-thingsboard/solarlab/Practica_SolarLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/reactorlab/README.md) · [.docx](2-thingsboard/reactorlab/Practica_ReactorLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/atomlab/README.md) · [.docx](2-thingsboard/atomlab/Practica_AtomLab_ThingsBoard_ES.docx) |
-| **3 · Reto** | La misma integración, menos guiada, con criterios de evaluación y rúbrica | [guion](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) · [solución](3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) · [solución](3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) | — | — |
+| Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) | ReactorLab (protocolos web) | AtomLab (OPC UA) | Fundición (OPC UA) |
+|---|---|---|---|---|---|---|---|
+| **1 · Node-RED + Dashboard** | Adquirir datos con Node-RED y construir un dashboard con alarmas (Dashboard 2.0) | [guía](1-dashboard/aerolab/README.md) · [.docx](1-dashboard/aerolab/Practica_AeroLab_NodeRED_ES.docx) | [guía](1-dashboard/oceanlab/README.md) · [.docx](1-dashboard/oceanlab/Practica_OceanLab_NodeRED_ES.docx) | [guía](1-dashboard/solarlab/README.md) · [.docx](1-dashboard/solarlab/Practica_SolarLab_NodeRED_ES.docx) | [guía](1-dashboard/reactorlab/README.md) · [.docx](1-dashboard/reactorlab/Practica_ReactorLab_NodeRED_ES.docx) | [guía](1-dashboard/atomlab/README.md) · [.docx](1-dashboard/atomlab/Practica_AtomLab_NodeRED_ES.docx) | [guía](1-dashboard/fundicion/README.md) · [.docx](1-dashboard/fundicion/Practica_Fundicion_NodeRED_ES.docx) |
+| **2 · Node-RED + ThingsBoard** | Node-RED como pasarela: dispositivo, telemetría y atributos, panel, reglas de alarma, inactividad, RPC y API de gateway | [guía](2-thingsboard/aerolab/README.md) · [.docx](2-thingsboard/aerolab/Practica_AeroLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/oceanlab/README.md) · [.docx](2-thingsboard/oceanlab/Practica_OceanLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/solarlab/README.md) · [.docx](2-thingsboard/solarlab/Practica_SolarLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/reactorlab/README.md) · [.docx](2-thingsboard/reactorlab/Practica_ReactorLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/atomlab/README.md) · [.docx](2-thingsboard/atomlab/Practica_AtomLab_ThingsBoard_ES.docx) | [guía](2-thingsboard/fundicion/README.md) · [.docx](2-thingsboard/fundicion/Practica_Fundicion_ThingsBoard_ES.docx) |
+| **3 · Reto** | La misma integración, menos guiada, con criterios de evaluación y rúbrica | [guion](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) · [solución](3-reto/aerolab-modbus/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) · [solución](3-reto/oceanlab-mqtt/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) · [solución](3-reto/solarlab-opcua/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/reactorlab-web/practica-node-red-thingsboard.md) · [solución](3-reto/reactorlab-web/solucion-practica-node-red-thingsboard.md) | [guion](3-reto/atomlab-opcua/practica-node-red-thingsboard.md) · [solución](3-reto/atomlab-opcua/solucion-practica-node-red-thingsboard.md) | — |
 
 ## ReactorLab: las mismas ideas con protocolos web
 
@@ -33,6 +33,33 @@ Las prácticas están organizadas en **tres series** que se pueden hacer en orde
 | 11 | **Escritura OPC UA**: consigna y pulsador AZ-5, rechazo de valores no válidos | **Dosímetros** como dispositivos (API de gateway) y regla en el perfil `dosimetro` |
 | 12 | **Caja negra**: suscripción a 250 ms | Órdenes RPC → escritura OPC UA (`setPotencia`, `setBombas`, `az5`) |
 | 13 | Reconstruir el **26-04-1986** y comparar el pico registrado con el real | **Registrador por lotes** con `ts` de la pasarela y el mismo experimento |
+
+## Fundición: una planta completa con 11 activos por OPC UA
+
+| Parte | 1 · Dashboard | 2 · ThingsBoard |
+|---|---|---|
+| 1–2 | **Explorar** el espacio de direcciones (BROWSE) y suscribirse a la planta | Suscripción a las 98 variables de los 11 activos y agrupado por activo |
+| 3–4 | Indicadores de planta (OEE, producción, energía), hornos, colada y acabado | **Pasarela** y un dispositivo por máquina con su perfil (`horno`, `prensa`, `robot`…) |
+| 5–6 | Tabla con el estado de todos los activos, organizar el dashboard | **Jerarquía de activos**: `Planta Norte` → zonas → máquinas (relación `Contains`) y primer panel |
+| 7–8 | Histórico; incidencias inyectadas | Histórico; **reglas en los perfiles** (horno, desmoldeo, escáner, OEE) |
+| 9–10 | Alarma con contexto (vibración del desmoldeo solo en marcha), estado de la planta y comunicación | Alarmas **propagadas** a la planta, incidencias y comunicación |
+| 11 | Inyector de averías por escritura OPC UA (profesorado) | Gestión de alarmas (reconocer, asignar, comentar) |
+| 12 | **Descubrimiento automático** del inventario (125 variables) | Navegar por la jerarquía |
+| 13 | Producción calculada: moldes por hora | Comparar las máquinas |
+
+Las averías de la Fundición (`ns=1;s=Mantenimiento.Averia`, 0–4) se describen en [`simuladores/fundicion`](../simuladores/fundicion/README.md#averías-para-las-prácticas).
+
+## Retos (serie 3)
+
+| Reto | Protocolo | Qué hay que construir |
+|---|---|---|
+| [AeroLab](3-reto/aerolab-modbus/practica-node-red-thingsboard.md) | Modbus TCP | Registros a unidades de ingeniería, cuadro de mando, alarma de mantenimiento, diagnóstico de avería y escritura Modbus controlada |
+| [OceanLab](3-reto/oceanlab-mqtt/practica-node-red-thingsboard.md) | MQTT | Suscripción y validación de una boya, comparación de QoS, alarma meteorológica, tormenta y desconexión; ampliación con la flota por la API de gateway |
+| [SolarLab](3-reto/solarlab-opcua/practica-node-red-thingsboard.md) | OPC UA | Transformación con tabla de correspondencias, diagnóstico de averías por firma y mandos |
+| [ReactorLab](3-reto/reactorlab-web/practica-node-red-thingsboard.md) | REST, WebSocket, webhooks | Pasarela HTTP, eventos por webhook, RPC con enclavamientos y reglas sobre válvulas y coste |
+| [AtomLab](3-reto/atomlab-opcua/practica-node-red-thingsboard.md) | OPC UA | Enclavamientos de seguridad en las órdenes, caja negra, reglas de ORM y protecciones, prueba del 26-04-1986 |
+
+Cada reto trae un **flujo inicial** (`flows/*-starter-flow.json`) para el alumnado y la **solución** con el flujo resuelto, las firmas de las averías y la rúbrica.
 
 ## Serie 2 · Contenido de cada práctica
 
@@ -67,7 +94,7 @@ Los guiones de las series 1 y 3 están escritos también para instalaciones suel
 | API de ReactorLab | `http://reactorlab:8030` (REST), `ws://reactorlab:8030/ws`, clave `X-API-Key: reactorlab` |
 | URL de webhooks hacia Node-RED | `http://nodered:1880/...` |
 | API HTTP de ThingsBoard | `http://thingsboard:8080/api/v1/{TOKEN}/...` |
-| Endpoint OPC UA Fundición (ampliación) | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
+| Endpoint OPC UA Fundición | `opc.tcp://fundicion-opcua:4841/UA/Fundicion` |
 | MQTT de ThingsBoard | host `thingsboard`, puerto `1883`, access token como *Username* |
 | Web de ThingsBoard | `http://localhost:8080` (`tenant@thingsboard.org` / `tenant`) |
 | Dashboard 2.0 | `http://localhost:1880/dashboard` |
