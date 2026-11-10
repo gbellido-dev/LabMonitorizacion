@@ -5,8 +5,9 @@ Cada lectura que llega se usa dos veces, en este orden ("prequential"):
   2. si la lectura trae el valor real (objetivo), el modelo APRENDE de ella.
 Así el error que se publica es siempre el de datos que el modelo no había visto.
 
-Un detector ADWIN vigila ese error: si EMPEORA de forma significativa, hay
-**deriva** (la máquina ya no se comporta como cuando el modelo aprendió).
+Un detector ADWIN vigila ese error: si su media cambia de forma significativa
+(regresión: el error con signo; clasificación: la tasa de fallos sube), hay
+**deriva**: la máquina ya no se comporta como cuando el modelo aprendió.
 
 Para anomalías se usa un detector de vecinos cercanos con ventana: recuerda
 las últimas lecturas normales y mide lo lejos que queda cada lectura nueva de
@@ -82,7 +83,7 @@ class ModeloContinuo:
         self.entradas = list(entradas or [])
         self.modelo = _crear(tipo)
         self.metrica = utils.Rolling(metrics.MAE() if tipo == "regresion" else metrics.Accuracy(), window_size=200)
-        self.adwin = drift.ADWIN(delta=0.002)
+        self.adwin = drift.ADWIN(delta=0.00002)       # poco sensible: evita derivas falsas por el ruido
         self.n = 0
         self.derivas = 0
         self.ultima_deriva: str | None = None
@@ -119,13 +120,19 @@ class ModeloContinuo:
             if y is not None:
                 if pred is not None and self.n >= 20:
                     self.metrica.update(y, pred)
-                    error = abs(float(y) - float(pred)) if self.tipo == "regresion" else float(y != pred)
                     if self.tipo == "regresion":
+                        # error CON SIGNO: si la máquina produce sistemáticamente más (o menos) de lo que el
+                        # modelo espera, la media cambia aunque el error absoluto medio apenas varíe
+                        error = float(y) - float(pred)
                         res["error"] = round(error, 4)
-                    antes = self.adwin.estimation
-                    self.adwin.update(error)
-                    # deriva = el error EMPEORA, y solo cuando el modelo ya ha aprendido lo básico
-                    if self.adwin.drift_detected and self.n >= 300 and self.adwin.estimation > antes:
+                        self.adwin.update(error)
+                        cambio = self.adwin.drift_detected
+                    else:
+                        antes = self.adwin.estimation
+                        self.adwin.update(float(y != pred))
+                        cambio = self.adwin.drift_detected and self.adwin.estimation > antes   # acierta menos
+                    # solo cuando el modelo ya ha aprendido lo básico
+                    if cambio and self.n >= 600:
                         deriva = True
                         self.derivas += 1
                         self.ultima_deriva = datetime.now().isoformat(timespec="seconds")

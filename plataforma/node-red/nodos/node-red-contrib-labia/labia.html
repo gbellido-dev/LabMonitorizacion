@@ -184,7 +184,8 @@
         <li>clasificación: <code>clase</code> y <code>acierto</code></li>
         <li>anomalías: <code>anomalia</code> y <code>puntuacion</code> (1 = tan raro como el 1 % más raro de lo
             normal; avisa por encima del <b>umbral</b>). Solo aprende de las lecturas que considera normales.</li>
-        <li>siempre: <code>deriva</code> (true en la lectura en la que el error empeora de forma significativa),
+        <li>siempre: <code>deriva</code> (true en la lectura en la que el comportamiento cambia: en regresión, la máquina
+            empieza a dar sistemáticamente más o menos de lo que predice el modelo; en clasificación, falla más),
             <code>derivas</code> y <code>aprendidas</code></li>
     </ul>
     <p><code>msg.aprender = false</code> hace que esa lectura solo se prediga. Para empezar de cero:

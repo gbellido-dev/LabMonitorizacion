@@ -28,6 +28,12 @@ module.exports = function (RED) {
         return s ? s.url : "http://ia:8000";
     }
 
+    // "2026-11-10T19:31:00.267", hora local sin zona (como la que pone el servicio)
+    function horaLocal() {
+        const d = new Date();
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, -1);
+    }
+
     function esObjeto(p) {
         return p !== null && typeof p === "object";
     }
@@ -59,7 +65,10 @@ module.exports = function (RED) {
             const conjunto = msg.conjunto || n.conjunto;
             if (!conjunto) { done(new Error("Indica el conjunto de datos (propiedad del nodo o msg.conjunto)")); return; }
             if (!esObjeto(msg.payload)) { done(new Error("msg.payload debe ser un objeto con las lecturas")); return; }
-            const filas = Array.isArray(msg.payload) ? msg.payload : [msg.payload];
+            // cada lectura con SU hora (si no la trae): con lotes, el servicio recibiría todas a la vez
+            const ahora = horaLocal();
+            const filas = (Array.isArray(msg.payload) ? msg.payload : [msg.payload])
+                .map((f) => (f.ts === undefined ? Object.assign({ ts: ahora }, f) : f));
             pendientes = pendientes.concat(filas);
             if (pendientes.length < lote) {
                 node.status({ fill: "grey", shape: "ring", text: `${pendientes.length}/${lote} en espera` });

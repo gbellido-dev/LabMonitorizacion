@@ -150,7 +150,7 @@
       "421f3ea4-9c49-2aa3-7668-0de22e488d04": {
         "typeFullFqn": "system.cards.value_card",
         "type": "latest",
-        "sizeX": 5,
+        "sizeX": 4,
         "sizeY": 3,
         "config": {
           "datasources": [
@@ -291,7 +291,7 @@
         "col": 0,
         "id": "421f3ea4-9c49-2aa3-7668-0de22e488d04"
       },
-      "b9ccb1c0-459e-1370-31d6-fbed7253f7ef": {
+      "1bb1a9ea-56b3-d5d6-8fc4-7e5a06abec79": {
         "typeFullFqn": "system.cards.value_card",
         "type": "latest",
         "sizeX": 4,
@@ -433,12 +433,12 @@
         },
         "row": 0,
         "col": 0,
-        "id": "b9ccb1c0-459e-1370-31d6-fbed7253f7ef"
+        "id": "1bb1a9ea-56b3-d5d6-8fc4-7e5a06abec79"
       },
-      "71038455-461b-d5a0-3cdb-733f853009bc": {
+      "03a8dcee-14b5-982d-e674-9bbfcdd57fad": {
         "typeFullFqn": "system.cards.value_card",
         "type": "latest",
-        "sizeX": 4,
+        "sizeX": 3,
         "sizeY": 3,
         "config": {
           "datasources": [
@@ -577,9 +577,9 @@
         },
         "row": 0,
         "col": 0,
-        "id": "71038455-461b-d5a0-3cdb-733f853009bc"
+        "id": "03a8dcee-14b5-982d-e674-9bbfcdd57fad"
       },
-      "992a1e79-785e-ee5d-a1a9-6fcf5be51ceb": {
+      "3bad21b1-decf-9b33-3795-583ac7d43246": {
         "typeFullFqn": "system.cards.value_card",
         "type": "latest",
         "sizeX": 4,
@@ -721,12 +721,12 @@
         },
         "row": 0,
         "col": 0,
-        "id": "992a1e79-785e-ee5d-a1a9-6fcf5be51ceb"
+        "id": "3bad21b1-decf-9b33-3795-583ac7d43246"
       },
-      "8cc646f0-310c-865a-0a6a-e3b19d8db563": {
+      "b13c6c00-1c93-1200-47b3-28441651312a": {
         "typeFullFqn": "system.cards.value_card",
         "type": "latest",
-        "sizeX": 3,
+        "sizeX": 5,
         "sizeY": 3,
         "config": {
           "datasources": [
@@ -864,7 +864,7 @@
         },
         "row": 0,
         "col": 0,
-        "id": "8cc646f0-310c-865a-0a6a-e3b19d8db563"
+        "id": "b13c6c00-1c93-1200-47b3-28441651312a"
       },
       "e7c1c613-20f4-a000-03e3-978a9068aa0d": {
         "typeFullFqn": "system.time_series_chart",
@@ -1847,34 +1847,34 @@
                 "col": 0
               },
               "421f3ea4-9c49-2aa3-7668-0de22e488d04": {
-                "sizeX": 5,
+                "sizeX": 4,
                 "sizeY": 3,
                 "row": 0,
                 "col": 4
               },
-              "b9ccb1c0-459e-1370-31d6-fbed7253f7ef": {
+              "1bb1a9ea-56b3-d5d6-8fc4-7e5a06abec79": {
                 "sizeX": 4,
                 "sizeY": 3,
                 "row": 0,
-                "col": 9
+                "col": 8
               },
-              "71038455-461b-d5a0-3cdb-733f853009bc": {
-                "sizeX": 4,
-                "sizeY": 3,
-                "row": 0,
-                "col": 13
-              },
-              "992a1e79-785e-ee5d-a1a9-6fcf5be51ceb": {
-                "sizeX": 4,
-                "sizeY": 3,
-                "row": 0,
-                "col": 17
-              },
-              "8cc646f0-310c-865a-0a6a-e3b19d8db563": {
+              "03a8dcee-14b5-982d-e674-9bbfcdd57fad": {
                 "sizeX": 3,
                 "sizeY": 3,
                 "row": 0,
-                "col": 21
+                "col": 12
+              },
+              "3bad21b1-decf-9b33-3795-583ac7d43246": {
+                "sizeX": 4,
+                "sizeY": 3,
+                "row": 0,
+                "col": 15
+              },
+              "b13c6c00-1c93-1200-47b3-28441651312a": {
+                "sizeX": 5,
+                "sizeY": 3,
+                "row": 0,
+                "col": 19
               },
               "e7c1c613-20f4-a000-03e3-978a9068aa0d": {
                 "sizeX": 14,

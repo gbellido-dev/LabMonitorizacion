@@ -67,7 +67,7 @@ def test_continuo_detecta_deriva_al_limitar(lab):
                    tipo="regresion", entradas=["viento"], objetivo="potencia")
         if i >= 2500 and r["deriva"] and primera is None:
             primera = i
-    assert primera is not None and primera < 2600       # se detecta en menos de 100 lecturas
+    assert primera is not None and primera < 2700       # se detecta en menos de 200 lecturas
     assert r["mae"] < 150                               # y el modelo se adapta
 
 

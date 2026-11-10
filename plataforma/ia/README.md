@@ -79,8 +79,10 @@ Errores: `404` si el modelo o el conjunto no existen (con la lista de los que ha
 - **Regresión y clasificación**: árboles de Hoeffding adaptativos (River). Cada lectura se usa primero para
   **predecir** y después para **aprender**, así el error publicado (`mae`, media de las últimas 200) es siempre sobre
   datos nuevos.
-- **Deriva**: un detector ADWIN vigila el error. Avisa (`deriva: true` en esa lectura) cuando el error **empeora** de
-  forma significativa, a partir de 300 lecturas aprendidas.
+- **Deriva**: un detector ADWIN vigila el error. En regresión, el error **con signo** (real − predicho): avisa
+  (`deriva: true` en esa lectura) cuando la máquina empieza a producir sistemáticamente más o menos de lo esperado,
+  aunque el error absoluto medio apenas cambie. En clasificación, cuando la tasa de fallos sube. Solo a partir de
+  600 lecturas aprendidas (antes el modelo aún está aprendiendo lo básico).
 - **Anomalías**: distancia a los 10 vecinos más cercanos entre las últimas 1000 lecturas normales. La
   `puntuacion` se expresa respecto a lo habitual (1 = como el 1 % más raro de lo normal) y avisa por encima del
   `umbral` (1,5). Solo aprende de lo que considera normal.
