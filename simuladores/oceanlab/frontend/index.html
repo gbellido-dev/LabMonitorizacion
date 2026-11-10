@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#031019" />
+    <meta name="description" content="Simulador didáctico de boyas meteorológicas y protocolo MQTT" />
+    <title>OceanLab · Simulador MQTT</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="OceanLab, inicio">
+        <span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>OceanLab</strong><small>Simulador MQTT</small></span>
+      </a>
+      <div class="topbar-center"><span class="live-dot"></span><span id="connection-label">Conectando con el laboratorio…</span></div>
+      <nav><a href="#laboratorio">Laboratorio</a><a href="#guia">Guía MQTT</a><button id="fullscreen-button" class="ghost-button">Vista aula</button></nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Monitorización de máquinas · Gemelo digital</p>
+          <h1>El océano,<br><em>conectado.</em></h1>
+          <p>Explora una red mundial de boyas meteorológicas, observa su telemetría y aprende cómo MQTT transporta datos desde el sensor hasta el sistema de monitorización.</p>
+          <div class="hero-stats">
+            <div><strong id="fleet-count">96</strong><span>boyas activas</span></div>
+            <div><strong>32</strong><span>regiones marítimas</span></div>
+            <div><strong id="message-rate">42</strong><span>mensajes/min</span></div>
+          </div>
+        </div>
+        <div class="globe-stage">
+          <canvas id="globe-canvas" aria-label="Globo terrestre 3D con estaciones meteorológicas"></canvas>
+          <div class="globe-caption"><span>Arrastra para rotar</span><span>Rueda para acercar</span></div>
+          <div class="ocean-legend"><span class="legend-dot online"></span> En línea <span class="legend-dot warning"></span> Alerta <span class="legend-dot offline"></span> Sin conexión</div>
+        </div>
+      </section>
+
+      <section class="workspace" id="laboratorio">
+        <aside class="fleet-panel">
+          <div class="section-heading"><div><p class="eyebrow">Red mundial</p><h2>Estaciones</h2></div><span class="count-pill" id="filtered-count">96</span></div>
+          <label class="search"><span>⌕</span><input id="buoy-search" type="search" placeholder="Buscar boya u océano" /></label>
+          <div class="filters" id="ocean-filters">
+            <button class="active" data-ocean="all">Todas</button><button data-ocean="Atlántico">Atlántico</button><button data-ocean="Pacífico">Pacífico</button><button data-ocean="Índico">Índico</button><button data-ocean="Polar">Polar</button><button data-ocean="Mares">Mares</button>
+          </div>
+          <div class="buoy-list" id="buoy-list"></div>
+        </aside>
+
+        <section class="detail-panel">
+          <div class="detail-header">
+            <div><p class="eyebrow" id="selected-ocean">Atlántico Norte</p><h2 id="selected-name">Estación Atlántico 01</h2><p class="coordinates" id="selected-coordinates">38.0000° N · 37.0000° O</p></div>
+            <div class="status-badge" id="selected-status"><span></span> En línea</div>
+          </div>
+          <div class="metrics-grid">
+            <article class="metric featured"><span>Temperatura del agua</span><strong id="water-value">18,4 <small>°C</small></strong><div class="sparkline" id="temperature-chart"></div></article>
+            <article class="metric"><span>Altura de ola</span><strong id="wave-value">1,82 <small>m</small></strong><div class="meter"><i id="wave-meter"></i></div></article>
+            <article class="metric"><span>Velocidad del viento</span><strong id="wind-value">8,2 <small>m/s</small></strong><small id="wind-direction">↗ 224° SO</small></article>
+            <article class="metric"><span>Presión atmosférica</span><strong id="pressure-value">1.012 <small>hPa</small></strong><small class="trend">Estable</small></article>
+            <article class="metric"><span>Batería</span><strong id="battery-value">92 <small>%</small></strong><div class="meter battery"><i id="battery-meter"></i></div></article>
+            <article class="metric"><span>Señal</span><strong id="signal-value">−62 <small>dBm</small></strong><small class="trend">Buena cobertura</small></article>
+          </div>
+          <div class="fault-strip">
+            <div><p class="eyebrow">Inyección de incidencias</p><span>Comprueba alarmas, LWT y pérdida de telemetría</span></div>
+            <div><button data-fault="storm">Simular tormenta</button><button data-fault="battery">Batería baja</button><button data-fault="offline">Desconectar</button><button data-fault="reset" class="subtle">Restablecer</button></div>
+          </div>
+        </section>
+      </section>
+
+      <section class="mqtt-lab" id="guia">
+        <div class="lab-heading">
+          <div><p class="eyebrow">Laboratorio de comunicaciones</p><h2>MQTT bajo el microscopio</h2><p>Observa el flujo publicador → broker → suscriptor y modifica los parámetros del protocolo en tiempo real.</p></div>
+          <button id="simulation-toggle" class="primary-button"><span>Ⅱ</span> Pausar simulación</button>
+        </div>
+        <div class="mqtt-flow" aria-label="Flujo de mensajes MQTT">
+          <div class="flow-node"><span class="node-icon buoy-icon">⌁</span><div><small>PUBLICADOR</small><strong>Boya seleccionada</strong><code id="publisher-id">BOY-001</code></div></div>
+          <div class="flow-link"><i></i><span id="publish-label">PUBLISH · QoS 0</span></div>
+          <div class="flow-node broker"><span class="node-icon">◇</span><div><small>BROKER MQTT</small><strong>localhost:1883</strong><code>Conexión anónima</code></div></div>
+          <div class="flow-link"><i></i><span>ENTREGA</span></div>
+          <div class="flow-node"><span class="node-icon">⌁</span><div><small>SUSCRIPTOR</small><strong>Panel de aula</strong><code>oceanlab/#</code></div></div>
+        </div>
+        <div class="lab-grid">
+          <article class="settings-card">
+            <div class="card-title"><span>01</span><div><strong>Configura la publicación</strong><small>Cambia el comportamiento del cliente MQTT</small></div></div>
+            <label>Topic <code id="topic-value">oceanlab/buoys/BOY-001/telemetry</code></label>
+            <div class="setting-row"><label>QoS<select id="qos-control"><option value="0">0 · Como máximo una vez</option><option value="1">1 · Al menos una vez</option><option value="2">2 · Exactamente una vez</option></select></label><label>Intervalo<select id="interval-control"><option value="1">1 segundo</option><option value="2" selected>2 segundos</option><option value="5">5 segundos</option><option value="10">10 segundos</option></select></label></div>
+            <label class="switch-line"><span><strong>Mensaje retenido</strong><small>El broker conserva el último valor del topic</small></span><input id="retain-control" type="checkbox" /></label>
+          </article>
+          <article class="payload-card">
+            <div class="card-title"><span>02</span><div><strong>Inspecciona el mensaje</strong><small>Payload JSON publicado por la boya</small></div><span class="live-chip">● EN DIRECTO</span></div>
+            <pre id="payload-view"></pre>
+          </article>
+          <article class="events-card">
+            <div class="card-title"><span>03</span><div><strong>Traza del broker</strong><small>Últimos intercambios observados</small></div><button id="clear-events">Limpiar</button></div>
+            <div class="event-list" id="event-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lesson">
+        <p class="eyebrow">Conceptos clave</p><h2>Una práctica, cuatro ideas esenciales</h2>
+        <div class="lesson-grid">
+          <article><span>01</span><h3>Topics jerárquicos</h3><p>Organiza los mensajes por planta, activo y variable. Usa <code>+</code> y <code>#</code> para suscribirte con comodines.</p></article>
+          <article><span>02</span><h3>Calidad de servicio</h3><p>Compara QoS 0, 1 y 2. Más garantía implica más intercambios, latencia y consumo.</p></article>
+          <article><span>03</span><h3>Publicar / suscribirse</h3><p>Los equipos no se conocen entre sí: el broker desacopla productores y consumidores.</p></article>
+          <article><span>04</span><h3>Estado y alarmas</h3><p>Retained y Last Will ayudan a conocer el último valor y detectar dispositivos desconectados.</p></article>
+        </div>
+      </section>
+    </main>
+    <footer><div class="brand"><span class="brand-symbol mini"><i></i><i></i><i></i></span><span><strong>OceanLab</strong><small>Formación para la industria conectada</small></span></div><p>Especialización en Digitalización del Mantenimiento · Monitorización de Máquinas</p></footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
