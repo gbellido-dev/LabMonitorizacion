@@ -480,6 +480,32 @@ def salud() -> dict:
     return {"status": "ok", "secuencia": planta.secuencia}
 
 
+# ---------------------------------------------------------------------- vista 3D (GRFICS)
+VISTA3D = Path(__file__).resolve().parents[2] / "vista3d"
+
+
+@app.get("/data/index.php", include_in_schema=False)
+@app.get("/3d/data/index.php", include_in_schema=False)
+def datos_grfics() -> dict:
+    """Endpoint compatible con GRFICS: la escena 3D de Unity lo consulta cada pocos segundos."""
+    return planta.formato_grfics()
+
+
+if VISTA3D.is_dir():
+    @app.get("/LowQuality.mp4", include_in_schema=False)
+    @app.get("/3d/LowQuality.mp4", include_in_schema=False)
+    def video_3d() -> FileResponse:
+        ruta = VISTA3D / "LowQuality.mp4"
+        if not ruta.is_file():
+            raise HTTPException(404, "Vídeo de la vista 3D no instalado")
+        return FileResponse(ruta, media_type="video/mp4")
+
+    @app.get("/3d", include_in_schema=False)
+    def vista_3d_barra() -> Response:
+        return Response(status_code=307, headers={"Location": "/3d/"})
+
+    app.mount("/3d", StaticFiles(directory=VISTA3D, html=True), name="vista3d")
+
 FRONTEND = Path(__file__).resolve().parents[2] / "frontend"
 if FRONTEND.is_dir():
     app.mount("/static", StaticFiles(directory=FRONTEND), name="static")

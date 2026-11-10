@@ -15,6 +15,7 @@ Cambios respecto al original:
 - Control integrado (los lazos del PLC) con PI sintonizados en unidades de ingeniería.
 - Corregidos dos errores del original: el analizador de purga nunca entregaba la muestra retardada y el estado estacionario usaba un índice fuera de rango para la purga.
 - Interfaz y API nuevas, en castellano.
+- Se conserva la **visualización 3D original de GRFICS** (Unity WebGL) en `http://localhost:8030/3d/`, movida por los datos de ReactorLab a través de un endpoint compatible (`/data/index.php`, mismo JSON que GRFICS).
 
 ## El proceso
 
@@ -81,7 +82,7 @@ Las **órdenes** (PUT/POST/DELETE) necesitan la cabecera `X-API-Key` (por defect
 | `NIVEL_ALTO` / `NIVEL_BAJO` | nivel > 80 % / < 15 % | MAJOR |
 | `PRODUCCION_BAJA` | producto < 80 kmol/h | WARNING |
 
-Eventos que se envían por SSE y webhooks: `alarma.activada`, `alarma.borrada`, `consigna.cambiada`, `estado.modo`, `estado.marcha`, `estado.paro_emergencia`, `averia.inyectada`, `averia.retirada`, `planta.reiniciada`. Un webhook se suscribe por prefijo (`"alarma"`, `"estado"`…). Con `"formato": "plano"` el cuerpo llega sin anidar (`alarma_codigo`, `alarma_valor`…). Con `"secreto"` se firma con HMAC-SHA256 en la cabecera `X-ReactorLab-Firma`.
+Eventos que se envían por SSE y webhooks: `alarma.activada`, `alarma.borrada`, `consigna.cambiada`, `estado.modo`, `estado.marcha`, `estado.paro_emergencia`, `averia.inyectada`, `averia.retirada`, `planta.reiniciada`. Los webhooks se guardan en el volumen `/data` (sobreviven a un reinicio) y registrar dos veces la misma URL la actualiza en lugar de duplicarla (200 en vez de 201). Listarlos (`GET /api/v1/webhooks`) también requiere la clave, y los tokens que vayan en la URL se muestran enmascarados. Un webhook se suscribe por prefijo (`"alarma"`, `"estado"`…). Con `"formato": "plano"` el cuerpo llega sin anidar (`alarma_codigo`, `alarma_valor`…). Con `"secreto"` se firma con HMAC-SHA256 en la cabecera `X-ReactorLab-Firma`.
 
 ### Averías (para el profesorado)
 
@@ -95,6 +96,14 @@ Eventos que se envían por SSE y webhooks: `alarma.activada`, `alarma.borrada`, 
 | `sensor` | `modo` deriva / congelado / ruido / perdida | `{"tipo":"sensor","objetivo":"presion","modo":"deriva","valor":50}` |
 
 La API siempre entrega los valores **medidos**: con un sensor averiado, el cliente ve el valor falso, igual que en una planta real.
+
+## Vista 3D (GRFICS)
+
+`http://localhost:8030/3d/` carga la escena Unity WebGL original de GRFICSv3 (nave con el reactor, tuberías y las cuatro válvulas con su posición). Se mueve con el ratón y WASD; TAB abre las opciones y ESC devuelve el cursor.
+
+- Sus binarios ocupan unos **230 MB**, demasiado para el repositorio. El `Dockerfile` los descarga del commit fijado de GRFICSv3 y comprueba su SHA-256 ([`vista3d/descargar.py`](vista3d/descargar.py)). Sin Internet, o con `--build-arg VISTA_3D=0`, la imagen se construye sin ellos y la página lo indica; el resto de ReactorLab funciona igual.
+- El navegador descarga la escena una vez y la guarda en su caché (IndexedDB).
+- La escena consulta `GET /data/index.php`, que devuelve el estado en el formato de GRFICS (`outputs`, `state`, `measured`).
 
 ## Puesta en marcha
 

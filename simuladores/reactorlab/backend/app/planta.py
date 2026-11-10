@@ -124,6 +124,24 @@ class Planta:
             "consignas": self.consignas(),
         }
 
+    def formato_grfics(self) -> dict:
+        """Estado en el formato JSON de GRFICS (lo que espera su visualización 3D en Unity)."""
+        p, m = self.proceso, self.proceso.medidas
+        reales = {"f1_flow": p.caudal["f1"], "f2_flow": p.caudal["f2"], "purge_flow": p.caudal["purga"],
+                  "product_flow": p.caudal["producto"], "pressure": p.presion, "liquid_level": p.nivel,
+                  "A_in_purge": p.y_purga[0], "B_in_purge": p.y_purga[1], "C_in_purge": p.y_purga[2],
+                  "cost": p.coste}
+        medidos = {"f1_flow": m["caudal_f1"], "f2_flow": m["caudal_f2"], "purge_flow": m["caudal_purga"],
+                   "product_flow": m["caudal_producto"], "pressure": m["presion"], "liquid_level": m["nivel"],
+                   "A_in_purge": m["a_purga"], "B_in_purge": m["b_purga"], "C_in_purge": m["c_purga"]}
+        nombres = {"f1": "f1", "f2": "f2", "purga": "purge", "producto": "product"}
+        estado = {"e_stop": self.control.paro_emergencia or not self.control.en_marcha}
+        for n, g in nombres.items():
+            v = p.valvulas[n]
+            estado.update({f"{g}_valve_pos": v.pos, f"{g}_stuck": v.atascada,
+                           f"{g}_slew_rate": v.velocidad_max, f"{g}_cv_scale": v.cv_factor})
+        return {"process": "simpleTE", "outputs": reales, "state": estado, "measured": medidos}
+
     # ------------------------------------------------------------------ alarmas
     def _evento(self, tipo: str, **datos) -> dict:
         ev = {"evento": tipo, "timestamp": ahora_iso(), "planta": "ReactorLab", **datos}

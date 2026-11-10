@@ -17,6 +17,7 @@ code { font-family: var(--mono); font-size: 12px; background: #0b121b; padding: 
 .pildora { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--borde); font-size: 12px; color: var(--suave); }
 .pildora.ok { color: var(--ok); border-color: #1f5132; } .pildora.aviso { color: var(--aviso); border-color: #5c4310; }
 .pildora.mal { color: #fff; background: var(--mal); border-color: var(--mal); }
+.pildora.enlace { color: var(--acento); border-color: #1e4a63; text-decoration: none; }
 .reloj { color: var(--suave); font-size: 12px; margin-left: 6px; }
 main { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; padding: 14px 16px 30px; max-width: 1500px; margin: 0 auto; }
 .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px; padding: 14px; min-width: 0; }

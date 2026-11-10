@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReactorLab · Planta 3D</title>
+<style>
+  :root { --fondo: #0d1520; --texto: #e3ebf5; --suave: #8ea1b8; --acento: #38bdf8; --borde: #233246; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px 16px; border-bottom: 1px solid var(--borde); }
+  header a { color: var(--acento); text-decoration: none; } header small { color: var(--suave); }
+  main { position: relative; height: calc(100% - 52px); }
+  #unity { position: absolute; inset: 0; }
+  #unity canvas { width: 100% !important; height: 100% !important; display: block; }
+  .progress { position: absolute; left: 50%; top: 50%; width: min(60vw, 420px); height: 10px; transform: translate(-50%, -50%); background: #1b2a3c; border-radius: 5px; overflow: hidden; }
+  .progress .full { height: 100%; background: var(--acento); float: left; } .progress .empty { float: right; height: 100%; }
+  .logo { display: none; }
+  .aviso { position: absolute; left: 50%; top: calc(50% + 34px); transform: translateX(-50%); color: var(--suave); text-align: center; max-width: 92vw; }
+  .falta { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 24px; }
+  .falta div { max-width: 560px; background: #141f2d; border: 1px solid var(--borde); border-radius: 10px; padding: 18px; }
+  code { background: #0b121b; padding: 1px 5px; border-radius: 4px; color: #bae6fd; }
+  .boton { color: var(--texto); background: #1b2a3c; border: 1px solid #2f445e; border-radius: 7px; padding: 5px 10px; cursor: pointer; font: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <div><b>ReactorLab · Planta 3D</b> <small>Visualización WebGL original de GRFICS (Fortiphyd, GPL-3.0) movida por los datos de ReactorLab</small></div>
+  <div><button class="boton" onclick="unityInstance && unityInstance.SetFullscreen(1)">Pantalla completa</button> · <a href="/">← Volver al sinóptico</a></div>
+</header>
+<main>
+  <div id="unity"></div>
+  <p class="aviso" id="aviso">Cargando la planta 3D (≈ 220 MB la primera vez; después queda en la caché del navegador)…<br>
+     Con la escena cargada: <b>clic</b> para moverse (WASD + ratón), <b>TAB</b> opciones, <b>ESC</b> recuperar el cursor.</p>
+  <div class="falta" id="falta"><div>
+    <h3>La vista 3D no está instalada</h3>
+    <p>Los modelos 3D de GRFICS (≈ 230 MB) se descargan al construir la imagen Docker. Esta imagen se construyó sin ellos (sin conexión o con <code>VISTA_3D=0</code>).</p>
+    <p>Para instalarlos: <code>docker compose build --no-cache reactorlab</code> con Internet. El resto de ReactorLab funciona igual.</p>
+  </div></div>
+</main>
+<script src="Build/UnityLoader.js"></script>
+<script>
+  var unityInstance = null;
+  function progreso(instancia, p) {
+    if (!instancia.Module) return;
+    if (!instancia.progress) {
+      instancia.progress = document.createElement("div"); instancia.progress.className = "progress";
+      instancia.progress.full = document.createElement("div"); instancia.progress.full.className = "full";
+      instancia.progress.empty = document.createElement("div"); instancia.progress.empty.className = "empty";
+      instancia.progress.append(instancia.progress.full, instancia.progress.empty);
+      instancia.container.appendChild(instancia.progress);
+    }
+    instancia.progress.full.style.width = (100 * p) + "%";
+    instancia.progress.empty.style.width = (100 * (1 - p)) + "%";
+    if (p === 1) { instancia.progress.style.display = "none"; document.getElementById("aviso").style.display = "none"; }
+  }
+  fetch("Build/ChemicalPlant.data.unityweb", { method: "HEAD" }).then((r) => {
+    if (!r.ok) throw new Error("sin datos 3D");
+    unityInstance = UnityLoader.instantiate("unity", "Build/ChemicalPlant.json", { onProgress: progreso });
+  }).catch(() => {
+    document.getElementById("aviso").style.display = "none";
+    document.getElementById("falta").style.display = "grid";
+  });
+</script>
+</body>
+</html>

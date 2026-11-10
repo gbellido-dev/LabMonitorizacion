@@ -115,3 +115,13 @@ def test_reiniciar_borra_las_alarmas_activas():
     pl.reiniciar()
     borradas = [e for e in pl.eventos if e["evento"] == "alarma.borrada"]
     assert borradas and not pl.activas
+
+
+def test_formato_grfics_para_la_vista_3d():
+    from app.main import app
+    with TestClient(app) as c:
+        d = c.get("/data/index.php").json()
+        assert d["process"] == "simpleTE"
+        assert {"f1_flow", "pressure", "liquid_level", "A_in_purge"} <= set(d["outputs"])
+        assert {"f1_valve_pos", "product_valve_pos", "e_stop"} <= set(d["state"])
+        assert c.get("/3d/data/index.php").status_code == 200
