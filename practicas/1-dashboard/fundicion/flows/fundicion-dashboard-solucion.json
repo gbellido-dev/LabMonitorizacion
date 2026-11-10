@@ -2182,6 +2182,21 @@
                 "label": "4 · Deriva del escáner 3D",
                 "value": 4,
                 "type": "num"
+            },
+            {
+                "label": "5 · Humedad de arena alta",
+                "value": 5,
+                "type": "num"
+            },
+            {
+                "label": "6 · Inoculación intermitente",
+                "value": 6,
+                "type": "num"
+            },
+            {
+                "label": "7 · Termopar de IF-01 descalibrado",
+                "value": 7,
+                "type": "num"
             }
         ],
         "payload": "",
@@ -2205,7 +2220,7 @@
         "type": "function",
         "z": "1432a64cf8d8a504",
         "name": "Orden de avería",
-        "func": "// ENTRADA: el código elegido en el desplegable (0-4)\n// SALIDA:  una escritura OPC UA en Mantenimiento.Averia\n\nmsg.topic    = \"ns=1;s=Mantenimiento.Averia\";\nmsg.datatype = \"Int32\";\nmsg.payload  = Number(msg.payload);\nreturn msg;",
+        "func": "// ENTRADA: el código elegido en el desplegable (0-7)\n// SALIDA:  una escritura OPC UA en Mantenimiento.Averia\n\nmsg.topic    = \"ns=1;s=Mantenimiento.Averia\";\nmsg.datatype = \"Int32\";\nmsg.payload  = Number(msg.payload);\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,

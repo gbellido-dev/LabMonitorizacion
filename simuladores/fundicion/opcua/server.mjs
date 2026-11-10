@@ -35,6 +35,10 @@ const server = new OPCUAServer({
   port: PORT,
   ...(ALT_HOSTNAME ? { alternateHostname: ALT_HOSTNAME.split(",").map((h) => h.trim()).filter(Boolean) } : {}),
   resourcePath: "/UA/Fundicion",
+  // node-opcua admite 10 conexiones por defecto; cada nodo cliente de Node-RED abre la suya
+  // (más el puente, el PLC S7 y UaExpert), así que en un aula se agotan enseguida
+  maxConnectionsPerEndpoint: 100,
+  maxAllowedSessionNumber: 100,
   buildInfo: {
     productName: "Ferrovia Digital Foundry OPC UA",
     productUri: "urn:ferrovia:digital-foundry",

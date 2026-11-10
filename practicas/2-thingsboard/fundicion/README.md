@@ -232,7 +232,20 @@ alarmas de **cualquier** máquina.
 ### Parte 9 — Incidencias
 
 El profesor inyectará averías desde la página `Mantenimiento` de la
-serie 1 (o escribiendo en `ns=1;s=Mantenimiento.Averia`).
+serie 1, desde el gemelo 3D (`http://localhost:3000`) o escribiendo en
+`ns=1;s=Mantenimiento.Averia`. Las cuatro reglas de la Parte 7 cubren las
+averías 1 a 4. La del rodamiento tarda: el desgaste lleva la vibración en
+marcha por encima de 12 mm/s a los ~13 min y la alarma llega a `Planta
+Norte` a los ~16 min (comprobado a ×1). Las averías 5, 6 y 7 bajan las
+piezas conformes con ~47 min de retraso (lo que tarda el túnel): ¿cuál de
+tus reglas las detecta?
+
+> **Planta acelerada y reglas con duración.** El profesor puede acelerar la
+> planta (`ns=1;s=Simulacion.Velocidad`), pero las duraciones de las reglas
+> de ThingsBoard cuentan **tiempo real**. A ×5, cada marcha del desmoldeo
+> (22 s de planta) dura 4,4 s reales y la regla «vibración > 12 y en marcha
+> durante 10 s» **no salta nunca**. Prueba esa regla a ×1. ¿Cómo la
+> rediseñarías para que no dependa de la velocidad?
 
 | **Avería** | **Alarma** | **Originador** | **¿Llega a Planta Norte?** | **Tiempo** |
 |---|---|---|---|---|

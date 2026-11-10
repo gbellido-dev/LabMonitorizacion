@@ -136,4 +136,6 @@ node --test tests/motor.test.mjs   # pruebas del motor de proceso
 ## Prácticas
 
 - Serie 1 · Node-RED + Dashboard: [`practicas/1-dashboard/fundicion`](../../practicas/1-dashboard/fundicion/README.md)
+- Serie 1 · S7 frente a OPC UA: [`practicas/1-dashboard/fundicion-s7`](../../practicas/1-dashboard/fundicion-s7/README.md)
 - Serie 2 · Node-RED + ThingsBoard: [`practicas/2-thingsboard/fundicion`](../../practicas/2-thingsboard/fundicion/README.md)
+- Serie 3 · Reto de trazabilidad y diagnóstico de calidad: [`practicas/3-reto/fundicion-trazabilidad`](../../practicas/3-reto/fundicion-trazabilidad/practica-node-red-thingsboard.md)

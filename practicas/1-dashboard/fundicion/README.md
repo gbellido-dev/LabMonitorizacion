@@ -10,7 +10,7 @@
 Hasta ahora cada práctica vigilaba **una máquina**. Aquí vas a vigilar
 **una planta entera**: la Planta Norte de una fundición de hierro, con 11
 activos (hornos, prensas, robots, colada, túnel, desmoldeo y control de
-calidad) y 127 variables. Al terminar tendrás un panel de planta, una
+calidad) y unas 170 variables, con **trazabilidad pieza a pieza**. Al terminar tendrás un panel de planta, una
 tabla con el estado de todos los activos y un explorador que **descubre
 solo** qué variables tiene cada máquina.
 
@@ -37,13 +37,15 @@ solo** qué variables tiene cada máquina.
 > `opc.tcp://fundicion-opcua:4841/UA/Fundicion`. Desde un cliente de tu
 > ordenador (UaExpert) es `opc.tcp://localhost:4841/UA/Fundicion`.
 
-**El proceso en un minuto.** Los **hornos** funden la carga en ciclos
-(`CARGA` → `FUSION` → `AFINO` → `LISTO`). La **línea** lleva los moldes
-hasta la **cuchara**, que cuela cuando hay un molde debajo
-(`MoldeEnPosicion`) y le queda metal (`PesoCuchara`); la **grúa** la
-rellena cuando baja de 400 kg. Después vienen el **túnel de
-enfriamiento**, el **desmoldeo** vibratorio, los **robots** y la **célula
-de calidad** con escáner 3D.
+**El proceso en un minuto.** Los **hornos** funden la chatarra en ciclos
+(`CARGA` → `FUSION` → `AFINO` → `LISTO`) y, cuando la cuchara se vacía,
+uno de ellos se **inclina** y la **grúa** trae una cuchara llena
+(`CambioCuchara`). La **línea** lleva los moldes hasta la **cuchara**, que
+cuela cuando hay un molde debajo (`MoldeEnPosicion`) y le queda metal
+(`PesoCuchara`). Cada molde recorre el **túnel de enfriamiento** (unos
+47 min), pasa por el **desmoldeo** vibratorio y la **célula de calidad**
+lo inspecciona con un escáner 3D. Todo sale de un modelo físico: el metal
+se enfría, la arena puede humedecerse y un rodamiento puede desgastarse.
 
 **Cómo están organizados los datos:**
 
@@ -56,7 +58,9 @@ de calidad** con escáner 3D.
     │   ├── Enfriamiento    ENF-01
     │   ├── Acabado         DES-01, ROB-02
     │   └── Calidad         QC-01
-    └── Mantenimiento       Averia (para el profesor)
+    ├── Trazabilidad        UltimaPieza (molde, colada, condiciones, resultado)
+    ├── Mantenimiento       Averia (para el profesor)
+    └── Simulacion          Velocidad (para acelerar la planta)
 
 El NodeId de cada variable es `ns=1;s=<ACTIVO>.<Variable>`, por ejemplo
 `ns=1;s=IF-01.TemperaturaMetal`. Fíjate en que aquí el espacio de nombres
@@ -284,6 +288,12 @@ cuchara?
 Las averías las inyecta el profesor (página `Mantenimiento`, Parte 11).
 Para cada una, anota qué ves **antes** de mirar el gemelo 3D:
 
+> Algunas averías tardan en notarse: el rodamiento se desgasta durante
+> ~15 min antes de dar aviso, y las de moldeo y colada (5, 6 y 7) solo se
+> ven en calidad cuando las piezas afectadas salen del túnel, ~47 min
+> después. Para verlas en clase, el profesor puede acelerar la planta
+> escribiendo `5` en `ns=1;s=Simulacion.Velocidad` (o desde el gemelo 3D).
+
 | **Avería** | **Primer síntoma** | **Variables afectadas** | **Activo** |
 |---|---|---|---|
 | A | | | |
@@ -386,15 +396,16 @@ Así queda la página `Planta`:
 
 Página `Mantenimiento`, grupo `AVERÍAS (PROFESORADO)`:
 
-1.  **dropdown** `Inyectar avería` con valores **numéricos** 0–4
+1.  **dropdown** `Inyectar avería` con valores **numéricos** 0–7
     (`0 · Sin avería`, `1 · Rodamiento del desmoldeo`, `2 · Extracción de
     humos IF-02`, `3 · Retraso de la grúa de cuchara`, `4 · Deriva del
-    escáner 3D`).
+    escáner 3D`, `5 · Humedad de arena alta`, `6 · Inoculación
+    intermitente`, `7 · Termopar de IF-01 descalibrado`).
 2.  **function** `Orden de avería` → **OpcUa-Client** `WRITE`:
 
 <!-- -->
 
-    // ENTRADA: el código elegido en el desplegable (0-4)
+    // ENTRADA: el código elegido en el desplegable (0-7)
     // SALIDA:  una escritura OPC UA en Mantenimiento.Averia
 
     msg.topic    = "ns=1;s=Mantenimiento.Averia";
@@ -404,6 +415,10 @@ Página `Mantenimiento`, grupo `AVERÍAS (PROFESORADO)`:
 
 3.  Un text `Avería activa` con `msg.payload.Mantenimiento.AveriaNombre`
     (ya está en la suscripción de la Parte 2).
+
+> El servidor también ofrece el **método** OPC UA
+> `Mantenimiento.InyectarAveria(Codigo)`: hace lo mismo y devuelve el
+> nombre de la avería. Es otra forma de «dar órdenes» por OPC UA.
 
 **Comprueba.** Escribe `9` cambiando el código: ¿qué responde el
 servidor (mira el debug del cliente)? ¿Por qué es mejor que lo rechace el

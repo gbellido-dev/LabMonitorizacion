@@ -1,0 +1,363 @@
+[
+    {
+        "id": "c65f25b23e1339f4",
+        "type": "tab",
+        "label": "Reto Fundición · Trazabilidad (solución)",
+        "disabled": false,
+        "info": "Reto 3-reto/fundicion-trazabilidad. Pega el token del dispositivo Fundicion-Calidad en el broker de ThingsBoard."
+    },
+    {
+        "id": "87967e14f547a8ae",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "e43e6b85eee3a76c",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Fundicion-Calidad",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-fundicion-calidad",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "2cf84a986b43c7c5",
+        "type": "comment",
+        "z": "c65f25b23e1339f4",
+        "name": "R1 · Suscripción a la trazabilidad (dado)",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "565e334695570ba3",
+        "type": "inject",
+        "z": "c65f25b23e1339f4",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "a3437273e4908b65"
+            ]
+        ]
+    },
+    {
+        "id": "a3437273e4908b65",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Suscribir trazabilidad",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  una suscripción por variable (la última pieza inspeccionada y el contexto)\n\nconst PIEZA = { Id: \"String\", Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\",\n                TiempoEnfriamiento: \"Double\", TemperaturaDesmoldeo: \"Double\",\n                Desviacion: \"Double\", Resultado: \"String\", Defecto: \"String\" };\nconst CONTEXTO = { \"KPIs.PiezasConformes\": \"Double\", \"KPIs.LoteActivo\": \"String\",\n                   \"IF-01.TemperaturaMetal\": \"Double\", \"COL-01.TemperaturaColada\": \"Double\",\n                   \"MP-01.HumedadArena\": \"Double\", \"QC-01.DesviacionEscaneo\": \"Double\" };\nconst m = [];\nfor (const [v, t] of Object.entries(PIEZA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaPieza.\" + v, datatype: t });\nfor (const [v, t] of Object.entries(CONTEXTO)) m.push({ topic: \"ns=1;s=\" + v, datatype: t });\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "ee7b7773c2d2f419"
+            ]
+        ]
+    },
+    {
+        "id": "ee7b7773c2d2f419",
+        "type": "OpcUa-Client",
+        "z": "c65f25b23e1339f4",
+        "endpoint": "87967e14f547a8ae",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 100,
+        "wires": [
+            [
+                "05f437b559ecc09b"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "05f437b559ecc09b",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 100,
+        "wires": [
+            [
+                "7679c9fa813a1474"
+            ]
+        ]
+    },
+    {
+        "id": "afc43cafc9c774b6",
+        "type": "comment",
+        "z": "c65f25b23e1339f4",
+        "name": "R2-R4 · Una muestra por pieza, diagnóstico y ThingsBoard",
+        "info": "",
+        "x": 200,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "7679c9fa813a1474",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Pieza nueva",
+        "func": "// ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)\n// SALIDA:  la pieza, una sola vez, cuando QC-01 inspecciona una nueva y ya han llegado todos sus campos\n\nconst p = (msg.payload.Trazabilidad || {}).UltimaPieza;\nif (!p || !p.Id) return null;\n// los campos de una pieza llegan como varios cambios OPC UA seguidos: esperamos a que esté completa\nif (p.Id === context.get(\"ultima\")) return null;\nconst campos = [\"Lote\", \"TemperaturaColada\", \"HumedadArena\", \"Inoculada\", \"TiempoEnfriamiento\",\n                \"TemperaturaDesmoldeo\", \"Desviacion\", \"Resultado\", \"Defecto\"];\nif (campos.some(c => p[c] === undefined)) return null;\nclearTimeout(context.get(\"t\"));\ncontext.set(\"t\", setTimeout(() => {               // 300 ms: que lleguen todos los campos de la misma pieza\n    const actual = flow.get(\"planta\").Trazabilidad.UltimaPieza;\n    if (actual.Id === context.get(\"ultima\")) return;\n    context.set(\"ultima\", actual.Id);\n    node.send({ payload: Object.assign({}, actual), contexto: flow.get(\"planta\") });\n}, 300));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 160,
+        "y": 220,
+        "wires": [
+            [
+                "a6639e6e65d49121"
+            ]
+        ]
+    },
+    {
+        "id": "a6639e6e65d49121",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Diagnóstico",
+        "func": "// ENTRADA: una pieza inspeccionada\n// SALIDA:  la pieza con su causa probable (reglas del jefe de calidad)\n\n// ---- límites del proceso ----\nconst COLADA_MIN = 1405;      // °C: por debajo, riesgo de unión fría\nconst HUMEDAD_MAX = 4.3;      // %: por encima, riesgo de porosidad\nconst DESMOLDEO_MAX = 700;    // °C: por encima, riesgo de deformación\n// ------------------------------\n\nconst p = msg.payload;\nconst causas = [];\nif (p.TemperaturaColada < COLADA_MIN) causas.push(\"colada fría\");\nif (p.HumedadArena > HUMEDAD_MAX) causas.push(\"arena húmeda\");\nif (p.Inoculada === false) causas.push(\"sin inocular\");\nif (p.TemperaturaDesmoldeo > DESMOLDEO_MAX) causas.push(\"desmoldeo en caliente\");\n\nlet causa = causas.join(\" + \");\nif (p.Resultado === \"RECHAZO\" && !causas.length) {\n    // rechazada con todas las condiciones en orden: ¿es la pieza o es la medida?\n    causa = p.Defecto === \"Fuera de tolerancia\" ? \"revisar el escáner (medida)\" : \"sin causa aparente\";\n}\np.causa = causa || \"—\";\np.condiciones_ok = causas.length === 0;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "7b950daa686bafd8",
+                "bcdc17df779f2e23",
+                "c27c9784268e4851"
+            ]
+        ]
+    },
+    {
+        "id": "7b950daa686bafd8",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Telemetría de la pieza",
+        "func": "// ENTRADA: la pieza diagnosticada\n// SALIDA:  { ts, values } para el dispositivo Fundicion-Calidad (una muestra por pieza)\n\nconst p = msg.payload;\n// racha: rechazos entre las últimas 20 piezas\nconst ult = context.get(\"ultimas\") || [];\nult.push(p.Resultado === \"RECHAZO\" ? 1 : 0);\nwhile (ult.length > 20) ult.shift();\ncontext.set(\"ultimas\", ult);\n\nmsg.payload = {\n    ts: Date.now(),\n    values: {\n        pieza: p.Id, lote: p.Lote, molde: p.Molde, prensa: p.Prensa,\n        t_colada: p.TemperaturaColada, humedad: p.HumedadArena, inoculada: p.Inoculada,\n        t_enfriamiento: p.TiempoEnfriamiento, t_desmoldeo: p.TemperaturaDesmoldeo,\n        desviacion: p.Desviacion, resultado: p.Resultado, defecto: p.Defecto,\n        rechazo: p.Resultado === \"RECHAZO\" ? 1 : 0, causa: p.causa,\n        rechazos_ultimas_20: ult.reduce((a, b) => a + b, 0)\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 220,
+        "wires": [
+            [
+                "e48a753dc33c8365"
+            ]
+        ]
+    },
+    {
+        "id": "e48a753dc33c8365",
+        "type": "mqtt out",
+        "z": "c65f25b23e1339f4",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e43e6b85eee3a76c",
+        "x": 800,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "bcdc17df779f2e23",
+        "type": "debug",
+        "z": "c65f25b23e1339f4",
+        "name": "Pieza diagnosticada",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 560,
+        "y": 270,
+        "wires": []
+    },
+    {
+        "id": "d8e1bd94729f3935",
+        "type": "comment",
+        "z": "c65f25b23e1339f4",
+        "name": "R5 · Colada en cuarentena (método OPC UA PiezasDelLote)",
+        "info": "",
+        "x": 200,
+        "y": 330,
+        "wires": []
+    },
+    {
+        "id": "c27c9784268e4851",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Lotes",
+        "func": "// ENTRADA: la pieza diagnosticada\n// SALIDA:  una llamada al método PiezasDelLote cuando una colada acumula 3 rechazos (una vez por colada)\n\nconst UMBRAL = 3;\nconst p = msg.payload;\nconst lotes = flow.get(\"lotes\") || {};\nconst l = lotes[p.Lote] || { piezas: 0, rechazos: 0, causas: {}, avisado: false };\nl.piezas++;\nif (p.Resultado === \"RECHAZO\") { l.rechazos++; l.causas[p.causa] = (l.causas[p.causa] || 0) + 1; }\nlotes[p.Lote] = l;\nflow.set(\"lotes\", lotes);\nif (l.rechazos < UMBRAL || l.avisado) return null;\nl.avisado = true;\n// método OPC UA: Trazabilidad.PiezasDelLote(Lote) → [piezas[], rechazadas]\nreturn {\n    lote: p.Lote, causas: l.causas,\n    objectId: \"ns=1;s=Trazabilidad\",\n    methodId: \"ns=1;s=Trazabilidad.PiezasDelLote\",\n    inputArguments: [{ dataType: \"String\", value: p.Lote }]\n};",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 380,
+        "wires": [
+            [
+                "4c0c030a6081e220"
+            ]
+        ]
+    },
+    {
+        "id": "4c0c030a6081e220",
+        "type": "OpcUa-Client",
+        "z": "c65f25b23e1339f4",
+        "endpoint": "87967e14f547a8ae",
+        "action": "method",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Método",
+        "x": 580,
+        "y": 380,
+        "wires": [
+            [
+                "e2ee971c7c302960"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "e2ee971c7c302960",
+        "type": "function",
+        "z": "c65f25b23e1339f4",
+        "name": "Cuarentena",
+        "func": "// ENTRADA: la respuesta del método PiezasDelLote (msg.payload = [piezas, rechazadas])\n// SALIDA:  la colada en cuarentena, para ThingsBoard (atributos de cliente)\n\nconst [piezas, rechazadas] = msg.payload;\nconst causa = Object.entries(msg.causas).sort((a, b) => b[1] - a[1])[0][0];\nnode.warn(`Colada ${msg.lote} en cuarentena: ${piezas.length} piezas inspeccionadas, ${rechazadas} rechazadas · ${causa}`);\nmsg.payload = {\n    lote_cuarentena: msg.lote,\n    cuarentena_piezas: piezas.length,\n    cuarentena_rechazadas: rechazadas,\n    cuarentena_causa: causa,\n    cuarentena_lista: piezas.join(\",\")\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 380,
+        "wires": [
+            [
+                "bdbd92d7c1eebaa7"
+            ]
+        ]
+    },
+    {
+        "id": "bdbd92d7c1eebaa7",
+        "type": "mqtt out",
+        "z": "c65f25b23e1339f4",
+        "name": "Atributos → ThingsBoard",
+        "topic": "v1/devices/me/attributes",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e43e6b85eee3a76c",
+        "x": 1020,
+        "y": 380,
+        "wires": []
+    }
+]

@@ -1,0 +1,535 @@
+[
+    {
+        "id": "2173e4b0f243d6a0",
+        "type": "tab",
+        "label": "Fundición · S7 frente a OPC UA",
+        "disabled": false,
+        "info": "Solución de la práctica 1-dashboard/fundicion-s7: la misma máquina por dos protocolos."
+    },
+    {
+        "id": "cc3ffb2cd3ddbf47",
+        "type": "ui-base",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false,
+        "name": "LabMonitorizacion"
+    },
+    {
+        "id": "8db9101cf4fa6dc2",
+        "type": "ui-theme",
+        "name": "Tema LabMonitorizacion",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "5b3def2baec55d95",
+        "type": "ui-page",
+        "name": "S7 frente a OPC UA",
+        "ui": "cc3ffb2cd3ddbf47",
+        "path": "/fundicion-s7",
+        "icon": "compare_arrows",
+        "layout": "grid",
+        "theme": "8db9101cf4fa6dc2",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "tabs": [],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "acd384e64966b438",
+        "type": "ui-group",
+        "name": "LA MISMA SEÑAL POR LOS DOS CAMINOS",
+        "width": "12",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "5b3def2baec55d95"
+    },
+    {
+        "id": "d7d249b568c5b0c4",
+        "type": "ui-group",
+        "name": "UN REAL EN BRUTO",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "5b3def2baec55d95"
+    },
+    {
+        "id": "6a655371219e0858",
+        "type": "ui-group",
+        "name": "ÓRDENES POR S7",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default",
+        "keepLoaded": false,
+        "tab": "",
+        "page": "5b3def2baec55d95"
+    },
+    {
+        "id": "939e5c9c60bd8d20",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "8b54b02542e0be0f",
+        "type": "s7 endpoint",
+        "transport": "iso-on-tcp",
+        "address": "fundicion-s7",
+        "port": "102",
+        "rack": "0",
+        "slot": "1",
+        "localtsaphi": "01",
+        "localtsaplo": "00",
+        "remotetsaphi": "01",
+        "remotetsaplo": "00",
+        "connmode": "rack-slot",
+        "adapter": "",
+        "busaddr": 2,
+        "cycletime": 1000,
+        "timeout": 2000,
+        "name": "PLC Fundición (S7)",
+        "verbose": "default",
+        "vartable": [
+            {
+                "name": "IF01_Temp",
+                "addr": "DB10,REAL0"
+            },
+            {
+                "name": "IF01_Listo",
+                "addr": "DB11,X12.0"
+            },
+            {
+                "name": "Cuchara_kg",
+                "addr": "DB30,REAL0"
+            },
+            {
+                "name": "Colada_C",
+                "addr": "DB30,REAL8"
+            },
+            {
+                "name": "IF02_Alarmas",
+                "addr": "DB90,WORD4"
+            },
+            {
+                "name": "Defecto_QC",
+                "addr": "DB61,WORD0"
+            },
+            {
+                "name": "IF01_bytes",
+                "addr": "DB10,BYTE0.4"
+            },
+            {
+                "name": "Orden_Averia",
+                "addr": "DB100,INT0"
+            }
+        ]
+    },
+    {
+        "id": "070450891f43aaf9",
+        "type": "comment",
+        "z": "2173e4b0f243d6a0",
+        "name": "FASE 1 · Leer por OPC UA (ya lo sabes hacer)",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "24b5cfe180d66241",
+        "type": "inject",
+        "z": "2173e4b0f243d6a0",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "8db5acb2fef4185a"
+            ]
+        ]
+    },
+    {
+        "id": "8db5acb2fef4185a",
+        "type": "function",
+        "z": "2173e4b0f243d6a0",
+        "name": "Suscribir por OPC UA",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  las mismas señales por OPC UA (en las carpetas TagsS7 de cada activo)\n\nconst SENALES = [\n    [\"IF01_Temp\", \"DB10,REAL0\", \"IF-01.TagsS7.Metal.Temp\", \"Double\"],\n    [\"IF01_Listo\", \"DB11,X12.0\", \"IF-01.TagsS7.ReadyToPour\", \"Boolean\"],\n    [\"Cuchara_kg\", \"DB30,REAL0\", \"COL-01.TagsS7.Ladle.Weight\", \"Double\"],\n    [\"Colada_C\", \"DB30,REAL8\", \"COL-01.TagsS7.Pour.Temp\", \"Double\"],\n    [\"IF02_Alarmas\", \"DB90,WORD4\", \"IF-02.TagsS7.Alarm.Word\", \"UInt16\"],\n    [\"Defecto_QC\", \"DB61,WORD0\", \"QC-01.TagsS7.Defect.Class\", \"UInt16\"]\n];\nnode.status({ text: SENALES.length + \" señales\" });\nreturn [SENALES.map(([nombre, s7, nodo, tipo]) => ({ topic: \"ns=1;s=\" + nodo, datatype: tipo, nombre }))];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "19391c3ee83b6bc8"
+            ]
+        ]
+    },
+    {
+        "id": "19391c3ee83b6bc8",
+        "type": "OpcUa-Client",
+        "z": "2173e4b0f243d6a0",
+        "endpoint": "939e5c9c60bd8d20",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 540,
+        "y": 100,
+        "wires": [
+            [
+                "84bcb7aafc6195bf"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "84bcb7aafc6195bf",
+        "type": "function",
+        "z": "2173e4b0f243d6a0",
+        "name": "Guardar OPC UA",
+        "func": "// ENTRADA: un mensaje por señal OPC UA (msg.topic = NodeId)\n// SALIDA:  nada; guarda el valor para compararlo\n\nif (!String(msg.topic).startsWith(\"ns=\")) return null;\nlet v = msg.payload;\nwhile (v !== null && typeof v === \"object\" && \"value\" in v) v = v.value;\nconst opc = flow.get(\"opcua\") || {};\nopc[String(msg.topic).split(\"s=\").pop()] = { v, t: Date.now() };\nflow.set(\"opcua\", opc);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a4bd0a5b1818737b",
+        "type": "comment",
+        "z": "2173e4b0f243d6a0",
+        "name": "FASE 2 · Leer por S7 y comparar",
+        "info": "",
+        "x": 200,
+        "y": 170,
+        "wires": []
+    },
+    {
+        "id": "273d50d30159103e",
+        "type": "s7 in",
+        "z": "2173e4b0f243d6a0",
+        "endpoint": "8b54b02542e0be0f",
+        "mode": "all",
+        "variable": "",
+        "diff": false,
+        "name": "PLC · todas las variables",
+        "x": 140,
+        "y": 220,
+        "wires": [
+            [
+                "ed16353859b34450",
+                "48d8c8246c4d2e9a"
+            ]
+        ]
+    },
+    {
+        "id": "ed16353859b34450",
+        "type": "function",
+        "z": "2173e4b0f243d6a0",
+        "name": "Comparar",
+        "func": "// ENTRADA: las variables leídas por S7 (msg.payload = { IF01_Temp: 1475.80004…, … })\n// SALIDA:  una fila por señal: valor S7, valor OPC UA, diferencia y qué hace falta saber para leerla\n\nconst SENALES = [\n    [\"IF01_Temp\", \"DB10,REAL0\", \"IF-01.TagsS7.Metal.Temp\", \"Double\"],\n    [\"IF01_Listo\", \"DB11,X12.0\", \"IF-01.TagsS7.ReadyToPour\", \"Boolean\"],\n    [\"Cuchara_kg\", \"DB30,REAL0\", \"COL-01.TagsS7.Ladle.Weight\", \"Double\"],\n    [\"Colada_C\", \"DB30,REAL8\", \"COL-01.TagsS7.Pour.Temp\", \"Double\"],\n    [\"IF02_Alarmas\", \"DB90,WORD4\", \"IF-02.TagsS7.Alarm.Word\", \"UInt16\"],\n    [\"Defecto_QC\", \"DB61,WORD0\", \"QC-01.TagsS7.Defect.Class\", \"UInt16\"]\n];\nconst opc = flow.get(\"opcua\") || {};\nconst fila = ([nombre, s7, nodo, tipo]) => {\n    const vs7 = msg.payload[nombre];\n    const vopc = opc[nodo] ? opc[nodo].v : undefined;\n    const dif = typeof vs7 === \"number\" && typeof vopc === \"number\" ? Math.abs(vs7 - vopc) : null;\n    return {\n        Señal: nombre,\n        \"Dirección S7\": s7,\n        \"Valor S7\": typeof vs7 === \"number\" ? vs7 : String(vs7),\n        \"NodeId OPC UA\": \"ns=1;s=\" + nodo,\n        \"Valor OPC UA\": vopc === undefined ? \"—\" : vopc,\n        Diferencia: dif === null ? (String(vs7) === String(vopc) ? \"igual\" : \"distinto\") : dif.toExponential(2)\n    };\n};\nmsg.payload = SENALES.map(fila);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 220,
+        "wires": [
+            [
+                "34896c22cff88703"
+            ]
+        ]
+    },
+    {
+        "id": "34896c22cff88703",
+        "type": "ui-table",
+        "z": "2173e4b0f243d6a0",
+        "name": "",
+        "label": "Señales",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "maxrows": 8,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "group": "acd384e64966b438",
+        "x": 600,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "48d8c8246c4d2e9a",
+        "type": "function",
+        "z": "2173e4b0f243d6a0",
+        "name": "Decodificar los bytes",
+        "func": "// ENTRADA: los 4 bytes en bruto de DB10.DBD0 (msg.payload.IF01_bytes = [68, 184, 153, 154])\n// SALIDA:  el REAL decodificado a mano (IEEE 754, big-endian), igual que hace el nodo S7\n\nconst b = msg.payload.IF01_bytes;\nif (!Array.isArray(b) && !(b instanceof Buffer)) return null;\nconst buf = Buffer.from(b);\nmsg.payload = {\n    bytes: Array.from(buf).map(x => x.toString(16).padStart(2, \"0\")).join(\" \"),\n    real: buf.readFloatBE(0),              // así lo guarda un S7: el byte más significativo primero\n    si_fuera_little_endian: buf.readFloatLE(0)\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 280,
+        "wires": [
+            [
+                "5c0e096f8b6e226a"
+            ]
+        ]
+    },
+    {
+        "id": "5c0e096f8b6e226a",
+        "type": "ui-template",
+        "z": "2173e4b0f243d6a0",
+        "name": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "head": "",
+        "noerr": 0,
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "group": "d7d249b568c5b0c4",
+        "format": "<div style=\"font-family:monospace;line-height:1.8\"><div>DB10.DBD0 en bruto: <b>{{msg.payload.bytes}}</b></div><div>como REAL big-endian: <b>{{msg.payload.real}}</b></div><div>si se leyera al revés (little-endian): <b>{{msg.payload.si_fuera_little_endian}}</b></div></div>",
+        "x": 600,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dff9803fe309c7ef",
+        "type": "comment",
+        "z": "2173e4b0f243d6a0",
+        "name": "FASE 3 · Escribir por S7 (bloque de órdenes DB100)",
+        "info": "",
+        "x": 200,
+        "y": 350,
+        "wires": []
+    },
+    {
+        "id": "9b435d59e3516211",
+        "type": "ui-dropdown",
+        "z": "2173e4b0f243d6a0",
+        "name": "",
+        "label": "Avería (DB100.DBW0)",
+        "tooltip": "",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "passthru": false,
+        "multiple": false,
+        "chips": false,
+        "clearable": false,
+        "options": [
+            {
+                "label": "0 · Sin avería",
+                "value": 0,
+                "type": "num"
+            },
+            {
+                "label": "1 · Rodamiento DES-01",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "2 · Humos IF-02",
+                "value": 2,
+                "type": "num"
+            },
+            {
+                "label": "3 · Grúa lenta",
+                "value": 3,
+                "type": "num"
+            },
+            {
+                "label": "4 · Escáner QC-01",
+                "value": 4,
+                "type": "num"
+            },
+            {
+                "label": "5 · Humedad de arena",
+                "value": 5,
+                "type": "num"
+            },
+            {
+                "label": "6 · Inoculación",
+                "value": 6,
+                "type": "num"
+            },
+            {
+                "label": "7 · Termopar IF-01",
+                "value": 7,
+                "type": "num"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "typeIsComboBox": true,
+        "msgTrigger": "onChange",
+        "group": "6a655371219e0858",
+        "placeholder": "Elige…",
+        "x": 160,
+        "y": 400,
+        "wires": [
+            [
+                "56cf2a5c431fb697"
+            ]
+        ]
+    },
+    {
+        "id": "56cf2a5c431fb697",
+        "type": "function",
+        "z": "2173e4b0f243d6a0",
+        "name": "Orden de avería",
+        "func": "// ENTRADA: el código elegido en el desplegable (0-7)\n// SALIDA:  escritura S7 en DB100.DBW0 (INT): el PLC la pasa a Mantenimiento.Averia\n\nmsg.payload = Number(msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 400,
+        "wires": [
+            [
+                "c4ba15117e75c149"
+            ]
+        ]
+    },
+    {
+        "id": "c4ba15117e75c149",
+        "type": "s7 out",
+        "z": "2173e4b0f243d6a0",
+        "endpoint": "8b54b02542e0be0f",
+        "variable": "Orden_Averia",
+        "name": "PLC · DB100.DBW0",
+        "x": 600,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    }
+]

@@ -25,6 +25,7 @@ FLUJOS = [
     ("3-reto/solarlab-opcua/flows/solarlab-starter-flow.json", "alumnado", "Reto SolarLab OPC UA - inicial"),
     ("3-reto/reactorlab-web/flows/reactorlab-starter-flow.json", "alumnado", "Reto ReactorLab web - inicial"),
     ("3-reto/atomlab-opcua/flows/atomlab-starter-flow.json", "alumnado", "Reto AtomLab OPC UA - inicial"),
+    ("3-reto/fundicion-trazabilidad/flows/fundicion-trazabilidad-starter-flow.json", "alumnado", "Reto Fundicion Trazabilidad - inicial"),
     # Serie 4 · Analítica e IA
     ("4-ia/aerolab/flows/ia-aerolab-recogida.json", "alumnado", "Serie 4 AeroLab - Recoger datos"),
     # Soluciones (solo con NODE_RED_INCLUIR_SOLUCIONES=true)
@@ -37,11 +38,13 @@ FLUJOS = [
     ("2-thingsboard/atomlab/flows/atomlab-thingsboard-solucion.json", "soluciones", "Serie 2 AtomLab - ThingsBoard"),
     ("1-dashboard/fundicion/flows/fundicion-dashboard-solucion.json", "soluciones", "Serie 1 Fundicion - Dashboard"),
     ("2-thingsboard/fundicion/flows/fundicion-thingsboard-solucion.json", "soluciones", "Serie 2 Fundicion - ThingsBoard"),
+    ("1-dashboard/fundicion-s7/flows/fundicion-s7-opcua-solucion.json", "soluciones", "Serie 1 Fundicion - S7 frente a OPC UA"),
     ("3-reto/aerolab-modbus/flows/aerolab-thingsboard-flow.json", "soluciones", "Reto AeroLab Modbus - solucion"),
     ("3-reto/oceanlab-mqtt/flows/oceanlab-thingsboard-flow.json", "soluciones", "Reto OceanLab MQTT - solucion"),
     ("3-reto/solarlab-opcua/flows/solarlab-thingsboard-flow.json", "soluciones", "Reto SolarLab OPC UA - solucion"),
     ("3-reto/reactorlab-web/flows/reactorlab-thingsboard-flow.json", "soluciones", "Reto ReactorLab web - solucion"),
     ("3-reto/atomlab-opcua/flows/atomlab-thingsboard-flow.json", "soluciones", "Reto AtomLab OPC UA - solucion"),
+    ("3-reto/fundicion-trazabilidad/flows/fundicion-trazabilidad-flow.json", "soluciones", "Reto Fundicion Trazabilidad - solucion"),
     ("4-ia/aerolab/flows/ia-aerolab-solucion.json", "soluciones", "Serie 4 AeroLab - IA"),
     ("4-ia/solarlab/flows/ia-solarlab-solucion.json", "soluciones", "Serie 4 SolarLab - IA"),
 ]

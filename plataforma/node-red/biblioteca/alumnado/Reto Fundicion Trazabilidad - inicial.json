@@ -1,0 +1,182 @@
+[
+    {
+        "id": "36fd25a5c53c9fcd",
+        "type": "tab",
+        "label": "Reto Fundición · Trazabilidad (inicial)",
+        "disabled": false,
+        "info": "Reto 3-reto/fundicion-trazabilidad. Pega el token del dispositivo Fundicion-Calidad en el broker de ThingsBoard."
+    },
+    {
+        "id": "de982c14706c636a",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "6e241a096673b567",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Fundicion-Calidad",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-fundicion-calidad",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "a2ee16631d8f9039",
+        "type": "comment",
+        "z": "36fd25a5c53c9fcd",
+        "name": "R1 · Suscripción a la trazabilidad (dado)",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "522e836c995737d7",
+        "type": "inject",
+        "z": "36fd25a5c53c9fcd",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "625ce991bd60ec32"
+            ]
+        ]
+    },
+    {
+        "id": "625ce991bd60ec32",
+        "type": "function",
+        "z": "36fd25a5c53c9fcd",
+        "name": "Suscribir trazabilidad",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  una suscripción por variable (la última pieza inspeccionada y el contexto)\n\nconst PIEZA = { Id: \"String\", Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\",\n                TiempoEnfriamiento: \"Double\", TemperaturaDesmoldeo: \"Double\",\n                Desviacion: \"Double\", Resultado: \"String\", Defecto: \"String\" };\nconst CONTEXTO = { \"KPIs.PiezasConformes\": \"Double\", \"KPIs.LoteActivo\": \"String\",\n                   \"IF-01.TemperaturaMetal\": \"Double\", \"COL-01.TemperaturaColada\": \"Double\",\n                   \"MP-01.HumedadArena\": \"Double\", \"QC-01.DesviacionEscaneo\": \"Double\" };\nconst m = [];\nfor (const [v, t] of Object.entries(PIEZA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaPieza.\" + v, datatype: t });\nfor (const [v, t] of Object.entries(CONTEXTO)) m.push({ topic: \"ns=1;s=\" + v, datatype: t });\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "20e1cff729f8bc5b"
+            ]
+        ]
+    },
+    {
+        "id": "20e1cff729f8bc5b",
+        "type": "OpcUa-Client",
+        "z": "36fd25a5c53c9fcd",
+        "endpoint": "de982c14706c636a",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 100,
+        "wires": [
+            [
+                "c3cdaa425ebe91f5"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c3cdaa425ebe91f5",
+        "type": "function",
+        "z": "36fd25a5c53c9fcd",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 100,
+        "wires": [
+            [
+                "65cb17908387e224"
+            ]
+        ]
+    },
+    {
+        "id": "65cb17908387e224",
+        "type": "debug",
+        "z": "36fd25a5c53c9fcd",
+        "name": "Planta",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 960,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "a25d0ba032f706a3",
+        "type": "comment",
+        "z": "36fd25a5c53c9fcd",
+        "name": "R2-R6 · A partir de aquí lo construyes tú (ver el guion)",
+        "info": "",
+        "x": 300,
+        "y": 180,
+        "wires": []
+    }
+]
