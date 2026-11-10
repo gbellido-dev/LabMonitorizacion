@@ -1,0 +1,111 @@
+module.exports = {
+  meta: { protocolo: "Modbus TCP", sigla: "Modbus", titulo: "Modbus TCP · El veterano de la automatización", color1: "B5462F", color2: "2F6690",
+          archivo: "02_Modbus_TCP.pptx" },
+  diapositivas: [
+    { tipo: "portada", titulo: "Modbus TCP", subtitulo: "El protocolo más sencillo y extendido de la industria: registros, códigos de función y polling",
+      pie: "En el laboratorio: **AeroLab** (aerogenerador de 5 MW, puerto 1502)" },
+
+    { tipo: "cifras", titulo: "Qué es Modbus",
+      intro: "Un protocolo de **petición-respuesta** creado por Modicon para sus PLC. Abierto, gratuito y tan simple que casi todos los equipos lo hablan.",
+      cifras: [{ valor: "1979", texto: "Modicon (hoy Schneider Electric)" }, { valor: "502", texto: "puerto TCP estándar (AeroLab usa 1502)" },
+               { valor: "16 bits", texto: "tamaño de cada registro" }],
+      nota: "Modbus solo mueve **números en direcciones**. Qué significa cada número lo dice el **mapa de registros** del fabricante, no el protocolo." },
+
+    { tipo: "tarjetas", titulo: "Tres variantes, la misma idea", columnas: 3,
+      items: [
+        { icono: "MdCable", titulo: "Modbus RTU", texto: "Serie **RS-485** (o RS-232), binario y compacto, con CRC. Hasta 247 esclavos en un bus. Aún domina en campo." },
+        { icono: "MdTextFields", titulo: "Modbus ASCII", texto: "Serie, en caracteres de texto con LRC. Más lento; hoy casi en desuso." },
+        { icono: "MdLan", titulo: "Modbus TCP", texto: "Sobre **Ethernet/TCP**. Sin CRC (lo hace TCP) y con una cabecera **MBAP**. Es el que usa AeroLab." },
+      ],
+      nota: "Una **pasarela Modbus TCP ↔ RTU** conecta una red Ethernet con un bus RS-485: el **Unit ID** de la trama TCP elige el equipo serie." },
+
+    { tipo: "seccion", numero: 1, titulo: "El modelo de datos", texto: "Cuatro tablas y unos pocos códigos de función" },
+
+    { tipo: "cuadricula", titulo: "Las cuatro tablas",
+      celdas: [
+        { icono: "MdToggleOn", titulo: "Coils", sub: "1 bit · lectura y **escritura**", etiqueta: "FC 1 · 5 · 15", texto: "Salidas digitales y órdenes. AeroLab: coil 0 **marcha/paro**, coil 2 **rearme**." },
+        { icono: "MdRadioButtonChecked", titulo: "Discrete inputs", sub: "1 bit · solo lectura", etiqueta: "FC 2", texto: "Entradas digitales y señales: en marcha, avería, conectado a red…" },
+        { icono: "MdSpeed", titulo: "Input registers", sub: "16 bits · solo lectura", etiqueta: "FC 4", texto: "Medidas: viento, rpm, potencia, temperaturas, vibración. AeroLab expone **16**." },
+        { icono: "MdTune", titulo: "Holding registers", sub: "16 bits · lectura y **escritura**", etiqueta: "FC 3 · 6 · 16", texto: "Consignas y parámetros. AeroLab: HR 4 = **límite de potencia**." },
+      ] },
+
+    { tipo: "tabla", titulo: "Códigos de función y excepciones",
+      cabecera: ["Código", "Operación", "Tabla"], anchos: [1.4, 5.6, 4],
+      filas: [["FC 1 / FC 2", "Leer coils / leer entradas discretas", "bits"], ["FC 3 / FC 4", "Leer holding / leer input registers", "registros de 16 bits"],
+              ["FC 5 / FC 6", "Escribir **un** coil / **un** holding register", "escritura simple"], ["FC 15 / FC 16", "Escribir **varios** coils / registros", "escritura múltiple"],
+              ["Excepción 01 · 02 · 03", "Función no válida · dirección no válida · valor no válido", "respuesta = FC + 0x80"],
+              ["Excepción 04 · 06", "Fallo del equipo · equipo ocupado", ""]],
+      altoFila: 0.66 },
+
+    { tipo: "trama", titulo: "La trama Modbus TCP",
+      campos: [{ nombre: "Transaction ID", bytes: 2, valor: "00 01" }, { nombre: "Protocol ID", bytes: 2, valor: "00 00" },
+               { nombre: "Length", bytes: 2, valor: "00 06" }, { nombre: "Unit ID", bytes: 1, valor: "01", peso: 1.4 },
+               { nombre: "FC", bytes: 1, valor: "04", color: "B5462F", peso: 1.4 }, { nombre: "Dirección", bytes: 2, valor: "00 00", color: "2F6690" },
+               { nombre: "Cantidad", bytes: 2, valor: "00 10", color: "2F6690" }],
+      grupos: [{ desde: 0, hasta: 7.4, texto: "Cabecera MBAP (7 bytes)" }, { desde: 7.4, hasta: 12.8, texto: "PDU: lo mismo que en RTU" }],
+      puntos: ["Ejemplo: «unidad 1, lee **16 input registers** desde la dirección 0» (lo que hace la práctica de AeroLab).",
+               "La respuesta repite la cabecera, el FC y añade un byte de cuenta (32) y los 16 valores de 2 bytes.",
+               "**Transaction ID** empareja preguntas y respuestas; **Unit ID** sirve para llegar a equipos serie detrás de una pasarela."] },
+
+    { tipo: "seccion", numero: 2, titulo: "De registros a datos", texto: "Escalado, signo, 32 bits y direcciones" },
+
+    { tipo: "codigo", titulo: "Codificar datos en 16 bits", anchoTexto: 5.6,
+      puntos: ["**Escalado**: 12,5 m/s se envía como `125` (÷10). El factor está en el mapa.",
+               "**Con signo**: −5 °C llega como `65531`; si es ≥ 32768, resta 65536.",
+               "**32 bits** en dos registros: alta × 65536 + baja. El orden (*endianness*) depende del fabricante.",
+               "**Reales** (float32) también ocupan dos registros.",
+               "Un solo número mal interpretado **no da error**: da un valor absurdo."],
+      codigo: "// Node-RED · function «Decodificar» (AeroLab)\nconst r = msg.payload;            // 16 registros\nconst int16  = v => v >= 32768 ? v - 65536 : v;\nconst uint32 = (alta, baja) => alta * 65536 + baja;\n\nmsg.payload = {\n  viento_mps:   r[0] / 10,\n  rotor_rpm:    r[1] / 100,\n  potencia_kw:  uint32(r[3], r[4]),\n  temp_rod_c:   int16(r[8]) / 10,\n  energia_kwh:  uint32(r[12], r[13]) / 10,\n  estado:       r[14]\n};\nreturn msg;" },
+
+    { tipo: "lista", titulo: "Cuidado con las direcciones",
+      puntos: ["En la **trama** las direcciones empiezan en **0**.",
+               "Muchos manuales usan la notación clásica: `00001` coils, `10001` entradas, `30001` input registers, `40001` holding.",
+               "«Registro 40005» en un manual suele ser la dirección **4** de holding registers.",
+               "El error de uno (*off-by-one*) es el fallo más frecuente: lees el dato de al lado y parece válido.",
+               "Comprueba siempre con un valor conocido (por ejemplo, el viento que muestra la web de AeroLab)."],
+      destacado: { icono: "MdWarning", titulo: "Ejemplo", texto: "Manual: «Límite de potencia en **40005**». En Node-RED: **Holding Register**, dirección `4`, cantidad `1`." } },
+
+    { tipo: "tabla", titulo: "Mapa de registros de AeroLab",
+      cabecera: ["Input register", "Dato", "Conversión"], anchos: [2.2, 5, 4.8],
+      filas: [["0 · 1 · 2", "Viento · rpm del rotor · pitch", "÷10 · ÷100 · ÷100"], ["3–4", "Potencia activa (kW)", "32 bits: `r[3]·65536 + r[4]`"],
+              ["5 · 6", "Dirección del viento · orientación (yaw)", "÷10"], ["7 · 8 · 9", "Vibración · T rodamiento · T multiplicador", "÷100 · con signo ÷10"],
+              ["10 · 11", "rpm del generador · par", "×1 · ×10"], ["12–13 · 14 · 15", "Energía (kWh) · estado · código de avería", "32 bits ÷10 · tablas de texto"]],
+      nota: "Escritura: coil 0 marcha/paro, coil 2 rearme, holding register 4 límite de potencia.", altoFila: 0.66 },
+
+    { tipo: "seccion", numero: 3, titulo: "Polling y seguridad", texto: "Cómo se comporta en la red y qué riesgos tiene" },
+
+    { tipo: "secuencia", titulo: "Polling: el cliente pregunta siempre", anchoTexto: 4.8,
+      actores: ["Cliente (Node-RED)", "Servidor (AeroLab)"],
+      mensajes: [{ de: 0, a: 1, texto: "FC 4 · 0 · 16" }, { de: 1, a: 0, texto: "16 registros", discontinua: true },
+                 { de: 0, a: 0, texto: "espera 1 s…" }, { de: 0, a: 1, texto: "FC 4 · 0 · 16" }, { de: 1, a: 0, texto: "16 registros", discontinua: true },
+                 { de: 0, a: 1, texto: "FC 5 · coil 0 = OFF" }, { de: 1, a: 0, texto: "eco de la orden", discontinua: true }],
+      puntos: ["No hay eventos: si algo cambia entre dos lecturas, **no te enteras**.", "Más frecuencia = más tráfico y carga del equipo.",
+               "Sin **marca de tiempo**: la hora la pone quien lee.", "Si no hay respuesta, el cliente decide el **timeout** y los reintentos."] },
+
+    { tipo: "compara", titulo: "Seguridad: Modbus no tiene",
+      columnas: [{ titulo: "El riesgo", items: ["Sin **autenticación**: cualquiera en la red puede escribir un coil", "Sin **cifrado**: el tráfico se lee con Wireshark", "Sin **integridad** de mensaje (más allá de TCP)", "Muy usado en ataques a infraestructuras"] },
+                 { titulo: "Cómo se protege", items: ["**Segmentar** la red (zonas y conductos, IEC 62443)", "Cortafuegos con inspección Modbus (solo FC de lectura)", "**Modbus/TCP Security**: TLS y certificados, puerto 802", "Una pasarela que traduzca a OPC UA o MQTT seguros"] }],
+      conclusion: "Por eso la práctica usa Node-RED como pasarela: Modbus se queda dentro; hacia fuera sale MQTT con token." },
+
+    { tipo: "flujo", titulo: "Modbus en Node-RED",
+      nodos: [{ titulo: "modbus-read", texto: "FC 4, dirección 0, cantidad 16, cada 1 s" }, { titulo: "Decodificar", texto: "Escalado, signo y 32 bits → JSON", color: "B5462F" },
+              { titulo: "Dashboard / MQTT", texto: "Gauges del dashboard o telemetría hacia ThingsBoard" }],
+      flechas: ["array", "objeto"], hueco: 1.2,
+      abajo: ["Paleta `node-red-contrib-modbus`: servidor `aerolab`, puerto `1502`, **Unit ID 1**.",
+              "Un **modbus-read** por tabla (FC 2, FC 3, FC 4); **modbus-write** para coils y holding registers.",
+              "En la serie 2, las órdenes RPC de ThingsBoard se traducen a **FC 5** y **FC 6**."] },
+
+    { tipo: "tabla", titulo: "Errores típicos",
+      cabecera: ["Síntoma", "Causa probable", "Qué hacer"], anchos: [3.4, 4.2, 4.4],
+      filas: [["*ECONNREFUSED* / *timeout*", "Host o puerto mal (502 frente a 1502)", "`aerolab:1502` dentro de Docker"],
+              ["Excepción 02", "Dirección o cantidad fuera del mapa", "Revisa dirección inicial y número de registros"],
+              ["Valores desplazados un puesto", "Direcciones 0-based frente a 40001", "Resta 1 o comprueba con un dato conocido"],
+              ["Temperaturas de 6500 °C", "Falta interpretar el **signo**", "Aplica `int16()` antes de escalar"],
+              ["Potencia que salta a cero", "Solo se lee uno de los dos registros", "Une alta y baja: `uint32()`"],
+              ["La escritura no cambia nada", "Tabla equivocada (coil frente a holding)", "Coil = FC 5; holding = FC 6"]], altoFila: 0.66 },
+
+    { tipo: "cierre", titulo: "Para recordar",
+      puntos: ["Modbus mueve **números en direcciones**; el significado está en el mapa.", "Cuatro tablas: **coils**, **entradas**, **input** y **holding registers**.",
+               "Escalado, signo y 32 bits los resuelves **tú** en la pasarela.", "Polling sin seguridad: **segmenta la red** y traduce hacia fuera."] },
+  ],
+};

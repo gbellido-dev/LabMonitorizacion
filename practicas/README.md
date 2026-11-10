@@ -20,6 +20,8 @@ Las prácticas están organizadas en **tres series** que se pueden hacer en orde
 | 12 | Órdenes `PUT`/`POST` con **clave API** (401, 403, 422) | Órdenes RPC por **long polling HTTP** |
 | 13 | **Webhooks**: Node-RED como servidor web | Mandos en el panel (sliders y botones RPC) |
 
+> Para explicar cada protocolo antes de la práctica hay una presentación en [`docs/presentaciones`](../docs/presentaciones/README.md) (OPC UA, Modbus TCP, MQTT, protocolos web y panorama).
+
 ## AtomLab: una central nuclear RBMK por OPC UA
 
 | Parte | 1 · Dashboard | 2 · ThingsBoard |

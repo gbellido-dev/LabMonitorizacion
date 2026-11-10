@@ -42,6 +42,7 @@ flowchart LR
 | [`plataforma/thingsboard`](plataforma/thingsboard) | ThingsBoard CE 4.3.1 que se instala solo en el primer arranque | nuevo |
 | [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED y ThingsBoard | nuevo |
 | [`practicas`](practicas) | Guiones, soluciones y flujos de las prácticas | repos anteriores y sesiones previas |
+| [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx) de cada protocolo: OPC UA, Modbus TCP, MQTT, protocolos web y un panorama comparativo | nuevo |
 
 El historial de commits de los cuatro repositorios originales se ha conservado (`git log -- simuladores/aerolab`).
 
