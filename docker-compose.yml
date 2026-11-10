@@ -1,0 +1,136 @@
+# LabMonitorizacion · entorno integrado de prácticas de Monitorización de Máquinas
+#
+#   docker compose up -d --build          (la primera vez, antes: scripts/thingsboard-init)
+#
+# Simuladores                                   Plataforma IIoT
+#   AeroLab    http://localhost:8010  Modbus 1502  Node-RED     http://localhost:1880
+#   OceanLab   http://localhost:8020  MQTT   1884  ThingsBoard  http://localhost:8080  MQTT 1885
+#   SolarLab   http://localhost:8000  OPC UA 4840  Mosquitto    mqtt://localhost:1883  WS 9001
+#   Fundición  http://localhost:3000  OPC UA 4841
+#
+# Dentro de la red de Docker cada servicio se alcanza por su nombre y su
+# puerto original (aerolab:1502, oceanlab:1883, solarlab:4840,
+# fundicion-opcua:4841, mosquitto:1883, thingsboard:1883 ...).
+
+name: labmonitorizacion
+
+services:
+  # ------------------------------------------------------------------ simuladores
+  aerolab:
+    build: simuladores/aerolab
+    image: labmonitorizacion/aerolab
+    environment:
+      MODBUS_HOST: 0.0.0.0
+      MODBUS_PORT: 1502
+    ports:
+      - "8010:8010"   # web 3D + API
+      - "1502:1502"   # Modbus TCP
+    restart: unless-stopped
+
+  oceanlab:
+    build: simuladores/oceanlab
+    image: labmonitorizacion/oceanlab
+    ports:
+      - "8020:8020"   # web 3D + API
+      - "1884:1883"   # broker MQTT integrado (1883 del anfitrión = Mosquitto)
+      - "8083:8083"   # MQTT sobre WebSocket
+    restart: unless-stopped
+
+  solarlab:
+    build: simuladores/solarlab
+    image: labmonitorizacion/solarlab
+    environment:
+      OPCUA_PUBLIC_HOST: ${LAB_PUBLIC_HOST:-localhost}
+    ports:
+      - "8000:8000"   # web 3D + API
+      - "4840:4840"   # OPC UA
+    restart: unless-stopped
+
+  fundicion-web:
+    build: simuladores/fundicion
+    image: labmonitorizacion/fundicion
+    command: ["npm", "run", "start", "--", "--host", "0.0.0.0"]
+    ports:
+      - "3000:3000"   # gemelo digital 3D
+    restart: unless-stopped
+
+  fundicion-opcua:
+    build: simuladores/fundicion
+    image: labmonitorizacion/fundicion
+    command: ["npm", "run", "opcua"]
+    environment:
+      OPCUA_PORT: 4841   # 4840 lo usa SolarLab
+      OPCUA_ALTERNATE_HOSTNAME: ${LAB_PUBLIC_HOST:-localhost}
+    ports:
+      - "4841:4841"   # OPC UA  opc.tcp://localhost:4841/UA/Fundicion
+    restart: unless-stopped
+
+  fundicion-bridge:
+    build: simuladores/fundicion
+    image: labmonitorizacion/fundicion
+    command: ["npm", "run", "opcua:bridge"]
+    depends_on:
+      - fundicion-opcua
+    environment:
+      OPCUA_ENDPOINT: opc.tcp://fundicion-opcua:4841/UA/Fundicion
+    ports:
+      - "8081:8081"   # WebSocket que consume el dashboard 3D
+    restart: unless-stopped
+
+  # ------------------------------------------------------------- plataforma IIoT
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22
+    depends_on:
+      - oceanlab
+    volumes:
+      - ./plataforma/mosquitto/config:/mosquitto/config:ro
+      - mosquitto-data:/mosquitto/data
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # MQTT sobre WebSocket
+    restart: unless-stopped
+
+  nodered:
+    build: plataforma/node-red
+    image: labmonitorizacion/node-red
+    environment:
+      TZ: Europe/Madrid
+      # true = la biblioteca de Node-RED incluye también los flujos resueltos
+      NODE_RED_INCLUIR_SOLUCIONES: ${NODE_RED_INCLUIR_SOLUCIONES:-false}
+    volumes:
+      - nodered-data:/data
+    ports:
+      - "1880:1880"   # editor y /dashboard
+    restart: unless-stopped
+
+  thingsboard:
+    image: thingsboard/tb-node:4.3.1.8
+    depends_on:
+      - tb-postgres
+    environment:
+      TB_SERVICE_ID: tb-ce-node
+      TB_QUEUE_TYPE: in-memory
+      SPRING_DATASOURCE_URL: jdbc:postgresql://tb-postgres:5432/thingsboard
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${TB_DB_PASSWORD:-postgres}
+    volumes:
+      - tb-logs:/var/log/thingsboard
+    ports:
+      - "8080:8080"   # web y API REST
+      - "1885:1883"   # MQTT de dispositivos (1883 del anfitrión = Mosquitto)
+    restart: unless-stopped
+
+  tb-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: thingsboard
+      POSTGRES_PASSWORD: ${TB_DB_PASSWORD:-postgres}
+    volumes:
+      - tb-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  nodered-data:
+  tb-logs:
+  tb-postgres-data:

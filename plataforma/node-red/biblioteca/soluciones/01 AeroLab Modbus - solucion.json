@@ -1,0 +1,632 @@
+[
+    {
+        "id": "b20f000000000001",
+        "type": "tab",
+        "label": "AeroLab → ThingsBoard",
+        "disabled": false,
+        "info": "Solución de la práctica: lectura Modbus TCP, conversión a unidades de ingeniería, publicación MQTT a ThingsBoard y mandos de prueba. Configurar host Modbus y credenciales MQTT antes de desplegar."
+    },
+    {
+        "id": "b20f000000000002",
+        "type": "comment",
+        "z": "b20f000000000001",
+        "name": "1. MODBUS TCP → UNIDADES DE INGENIERÍA",
+        "info": "FC04 lee 16 input registers desde offset PDU 0. FC02 lee 5 discrete inputs desde offset PDU 0.",
+        "x": 260,
+        "y": 50,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000003",
+        "type": "modbus-read",
+        "z": "b20f000000000001",
+        "name": "FC04 Input Registers 0...15",
+        "topic": "aerolab/input-registers",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "InputRegister",
+        "adr": "0",
+        "quantity": "16",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "b20f000000000030",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 210,
+        "y": 120,
+        "wires": [
+            [
+                "b20f000000000004"
+            ],
+            [
+                "b20f000000000009"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000004",
+        "type": "function",
+        "z": "b20f000000000001",
+        "name": "Decodificar telemetría",
+        "func": "const r = Array.isArray(msg.payload) ? msg.payload : msg.payload?.data;\nif (!Array.isArray(r) || r.length < 16) {\n    node.error(\"Se esperaban 16 input registers\", msg);\n    return null;\n}\n\nconst int16 = (value) => value >= 0x8000 ? value - 0x10000 : value;\nconst uint32be = (high, low) => high * 65536 + low;\nconst stateNames = [\"Parado\", \"Arrancando\", \"En marcha\", \"Frenando\", \"Avería\"];\nconst faultNames = [\n    \"Sin avería\",\n    \"Sobretemperatura de rodamiento\",\n    \"Vibración elevada\",\n    \"Pérdida de red\",\n    \"Sobrevelocidad\"\n];\n\nmsg.payload = {\n    wind_speed_mps: r[0] / 10,\n    rotor_rpm: r[1] / 100,\n    pitch_deg: r[2] / 100,\n    active_power_kw: uint32be(r[3], r[4]),\n    wind_direction_deg: r[5] / 10,\n    nacelle_yaw_deg: r[6] / 10,\n    vibration_mms: r[7] / 100,\n    bearing_temperature_c: int16(r[8]) / 10,\n    gearbox_temperature_c: int16(r[9]) / 10,\n    generator_rpm: r[10],\n    torque_nm: r[11] * 10,\n    energy_kwh: uint32be(r[12], r[13]) / 10,\n    operating_state: r[14],\n    operating_state_name: stateNames[r[14]] ?? \"Desconocido\",\n    fault_code: r[15],\n    fault_name: faultNames[r[15]] ?? \"Desconocida\"\n};\nmsg.topic = \"aerolab/telemetry\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 120,
+        "wires": [
+            [
+                "b20f000000000005",
+                "b20f000000000006"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000005",
+        "type": "json",
+        "z": "b20f000000000001",
+        "name": "Objeto → JSON",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 750,
+        "y": 100,
+        "wires": [
+            [
+                "b20f000000000007"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000006",
+        "type": "debug",
+        "z": "b20f000000000001",
+        "name": "Telemetría decodificada",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 150,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000007",
+        "type": "mqtt out",
+        "z": "b20f000000000001",
+        "name": "ThingsBoard: telemetría",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "application/json",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b20f000000000031",
+        "x": 1010,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000008",
+        "type": "modbus-read",
+        "z": "b20f000000000001",
+        "name": "FC02 Discrete Inputs 0...4",
+        "topic": "aerolab/discrete-inputs",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Input",
+        "adr": "0",
+        "quantity": "5",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "b20f000000000030",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 210,
+        "y": 250,
+        "wires": [
+            [
+                "b20f000000000010"
+            ],
+            [
+                "b20f000000000009"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000009",
+        "type": "debug",
+        "z": "b20f000000000001",
+        "name": "Respuesta Modbus completa",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 310,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000010",
+        "type": "function",
+        "z": "b20f000000000001",
+        "name": "Decodificar estados",
+        "func": "const d = Array.isArray(msg.payload) ? msg.payload : msg.payload?.data;\nif (!Array.isArray(d) || d.length < 5) {\n    node.error(\"Se esperaban 5 discrete inputs\", msg);\n    return null;\n}\n\nmsg.payload = {\n    ready: Boolean(d[0]),\n    running: Boolean(d[1]),\n    alarm: Boolean(d[2]),\n    grid_connected: Boolean(d[3]),\n    wind_ok: Boolean(d[4])\n};\nmsg.topic = \"aerolab/status\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 250,
+        "wires": [
+            [
+                "b20f000000000011",
+                "b20f000000000012"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000011",
+        "type": "json",
+        "z": "b20f000000000001",
+        "name": "Objeto → JSON",
+        "property": "payload",
+        "action": "str",
+        "pretty": false,
+        "x": 750,
+        "y": 230,
+        "wires": [
+            [
+                "b20f000000000013"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000012",
+        "type": "debug",
+        "z": "b20f000000000001",
+        "name": "Estados decodificados",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000013",
+        "type": "mqtt out",
+        "z": "b20f000000000001",
+        "name": "ThingsBoard: estados",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "application/json",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "b20f000000000031",
+        "x": 1000,
+        "y": 230,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000014",
+        "type": "comment",
+        "z": "b20f000000000001",
+        "name": "2. MANDOS DIDÁCTICOS MODBUS",
+        "info": "Las escrituras se incluyen para comprobar bidireccionalidad. En producción requieren autenticación, autorización, auditoría, enclavamientos y límites.",
+        "x": 220,
+        "y": 410,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000015",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Arrancar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 120,
+        "y": 480,
+        "wires": [
+            [
+                "b20f000000000017"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000016",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Parar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "x": 110,
+        "y": 530,
+        "wires": [
+            [
+                "b20f000000000017"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000017",
+        "type": "function",
+        "z": "b20f000000000001",
+        "name": "Preparar FC05 Coil 00001",
+        "func": "msg.payload = {\n    value: Boolean(msg.payload),\n    fc: 5,\n    unitid: 1,\n    address: 0,\n    quantity: 1\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 505,
+        "wires": [
+            [
+                "b20f000000000018"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000018",
+        "type": "modbus-flex-write",
+        "z": "b20f000000000001",
+        "name": "Escribir orden marcha",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "server": "b20f000000000030",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 650,
+        "y": 505,
+        "wires": [
+            [],
+            [
+                "b20f000000000029"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000019",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Sin avería (0)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 130,
+        "y": 610,
+        "wires": [
+            [
+                "b20f000000000024"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000020",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Sobretemperatura (1)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 160,
+        "y": 660,
+        "wires": [
+            [
+                "b20f000000000024"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000021",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Vibración elevada (2)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "2",
+        "payloadType": "num",
+        "x": 160,
+        "y": 710,
+        "wires": [
+            [
+                "b20f000000000024"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000022",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Pérdida de red (3)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "3",
+        "payloadType": "num",
+        "x": 150,
+        "y": 760,
+        "wires": [
+            [
+                "b20f000000000024"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000023",
+        "type": "inject",
+        "z": "b20f000000000001",
+        "name": "Sobrevelocidad (4)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "4",
+        "payloadType": "num",
+        "x": 150,
+        "y": 810,
+        "wires": [
+            [
+                "b20f000000000024"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000024",
+        "type": "function",
+        "z": "b20f000000000001",
+        "name": "Validar y preparar FC16 40006",
+        "func": "const fault = Number(msg.payload);\nif (!Number.isInteger(fault) || fault < 0 || fault > 4) {\n    node.error(\"Código de avería fuera de rango 0…4\", msg);\n    return null;\n}\nmsg.payload = {\n    value: [fault],\n    fc: 16,\n    unitid: 1,\n    address: 5,\n    quantity: 1\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 710,
+        "wires": [
+            [
+                "b20f000000000025"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000025",
+        "type": "modbus-flex-write",
+        "z": "b20f000000000001",
+        "name": "Escribir código de avería",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "server": "b20f000000000030",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 750,
+        "y": 710,
+        "wires": [
+            [],
+            [
+                "b20f000000000029"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000026",
+        "type": "comment",
+        "z": "b20f000000000001",
+        "name": "CONFIGURAR ANTES DE DESPLEGAR",
+        "info": "1) AeroLab Modbus TCP: host correcto, puerto 1502. 2) ThingsBoard MQTT: host, puerto y access token como Username; Password vacío. El token no se incluye en esta exportación.",
+        "x": 960,
+        "y": 410,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000027",
+        "type": "catch",
+        "z": "b20f000000000001",
+        "name": "Errores del laboratorio",
+        "scope": null,
+        "uncaught": false,
+        "x": 950,
+        "y": 500,
+        "wires": [
+            [
+                "b20f000000000028"
+            ]
+        ]
+    },
+    {
+        "id": "b20f000000000028",
+        "type": "debug",
+        "z": "b20f000000000001",
+        "name": "ERROR",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1160,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000029",
+        "type": "debug",
+        "z": "b20f000000000001",
+        "name": "Respuesta de escritura",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 710,
+        "wires": []
+    },
+    {
+        "id": "b20f000000000030",
+        "type": "modbus-client",
+        "name": "AeroLab Modbus TCP",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "aerolab",
+        "tcpPort": "1502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "b20f000000000031",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard MQTT - CONFIGURAR TOKEN",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "aerolab-nodered",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    }
+]
