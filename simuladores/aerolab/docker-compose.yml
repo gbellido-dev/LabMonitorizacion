@@ -1,0 +1,10 @@
+services:
+  aerolab:
+    build: .
+    environment:
+      MODBUS_HOST: 0.0.0.0
+      MODBUS_PORT: 1502
+    ports:
+      - "8010:8010"
+      - "1502:1502"
+    restart: unless-stopped
