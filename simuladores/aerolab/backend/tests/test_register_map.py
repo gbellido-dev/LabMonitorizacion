@@ -25,3 +25,13 @@ def test_map_exposes_human_and_zero_based_addresses() -> None:
     assert wind["pdu_address"] == 0
     assert wind["reference"] == "30001"
 
+
+
+def test_manual_mode_can_be_left_from_either_table() -> None:
+    # Estado en manual: la coil 3 y el HR0 lo reflejan a la vez
+    coils = [True, False, False, True]
+    holding = [1, 90, 200, 2350, 5000, 0, 40, 100]
+    commands, _ = decode_modbus_commands(coils, [0] + holding[1:], written="holding")
+    assert commands["manual_mode"] is False
+    commands, _ = decode_modbus_commands([True, False, False, False], holding, written="coil")
+    assert commands["manual_mode"] is False

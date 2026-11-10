@@ -41,6 +41,7 @@ flowchart LR
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
 | [`plataforma/thingsboard`](plataforma/thingsboard) | ThingsBoard CE 4.3.1 que se instala solo en el primer arranque | nuevo |
 | [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED y ThingsBoard | nuevo |
+| [`plataforma/ia`](plataforma/ia) | Capa de IA opcional (perfil `ia`): servicio REST para Node-RED, Jupyter con cuadernos y nodos **IA** de Node-RED | nuevo |
 | [`practicas`](practicas) | Guiones, soluciones y flujos de las prácticas | repos anteriores y sesiones previas |
 | [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx) de cada protocolo: OPC UA, Modbus TCP, MQTT, protocolos web y un panorama comparativo | nuevo |
 
@@ -73,6 +74,8 @@ También se puede arrancar solo una parte, por ejemplo `docker compose up -d aer
 | Mosquitto | MQTT `localhost:1883` · WS `localhost:9001` | `mosquitto:1883` |
 | ThingsBoard | http://localhost:8080 | `thingsboard:8080` · MQTT de dispositivos `thingsboard:1883` |
 | Copias | http://localhost:8090 (solo desde el propio equipo) | — |
+| Servicio de IA (perfil `ia`) | http://localhost:8100/docs | `http://ia:8000` |
+| Jupyter (perfil `ia`) | http://localhost:8888/?token=lab | — |
 
 Cambios respecto a los repositorios originales, necesarios para que todo conviva en el mismo equipo:
 
@@ -115,13 +118,14 @@ Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 
 ## Prácticas
 
-Tres series para los seis simuladores: AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA), ReactorLab (protocolos web), AtomLab (central nuclear, OPC UA) y, en las series 1 y 2, la Fundición (planta con 11 activos, OPC UA):
+Cuatro series para los seis simuladores: AeroLab (Modbus TCP), OceanLab (MQTT), SolarLab (OPC UA), ReactorLab (protocolos web), AtomLab (central nuclear, OPC UA) y, en las series 1 y 2, la Fundición (planta con 11 activos, OPC UA):
 
 | Serie | Contenido |
 |---|---|
 | [1 · Node-RED + Dashboard](practicas/README.md) | Adquisición con Node-RED y dashboard con alarmas en Dashboard 2.0 (guías paso a paso, con .docx) |
 | [2 · Node-RED + ThingsBoard](practicas/README.md#serie-2--contenido-de-cada-práctica) | Node-RED como pasarela hacia ThingsBoard: telemetría, atributos, paneles, reglas de alarma, inactividad, órdenes RPC y API de gateway (guías paso a paso, con .docx, flujos y paneles resueltos) |
 | [3 · Reto](practicas/README.md#retos-serie-3) | La misma integración, menos guiada, con flujo inicial, solución y rúbrica de evaluación (AeroLab, OceanLab, SolarLab, ReactorLab y AtomLab) |
+| [4 · Analítica e IA](practicas/4-ia/README.md) | Capa de IA genérica y opcional: Node-RED registra datos, Jupyter entrena (red neuronal, anomalías), Node-RED predice en tiempo real y ThingsBoard alarma sobre los modelos; aprendizaje continuo y deriva |
 
 Índice completo, valores para el entorno Docker y pruebas realizadas en [`practicas/README.md`](practicas/README.md).
 

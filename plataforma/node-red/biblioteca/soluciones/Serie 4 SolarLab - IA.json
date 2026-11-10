@@ -1,0 +1,534 @@
+[
+    {
+        "id": "0c39bed0900b5029",
+        "type": "tab",
+        "label": "Serie 4 · SolarLab · IA (solución)",
+        "disabled": false,
+        "info": "Solución del reto de la serie 4 con SolarLab: los mismos nodos de IA con otra fuente (OPC UA)."
+    },
+    {
+        "id": "c55c7f184bdd1821",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "609d3f9cf44aa371",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://solarlab:4840/solarlab/server/",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "674b11f6efc191fd",
+        "type": "comment",
+        "z": "0c39bed0900b5029",
+        "name": "FASE 1 · Recoger datos (conjunto «solarlab»)",
+        "info": "",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "c5318fb9178037a3",
+        "type": "inject",
+        "z": "0c39bed0900b5029",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 200,
+        "wires": [
+            [
+                "b09495f2cc7aa335",
+                "9845028fbe627798",
+                "90cc35aa8957149a",
+                "a5b49d1c01d5690c",
+                "8ec6f9ef255ca17b",
+                "86b80b0f45358580"
+            ]
+        ]
+    },
+    {
+        "id": "3246a6c404e271b6",
+        "type": "OpcUa-Client",
+        "z": "0c39bed0900b5029",
+        "endpoint": "609d3f9cf44aa371",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 200,
+        "wires": [
+            [
+                "5c14eb755f8e9501"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "b09495f2cc7aa335",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Plant.ActivePower",
+        "datatype": "Double",
+        "value": "",
+        "name": "Plant.ActivePower",
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "9845028fbe627798",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Plant.Irradiance",
+        "datatype": "Double",
+        "value": "",
+        "name": "Plant.Irradiance",
+        "x": 320,
+        "y": 136,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "90cc35aa8957149a",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Plant.PanelTemperature",
+        "datatype": "Double",
+        "value": "",
+        "name": "Plant.PanelTemperature",
+        "x": 320,
+        "y": 172,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "a5b49d1c01d5690c",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Plant.AmbientTemperature",
+        "datatype": "Double",
+        "value": "",
+        "name": "Plant.AmbientTemperature",
+        "x": 320,
+        "y": 208,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "8ec6f9ef255ca17b",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Plant.PerformanceRatio",
+        "datatype": "Double",
+        "value": "",
+        "name": "Plant.PerformanceRatio",
+        "x": 320,
+        "y": 244,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "86b80b0f45358580",
+        "type": "OpcUa-Item",
+        "z": "0c39bed0900b5029",
+        "item": "ns=2;s=Controls.FaultCode",
+        "datatype": "Int32",
+        "value": "",
+        "name": "Controls.FaultCode",
+        "x": 320,
+        "y": 280,
+        "wires": [
+            [
+                "3246a6c404e271b6"
+            ]
+        ]
+    },
+    {
+        "id": "5c14eb755f8e9501",
+        "type": "switch",
+        "z": "0c39bed0900b5029",
+        "name": "Solo datos",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "regex",
+                "v": "^ns=",
+                "vt": "str",
+                "case": false
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 760,
+        "y": 200,
+        "wires": [
+            [
+                "2d450e896dcbdf12"
+            ]
+        ]
+    },
+    {
+        "id": "2d450e896dcbdf12",
+        "type": "function",
+        "z": "0c39bed0900b5029",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por bloque\n\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 100) / 100;       // 2 decimales\n}\n\n// \"ns=2;s=Plant.ActivePower\"  →  bloque \"Plant\", variable \"ActivePower\"\nconst nombre = String(msg.topic).split(\"s=\").pop();\nconst [bloque, variable] = nombre.split(\".\");\n\nconst parque = flow.get(\"parque\") || {};\nparque[bloque] = parque[bloque] || {};\nparque[bloque][variable] = valor;\nparque.timestamp = new Date().toISOString();\nflow.set(\"parque\", parque);\n\nmsg.payload = parque;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 200,
+        "wires": [
+            [
+                "e1668fa2110cde0a"
+            ]
+        ]
+    },
+    {
+        "id": "e1668fa2110cde0a",
+        "type": "delay",
+        "z": "0c39bed0900b5029",
+        "name": "1 fila/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1080,
+        "y": 200,
+        "wires": [
+            [
+                "d7d6f2293c411073"
+            ]
+        ]
+    },
+    {
+        "id": "d7d6f2293c411073",
+        "type": "function",
+        "z": "0c39bed0900b5029",
+        "name": "Fila plana",
+        "func": "// ENTRADA: el parque agrupado (bloques Plant y Controls)\n// SALIDA:  msg.payload = una fila plana para el conjunto \"solarlab\"\n\nconst pl = msg.payload.Plant || {};\nconst c  = msg.payload.Controls || {};\nif (pl.ActivePower === undefined || pl.Irradiance === undefined) {\n    return null;                                   // aún no han llegado las variables básicas\n}\nmsg.payload = {\n    irradiancia:   pl.Irradiance,\n    temp_panel:    pl.PanelTemperature,\n    temp_ambiente: pl.AmbientTemperature,\n    potencia:      pl.ActivePower,\n    pr:            pl.PerformanceRatio,\n    averia:        c.FaultCode ?? 0                // etiqueta: la avería inyectada\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1230,
+        "y": 200,
+        "wires": [
+            [
+                "0367f97afe5df274",
+                "01c51fe5caa9fe5f"
+            ]
+        ]
+    },
+    {
+        "id": "0367f97afe5df274",
+        "type": "ia-registrar",
+        "z": "0c39bed0900b5029",
+        "name": "",
+        "servidor": "c55c7f184bdd1821",
+        "conjunto": "solarlab",
+        "lote": 1,
+        "x": 1430,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4daf2bc43e019f61",
+        "type": "OpcUa-Client",
+        "z": "0c39bed0900b5029",
+        "endpoint": "609d3f9cf44aa371",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 560,
+        "y": 380,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "25229e12f146cb50",
+        "type": "inject",
+        "z": "0c39bed0900b5029",
+        "name": "Cada 30 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 340,
+        "wires": [
+            [
+                "a3e0137a08ca45ea"
+            ]
+        ]
+    },
+    {
+        "id": "a3e0137a08ca45ea",
+        "type": "function",
+        "z": "0c39bed0900b5029",
+        "name": "Campaña de irradiancia",
+        "func": "// ENTRADA: un pulso cada 30 s\n// SALIDA:  una irradiancia nueva (escritura OPC UA)\n\nconst g = Math.round(100 + Math.random() * 1000);   // 100-1100 W/m²\nnode.status({ text: g + \" W/m²\" });\nreturn { topic: \"ns=2;s=Controls.IrradianceSetpoint\", datatype: \"Double\", payload: g };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 340,
+        "wires": [
+            [
+                "4daf2bc43e019f61"
+            ]
+        ]
+    },
+    {
+        "id": "112cfb330d91a592",
+        "type": "function",
+        "z": "0c39bed0900b5029",
+        "name": "Avería",
+        "func": "// ENTRADA: el código de avería (botones)\n// SALIDA:  escritura OPC UA en Controls.FaultCode\n\nreturn { topic: \"ns=2;s=Controls.FaultCode\", datatype: \"Int32\", payload: Number(msg.payload) };",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 420,
+        "wires": [
+            [
+                "4daf2bc43e019f61"
+            ]
+        ]
+    },
+    {
+        "id": "547428b2c8617989",
+        "type": "inject",
+        "z": "0c39bed0900b5029",
+        "name": "Sin avería",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "0",
+        "payloadType": "str",
+        "x": 110,
+        "y": 400,
+        "wires": [
+            [
+                "112cfb330d91a592"
+            ]
+        ]
+    },
+    {
+        "id": "c651b7acb03da54f",
+        "type": "inject",
+        "z": "0c39bed0900b5029",
+        "name": "Suciedad",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "1",
+        "payloadType": "str",
+        "x": 110,
+        "y": 440,
+        "wires": [
+            [
+                "112cfb330d91a592"
+            ]
+        ]
+    },
+    {
+        "id": "34294cbe2d3edd6d",
+        "type": "inject",
+        "z": "0c39bed0900b5029",
+        "name": "Disparo de inversor",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "2",
+        "payloadType": "str",
+        "x": 110,
+        "y": 480,
+        "wires": [
+            [
+                "112cfb330d91a592"
+            ]
+        ]
+    },
+    {
+        "id": "6f8e650d9dda3c43",
+        "type": "comment",
+        "z": "0c39bed0900b5029",
+        "name": "FASE 2 · Modelo de la plantilla en tiempo real",
+        "info": "",
+        "x": 220,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "01c51fe5caa9fe5f",
+        "type": "ia-predecir",
+        "z": "0c39bed0900b5029",
+        "name": "Potencia esperada",
+        "servidor": "c55c7f184bdd1821",
+        "modelo": "solarlab-curva",
+        "prefijo": "esperada_",
+        "salida": "unir",
+        "x": 1430,
+        "y": 280,
+        "wires": [
+            [
+                "fa41cbccf9ba6ed4"
+            ]
+        ]
+    },
+    {
+        "id": "fa41cbccf9ba6ed4",
+        "type": "ia-predecir",
+        "z": "0c39bed0900b5029",
+        "name": "¿Anomalía?",
+        "servidor": "c55c7f184bdd1821",
+        "modelo": "solarlab-anomalias",
+        "prefijo": "",
+        "salida": "unir",
+        "x": 1430,
+        "y": 340,
+        "wires": [
+            [
+                "4c18aaebb220ca44"
+            ]
+        ]
+    },
+    {
+        "id": "4c18aaebb220ca44",
+        "type": "debug",
+        "z": "0c39bed0900b5029",
+        "name": "Predicción SolarLab",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1640,
+        "y": 310,
+        "wires": []
+    }
+]

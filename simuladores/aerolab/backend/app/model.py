@@ -169,7 +169,11 @@ class TurbineSimulator:
         s.pitch_deg = _move_towards(s.pitch_deg, pitch_target, 7.5 * dt)
 
         can_generate = c.run_command and not c.brake_command and s.wind_ok and fault is FaultCode.NONE and s.grid_connected
-        pitch_efficiency = _clamp(1.0 - max(0.0, s.pitch_deg - 2.0) / 40.0, 0.0, 1.0)
+        # Por encima del viento nominal el pitch automático gira las palas justo lo necesario para quedarse
+        # en la potencia nominal: solo se pierde potencia si las palas están MÁS giradas de lo que pide el viento
+        # (frenado, consigna manual alta) y no por la propia regulación.
+        pitch_needed = _clamp(auto_pitch, 2.0, 32.0)
+        pitch_efficiency = _clamp(1.0 - max(0.0, s.pitch_deg - pitch_needed) / 40.0, 0.0, 1.0)
         if can_generate:
             target_rpm = _clamp(3.5 + (effective_wind - self.CUT_IN_MPS) * 0.95, 3.5, self.RATED_ROTOR_RPM)
             target_rpm *= 0.35 + 0.65 * pitch_efficiency

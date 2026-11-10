@@ -1,0 +1,369 @@
+[
+    {
+        "id": "d62cd6fa4f520b35",
+        "type": "tab",
+        "label": "Serie 4 · AeroLab · Recoger datos",
+        "disabled": false,
+        "info": "Flujo de recogida de la serie 4 (practicas/4-ia/aerolab). Necesita el servicio de IA: docker compose --profile ia up -d"
+    },
+    {
+        "id": "45326fab6c3cd475",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "d683d7ed8a494ef6",
+        "type": "modbus-client",
+        "name": "AeroLab Modbus TCP",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "aerolab",
+        "tcpPort": "1502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "165167cd69f48bfd",
+        "type": "comment",
+        "z": "d62cd6fa4f520b35",
+        "name": "FASE 1 · Recoger datos (conjunto «aerolab»)",
+        "info": "Cada segundo una fila en /lab/datos/aerolab.csv. Los botones fijan el escenario (la etiqueta).",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "9abd21afb9890ff7",
+        "type": "modbus-read",
+        "z": "d62cd6fa4f520b35",
+        "name": "Input registers (FC 4)",
+        "topic": "",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "InputRegister",
+        "adr": "0",
+        "quantity": "16",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "d683d7ed8a494ef6",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "8a026df1e4d2d37a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "8a026df1e4d2d37a",
+        "type": "function",
+        "z": "d62cd6fa4f520b35",
+        "name": "Decodificar",
+        "func": "// ENTRADA: msg.payload = los 16 input registers (enteros de 0 a 65535)\n// SALIDA:  msg.payload = los datos en unidades reales, agrupados por bloque\n\nconst r = msg.payload;\nif (!Array.isArray(r) || r.length < 16) {\n    return null;                      // respuesta incompleta: no seguimos\n}\n\nconst int16  = (v) => v >= 32768 ? v - 65536 : v;  // registros con signo\nconst uint32 = (alta, baja) => alta * 65536 + baja; // datos que ocupan 2 registros\n\nconst ESTADOS = [\"PARADO\", \"ARRANCANDO\", \"EN MARCHA\", \"FRENANDO\", \"AVERÍA\"];\nconst AVERIAS = [\"Sin avería\", \"Sobretemperatura de rodamiento\",\n                 \"Vibración elevada\", \"Pérdida de red\", \"Sobrevelocidad\"];\n\nmsg.payload = {\n    viento: {\n        velocidad_mps: r[0] / 10,\n        direccion_deg: r[5] / 10\n    },\n    rotor: {\n        rpm:           r[1] / 100,\n        pitch_deg:     r[2] / 100,\n        yaw_deg:       r[6] / 10,\n        generador_rpm: r[10]\n    },\n    produccion: {\n        potencia_kw:   uint32(r[3], r[4]),\n        par_nm:        r[11] * 10,\n        energia_kwh:   uint32(r[12], r[13]) / 10\n    },\n    condicion: {\n        vibracion_mms:        r[7] / 100,\n        temp_rodamiento_c:    int16(r[8]) / 10,\n        temp_multiplicador_c: int16(r[9]) / 10\n    },\n    estado: {\n        codigo:        r[14],\n        nombre:        ESTADOS[r[14]] ?? \"DESCONOCIDO\",\n        averia_codigo: r[15],\n        averia:        AVERIAS[r[15]] ?? \"Desconocida\"\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "be7fb161de399609"
+            ]
+        ]
+    },
+    {
+        "id": "be7fb161de399609",
+        "type": "function",
+        "z": "d62cd6fa4f520b35",
+        "name": "Fila plana",
+        "func": "// ENTRADA: el mensaje decodificado (bloques viento, rotor, produccion...)\n// SALIDA:  msg.payload = una fila plana: una columna por medida + la etiqueta\n\nconst p = msg.payload;\nmsg.payload = {\n    viento:             p.viento.velocidad_mps,\n    potencia:           p.produccion.potencia_kw,\n    rotor_rpm:          p.rotor.rpm,\n    pitch:              p.rotor.pitch_deg,\n    vibracion:          p.condicion.vibracion_mms,\n    temp_rodamiento:    p.condicion.temp_rodamiento_c,\n    temp_multiplicador: p.condicion.temp_multiplicador_c,\n    estado:             p.estado.codigo,\n    averia:             p.estado.averia_codigo,\n    // etiqueta: lo que está pasando DE VERDAD (lo fija el botón de escenario)\n    escenario:          flow.get(\"escenario\") || \"normal\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 100,
+        "wires": [
+            [
+                "7e353ff925a0fc25",
+                "364b9166ffd28cfe"
+            ]
+        ]
+    },
+    {
+        "id": "7e353ff925a0fc25",
+        "type": "ia-registrar",
+        "z": "d62cd6fa4f520b35",
+        "name": "",
+        "servidor": "45326fab6c3cd475",
+        "conjunto": "aerolab",
+        "lote": 1,
+        "x": 770,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "364b9166ffd28cfe",
+        "type": "debug",
+        "z": "d62cd6fa4f520b35",
+        "name": "Fila",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "45b723546c8e100d",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Cada 45 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "45",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "cc77d09862869e57"
+            ]
+        ]
+    },
+    {
+        "id": "cc77d09862869e57",
+        "type": "function",
+        "z": "d62cd6fa4f520b35",
+        "name": "Campaña de viento",
+        "func": "// ENTRADA: un pulso cada 45 s\n// SALIDA:  viento y turbulencia nuevos (HR1 en 0,1 m/s · HR6 en 0,1 %)\n// Así la recogida recorre toda la curva de potencia y no solo el viento de hoy.\n\nconst viento      = 3 + Math.random() * 15;        // 3-18 m/s\nconst turbulencia = 2 + Math.random() * 10;        // 2-12 %\nnode.status({ text: `viento ${viento.toFixed(1)} m/s · turbulencia ${turbulencia.toFixed(0)} %` });\nreturn [[\n    { payload: { value: Math.round(viento * 10),      fc: 6, unitid: 1, address: 1, quantity: 1 } },\n    { payload: { value: Math.round(turbulencia * 10), fc: 6, unitid: 1, address: 6, quantity: 1 } }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "96bedff0ecdcd287"
+            ]
+        ]
+    },
+    {
+        "id": "96bedff0ecdcd287",
+        "type": "modbus-flex-write",
+        "z": "d62cd6fa4f520b35",
+        "name": "Escribir holding registers",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "server": "d683d7ed8a494ef6",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 620,
+        "y": 220,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "0343d7e7f21bf2f2",
+        "type": "function",
+        "z": "d62cd6fa4f520b35",
+        "name": "Escenario",
+        "func": "// ENTRADA: msg.payload = nombre del escenario (botones de la izquierda)\n// SALIDA:  escrituras Modbus (holding registers) para provocarlo\n//   HR0 modo (0 auto, 1 manual) · HR3 consigna de yaw (0,1°) · HR4 límite (kW) · HR5 avería\n\nconst escenario = msg.payload;\nconst PLANES = {\n    \"normal\":       { 0: 0, 4: 5000, 5: 0 },\n    // modo manual con la góndola fija 35° fuera del viento (235°): produce menos, sin alarma\n    \"desalineada\":  { 0: 1, 2: 200, 3: 2000, 4: 5000, 5: 0 },\n    // un operador de red limita la potencia (curtailment): cambio de régimen legítimo\n    \"limitada\":     { 0: 0, 4: 3000, 5: 0 },\n    \"averia-vibracion\":  { 0: 0, 4: 5000, 5: 2 },\n    \"averia-rodamiento\": { 0: 0, 4: 5000, 5: 1 }\n};\nconst plan = PLANES[escenario];\nif (!plan) {\n    node.warn(\"Escenario desconocido: \" + escenario);\n    return null;\n}\nflow.set(\"escenario\", escenario);\nnode.status({ fill: escenario === \"normal\" ? \"green\" : \"orange\", shape: \"dot\", text: escenario });\n\nreturn [Object.entries(plan).map(([adr, valor]) => ({\n    payload: { value: valor, fc: 6, unitid: 1, address: Number(adr), quantity: 1 }\n}))];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 300,
+        "wires": [
+            [
+                "96bedff0ecdcd287"
+            ]
+        ]
+    },
+    {
+        "id": "4ddd2915b41c8b59",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Normal",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "normal",
+        "payloadType": "str",
+        "x": 150,
+        "y": 240,
+        "wires": [
+            [
+                "0343d7e7f21bf2f2"
+            ]
+        ]
+    },
+    {
+        "id": "0880f3ca7d9acd1f",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Góndola desalineada",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "desalineada",
+        "payloadType": "str",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "0343d7e7f21bf2f2"
+            ]
+        ]
+    },
+    {
+        "id": "2a75e4be40db1bf0",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Límite 3000 kW",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "limitada",
+        "payloadType": "str",
+        "x": 150,
+        "y": 320,
+        "wires": [
+            [
+                "0343d7e7f21bf2f2"
+            ]
+        ]
+    },
+    {
+        "id": "2020b3a31b8deca9",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Avería: vibración",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "averia-vibracion",
+        "payloadType": "str",
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "0343d7e7f21bf2f2"
+            ]
+        ]
+    },
+    {
+        "id": "2e8e87e85f784e11",
+        "type": "inject",
+        "z": "d62cd6fa4f520b35",
+        "name": "Avería: rodamiento",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "averia-rodamiento",
+        "payloadType": "str",
+        "x": 150,
+        "y": 400,
+        "wires": [
+            [
+                "0343d7e7f21bf2f2"
+            ]
+        ]
+    }
+]

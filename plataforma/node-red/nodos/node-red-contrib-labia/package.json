@@ -1,0 +1,12 @@
+{
+  "name": "node-red-contrib-labia",
+  "version": "1.0.0",
+  "description": "Nodos de Node-RED para la capa de IA del laboratorio: registrar datos, predecir con modelos entrenados en Jupyter y aprendizaje continuo",
+  "license": "MIT",
+  "keywords": ["node-red", "machine-learning", "ia"],
+  "node-red": {
+    "version": ">=3.0.0",
+    "nodes": { "labia": "labia.js" }
+  },
+  "engines": { "node": ">=18" }
+}

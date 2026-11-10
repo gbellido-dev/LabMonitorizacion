@@ -82,7 +82,7 @@ class ModbusBridge:
                 coils = encode_coils(self.simulator.commands)
                 coils[relative_address : relative_address + len(set_values)] = [bool(value) for value in set_values]
                 holding = encode_holding_registers(self.simulator.commands)
-                updates, reset_requested = decode_modbus_commands(coils, holding)
+                updates, reset_requested = decode_modbus_commands(coils, holding, written="coil")
                 self.simulator.apply_controls(updates)
                 if reset_requested:
                     self.simulator.reset_alarm()
@@ -99,7 +99,9 @@ class ModbusBridge:
             holding = encode_holding_registers(self.simulator.commands)
             if set_values:
                 holding[relative_address : relative_address + len(set_values)] = [int(value) for value in set_values]
-                updates, reset_requested = decode_modbus_commands(encode_coils(self.simulator.commands), holding)
+                updates, reset_requested = decode_modbus_commands(
+                    encode_coils(self.simulator.commands), holding, written="holding"
+                )
                 self.simulator.apply_controls(updates)
                 if reset_requested:
                     self.simulator.reset_alarm()

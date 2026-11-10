@@ -1,0 +1,702 @@
+[
+    {
+        "id": "ee2aee886c887d90",
+        "type": "tab",
+        "label": "Serie 4 · AeroLab · IA (solución)",
+        "disabled": false,
+        "info": "Solución de la serie 4 (practicas/4-ia/aerolab). Pega el token del dispositivo Aerogenerador-IA en el broker de ThingsBoard. Los modelos aerolab-curva y aerolab-anomalias se publican desde Jupyter."
+    },
+    {
+        "id": "f11c5903599c6d67",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "fe75ca1b6e47716a",
+        "type": "modbus-client",
+        "name": "AeroLab Modbus TCP",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "aerolab",
+        "tcpPort": "1502",
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": "9600",
+        "serialDatabits": "8",
+        "serialStopbits": "1",
+        "serialParity": "none",
+        "serialConnectionDelay": "100",
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": "1",
+        "commandDelay": "1",
+        "clientTimeout": "1000",
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": "2000",
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "1f279f8eb272c4d4",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Aerogenerador-IA",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-aerolab-ia",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "007024bb50d78b0d",
+        "type": "comment",
+        "z": "ee2aee886c887d90",
+        "name": "FASE 1 · Recoger datos (conjunto «aerolab»)",
+        "info": "Cada segundo una fila en /lab/datos/aerolab.csv. Los botones fijan el escenario (la etiqueta).",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "ede30cd1fabea104",
+        "type": "modbus-read",
+        "z": "ee2aee886c887d90",
+        "name": "Input registers (FC 4)",
+        "topic": "",
+        "showStatusActivities": true,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "InputRegister",
+        "adr": "0",
+        "quantity": "16",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": true,
+        "startDelayTime": "1",
+        "server": "fe75ca1b6e47716a",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "ea43997e569f75a5"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "ea43997e569f75a5",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Decodificar",
+        "func": "// ENTRADA: msg.payload = los 16 input registers (enteros de 0 a 65535)\n// SALIDA:  msg.payload = los datos en unidades reales, agrupados por bloque\n\nconst r = msg.payload;\nif (!Array.isArray(r) || r.length < 16) {\n    return null;                      // respuesta incompleta: no seguimos\n}\n\nconst int16  = (v) => v >= 32768 ? v - 65536 : v;  // registros con signo\nconst uint32 = (alta, baja) => alta * 65536 + baja; // datos que ocupan 2 registros\n\nconst ESTADOS = [\"PARADO\", \"ARRANCANDO\", \"EN MARCHA\", \"FRENANDO\", \"AVERÍA\"];\nconst AVERIAS = [\"Sin avería\", \"Sobretemperatura de rodamiento\",\n                 \"Vibración elevada\", \"Pérdida de red\", \"Sobrevelocidad\"];\n\nmsg.payload = {\n    viento: {\n        velocidad_mps: r[0] / 10,\n        direccion_deg: r[5] / 10\n    },\n    rotor: {\n        rpm:           r[1] / 100,\n        pitch_deg:     r[2] / 100,\n        yaw_deg:       r[6] / 10,\n        generador_rpm: r[10]\n    },\n    produccion: {\n        potencia_kw:   uint32(r[3], r[4]),\n        par_nm:        r[11] * 10,\n        energia_kwh:   uint32(r[12], r[13]) / 10\n    },\n    condicion: {\n        vibracion_mms:        r[7] / 100,\n        temp_rodamiento_c:    int16(r[8]) / 10,\n        temp_multiplicador_c: int16(r[9]) / 10\n    },\n    estado: {\n        codigo:        r[14],\n        nombre:        ESTADOS[r[14]] ?? \"DESCONOCIDO\",\n        averia_codigo: r[15],\n        averia:        AVERIAS[r[15]] ?? \"Desconocida\"\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "09538b4262749158"
+            ]
+        ]
+    },
+    {
+        "id": "09538b4262749158",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Fila plana",
+        "func": "// ENTRADA: el mensaje decodificado (bloques viento, rotor, produccion...)\n// SALIDA:  msg.payload = una fila plana: una columna por medida + la etiqueta\n\nconst p = msg.payload;\nmsg.payload = {\n    viento:             p.viento.velocidad_mps,\n    potencia:           p.produccion.potencia_kw,\n    rotor_rpm:          p.rotor.rpm,\n    pitch:              p.rotor.pitch_deg,\n    vibracion:          p.condicion.vibracion_mms,\n    temp_rodamiento:    p.condicion.temp_rodamiento_c,\n    temp_multiplicador: p.condicion.temp_multiplicador_c,\n    estado:             p.estado.codigo,\n    averia:             p.estado.averia_codigo,\n    // etiqueta: lo que está pasando DE VERDAD (lo fija el botón de escenario)\n    escenario:          flow.get(\"escenario\") || \"normal\"\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 100,
+        "wires": [
+            [
+                "fa6b04144a80046b",
+                "92bcdf7991ee6a61",
+                "866a75d926e2d7d4",
+                "67b0e8528f561de5",
+                "78b1c2a7abea6814"
+            ]
+        ]
+    },
+    {
+        "id": "fa6b04144a80046b",
+        "type": "ia-registrar",
+        "z": "ee2aee886c887d90",
+        "name": "",
+        "servidor": "f11c5903599c6d67",
+        "conjunto": "aerolab",
+        "lote": 1,
+        "x": 770,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "92bcdf7991ee6a61",
+        "type": "debug",
+        "z": "ee2aee886c887d90",
+        "name": "Fila",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "9a5c71368a71efe6",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Cada 45 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "45",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "02fe8abced19ca29"
+            ]
+        ]
+    },
+    {
+        "id": "02fe8abced19ca29",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Campaña de viento",
+        "func": "// ENTRADA: un pulso cada 45 s\n// SALIDA:  viento y turbulencia nuevos (HR1 en 0,1 m/s · HR6 en 0,1 %)\n// Así la recogida recorre toda la curva de potencia y no solo el viento de hoy.\n\nconst viento      = 3 + Math.random() * 15;        // 3-18 m/s\nconst turbulencia = 2 + Math.random() * 10;        // 2-12 %\nnode.status({ text: `viento ${viento.toFixed(1)} m/s · turbulencia ${turbulencia.toFixed(0)} %` });\nreturn [[\n    { payload: { value: Math.round(viento * 10),      fc: 6, unitid: 1, address: 1, quantity: 1 } },\n    { payload: { value: Math.round(turbulencia * 10), fc: 6, unitid: 1, address: 6, quantity: 1 } }\n]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "f245712db4f52d57"
+            ]
+        ]
+    },
+    {
+        "id": "f245712db4f52d57",
+        "type": "modbus-flex-write",
+        "z": "ee2aee886c887d90",
+        "name": "Escribir holding registers",
+        "showStatusActivities": true,
+        "showErrors": true,
+        "showWarnings": true,
+        "server": "fe75ca1b6e47716a",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 620,
+        "y": 220,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ab704c45c3e0aeab",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Escenario",
+        "func": "// ENTRADA: msg.payload = nombre del escenario (botones de la izquierda)\n// SALIDA:  escrituras Modbus (holding registers) para provocarlo\n//   HR0 modo (0 auto, 1 manual) · HR3 consigna de yaw (0,1°) · HR4 límite (kW) · HR5 avería\n\nconst escenario = msg.payload;\nconst PLANES = {\n    \"normal\":       { 0: 0, 4: 5000, 5: 0 },\n    // modo manual con la góndola fija 35° fuera del viento (235°): produce menos, sin alarma\n    \"desalineada\":  { 0: 1, 2: 200, 3: 2000, 4: 5000, 5: 0 },\n    // un operador de red limita la potencia (curtailment): cambio de régimen legítimo\n    \"limitada\":     { 0: 0, 4: 3000, 5: 0 },\n    \"averia-vibracion\":  { 0: 0, 4: 5000, 5: 2 },\n    \"averia-rodamiento\": { 0: 0, 4: 5000, 5: 1 }\n};\nconst plan = PLANES[escenario];\nif (!plan) {\n    node.warn(\"Escenario desconocido: \" + escenario);\n    return null;\n}\nflow.set(\"escenario\", escenario);\nnode.status({ fill: escenario === \"normal\" ? \"green\" : \"orange\", shape: \"dot\", text: escenario });\n\nreturn [Object.entries(plan).map(([adr, valor]) => ({\n    payload: { value: valor, fc: 6, unitid: 1, address: Number(adr), quantity: 1 }\n}))];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 300,
+        "wires": [
+            [
+                "f245712db4f52d57"
+            ]
+        ]
+    },
+    {
+        "id": "bdf890a0c4cdce84",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Normal",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "normal",
+        "payloadType": "str",
+        "x": 150,
+        "y": 240,
+        "wires": [
+            [
+                "ab704c45c3e0aeab"
+            ]
+        ]
+    },
+    {
+        "id": "70ccfb29b03672b5",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Góndola desalineada",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "desalineada",
+        "payloadType": "str",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "ab704c45c3e0aeab"
+            ]
+        ]
+    },
+    {
+        "id": "d547c40b9c76a47f",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Límite 3000 kW",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "limitada",
+        "payloadType": "str",
+        "x": 150,
+        "y": 320,
+        "wires": [
+            [
+                "ab704c45c3e0aeab"
+            ]
+        ]
+    },
+    {
+        "id": "395a79516ba9689e",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Avería: vibración",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "averia-vibracion",
+        "payloadType": "str",
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "ab704c45c3e0aeab"
+            ]
+        ]
+    },
+    {
+        "id": "8fd6332898dea236",
+        "type": "inject",
+        "z": "ee2aee886c887d90",
+        "name": "Avería: rodamiento",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "averia-rodamiento",
+        "payloadType": "str",
+        "x": 150,
+        "y": 400,
+        "wires": [
+            [
+                "ab704c45c3e0aeab"
+            ]
+        ]
+    },
+    {
+        "id": "d544223399ddb6e9",
+        "type": "comment",
+        "z": "ee2aee886c887d90",
+        "name": "FASE 2 · Modelos de Jupyter en tiempo real → ThingsBoard",
+        "info": "",
+        "x": 230,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "866a75d926e2d7d4",
+        "type": "ia-predecir",
+        "z": "ee2aee886c887d90",
+        "name": "Potencia esperada",
+        "servidor": "f11c5903599c6d67",
+        "modelo": "aerolab-curva",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 360,
+        "y": 560,
+        "wires": [
+            [
+                "8c228fe10314a1ee"
+            ]
+        ]
+    },
+    {
+        "id": "8c228fe10314a1ee",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Comparar con lo esperado",
+        "func": "// ENTRADA: la fila plana + msg.prediccion (lo que el modelo espera producir)\n// SALIDA:  la fila con la potencia esperada y la desviación\n\nconst p = msg.payload;\np.potencia_esperada = Math.max(0, Math.round(msg.prediccion.prediccion));\np.desviacion_kw     = Math.round(p.potencia - p.potencia_esperada);\n// rendimiento solo tiene sentido si se espera producir algo\np.rendimiento_pct   = p.potencia_esperada > 200\n    ? Math.round(1000 * p.potencia / p.potencia_esperada) / 10\n    : null;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 560,
+        "wires": [
+            [
+                "69047dd17e8194c5"
+            ]
+        ]
+    },
+    {
+        "id": "69047dd17e8194c5",
+        "type": "ia-predecir",
+        "z": "ee2aee886c887d90",
+        "name": "¿Anomalía?",
+        "servidor": "f11c5903599c6d67",
+        "modelo": "aerolab-anomalias",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 800,
+        "y": 560,
+        "wires": [
+            [
+                "d545f3c8921422c5"
+            ]
+        ]
+    },
+    {
+        "id": "d545f3c8921422c5",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Telemetría IA",
+        "func": "// ENTRADA: la fila con las predicciones de los dos modelos\n// SALIDA:  { ts, values } para ThingsBoard\n\nconst p = msg.payload;\nmsg.payload = {\n    ts: Date.now(),\n    values: {\n        viento:              p.viento,\n        potencia:            p.potencia,\n        potencia_esperada:   p.potencia_esperada,\n        desviacion_kw:       p.desviacion_kw,\n        rendimiento_pct:     p.rendimiento_pct,\n        anomalia:            msg.prediccion.anomalia,\n        puntuacion_anomalia: msg.prediccion.puntuacion,\n        escenario:           p.escenario\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 560,
+        "wires": [
+            [
+                "f3fe2cfa6ba3521c",
+                "4bb4cb092d8dfefc"
+            ]
+        ]
+    },
+    {
+        "id": "f3fe2cfa6ba3521c",
+        "type": "mqtt out",
+        "z": "ee2aee886c887d90",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "1f279f8eb272c4d4",
+        "x": 1250,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "4bb4cb092d8dfefc",
+        "type": "debug",
+        "z": "ee2aee886c887d90",
+        "name": "Telemetría IA",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1230,
+        "y": 610,
+        "wires": []
+    },
+    {
+        "id": "e3e4399c592e1db1",
+        "type": "catch",
+        "z": "ee2aee886c887d90",
+        "name": "Errores de la IA",
+        "scope": [
+            "866a75d926e2d7d4",
+            "69047dd17e8194c5"
+        ],
+        "uncaught": false,
+        "x": 360,
+        "y": 620,
+        "wires": [
+            [
+                "4a02d4a116bdc325"
+            ]
+        ]
+    },
+    {
+        "id": "4a02d4a116bdc325",
+        "type": "debug",
+        "z": "ee2aee886c887d90",
+        "name": "Error de la IA",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "6f429499f4cdfaa0",
+        "type": "comment",
+        "z": "ee2aee886c887d90",
+        "name": "FASE 3 · Aprendizaje continuo y deriva",
+        "info": "",
+        "x": 220,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "67b0e8528f561de5",
+        "type": "switch",
+        "z": "ee2aee886c887d90",
+        "name": "¿Sin avería?",
+        "property": "payload.averia",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 360,
+        "y": 760,
+        "wires": [
+            [
+                "bc6f972ccc66e359"
+            ]
+        ]
+    },
+    {
+        "id": "bc6f972ccc66e359",
+        "type": "ia-aprender",
+        "z": "ee2aee886c887d90",
+        "name": "Curva continua",
+        "servidor": "f11c5903599c6d67",
+        "modelo": "aerolab-continuo",
+        "tipo": "regresion",
+        "objetivo": "potencia",
+        "entradas": "viento",
+        "umbral": 1.5,
+        "aprender": true,
+        "prefijo": "continuo_",
+        "salida": "unir",
+        "x": 580,
+        "y": 760,
+        "wires": [
+            [
+                "e92357536233e655",
+                "6862f57bb18326d4"
+            ]
+        ]
+    },
+    {
+        "id": "e92357536233e655",
+        "type": "ia-registrar",
+        "z": "ee2aee886c887d90",
+        "name": "",
+        "servidor": "f11c5903599c6d67",
+        "conjunto": "aerolab-continuo",
+        "lote": 10,
+        "x": 820,
+        "y": 720,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6862f57bb18326d4",
+        "type": "function",
+        "z": "ee2aee886c887d90",
+        "name": "Telemetría continua",
+        "func": "// ENTRADA: la fila + el resultado del modelo continuo (msg.prediccion)\n// SALIDA:  { ts, values } para ThingsBoard\n\nconst r = msg.prediccion;\nmsg.payload = {\n    ts: Date.now(),\n    values: {\n        continuo_prediccion: r.prediccion,\n        continuo_mae:        r.mae,\n        continuo_deriva:     r.deriva,\n        continuo_derivas:    r.derivas,\n        continuo_aprendidas: r.aprendidas\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 760,
+        "wires": [
+            [
+                "e62d5273df7b5702"
+            ]
+        ]
+    },
+    {
+        "id": "e62d5273df7b5702",
+        "type": "mqtt out",
+        "z": "ee2aee886c887d90",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "1f279f8eb272c4d4",
+        "x": 1060,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "78b1c2a7abea6814",
+        "type": "ia-aprender",
+        "z": "ee2aee886c887d90",
+        "name": "Anomalías continuas",
+        "servidor": "f11c5903599c6d67",
+        "modelo": "aerolab-anomalias-continuo",
+        "tipo": "anomalias",
+        "objetivo": "",
+        "entradas": "viento,potencia,vibracion,temp_rodamiento",
+        "umbral": 1.5,
+        "aprender": true,
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 580,
+        "y": 840,
+        "wires": [
+            [
+                "0bd438ab39f18a88"
+            ]
+        ]
+    },
+    {
+        "id": "0bd438ab39f18a88",
+        "type": "debug",
+        "z": "ee2aee886c887d90",
+        "name": "Anomalía continua",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 840,
+        "wires": []
+    }
+]

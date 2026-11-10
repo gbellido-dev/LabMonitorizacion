@@ -1,6 +1,6 @@
 # Prácticas
 
-Las prácticas están organizadas en **tres series** que se pueden hacer en orden con cada simulador. Todas siguen el mismo esquema: una **Fase 1** de monitorización (leer, mostrar, histórico, incidencia, alarmas, pérdida de comunicación) y una **Fase 2** que amplía (órdenes a la máquina o varios equipos).
+Las prácticas están organizadas en **tres series** (más una **serie 4 de analítica e IA**, ver más abajo) que se pueden hacer en orden con cada simulador. Todas siguen el mismo esquema: una **Fase 1** de monitorización (leer, mostrar, histórico, incidencia, alarmas, pérdida de comunicación) y una **Fase 2** que amplía (órdenes a la máquina o varios equipos).
 
 | Serie | Qué se aprende | AeroLab (Modbus TCP) | OceanLab (MQTT) | SolarLab (OPC UA) | ReactorLab (protocolos web) | AtomLab (OPC UA) | Fundición (OPC UA) |
 |---|---|---|---|---|---|---|---|
@@ -33,6 +33,17 @@ Las prácticas están organizadas en **tres series** que se pueden hacer en orde
 | 11 | **Escritura OPC UA**: consigna y pulsador AZ-5, rechazo de valores no válidos | **Dosímetros** como dispositivos (API de gateway) y regla en el perfil `dosimetro` |
 | 12 | **Caja negra**: suscripción a 250 ms | Órdenes RPC → escritura OPC UA (`setPotencia`, `setBombas`, `az5`) |
 | 13 | Reconstruir el **26-04-1986** y comparar el pico registrado con el real | **Registrador por lotes** con `ts` de la pasarela y el mismo experimento |
+
+## Serie 4 · Analítica e IA
+
+Una capa de IA **genérica** y opcional ([`plataforma/ia`](../plataforma/ia/README.md), `docker compose --profile ia up -d`): Node-RED registra los datos, **Jupyter** entrena los modelos y Node-RED los usa en tiempo real con los nodos **ia predecir** e **ia aprender**.
+
+| Práctica | Contenido |
+|---|---|
+| [AeroLab](4-ia/aerolab/README.md) · [.docx](4-ia/aerolab/Practica_AeroLab_IA_ES.docx) | Campaña de datos etiquetados, red neuronal (curva de potencia), detector de anomalías, despliegue a ThingsBoard con alarmas sobre los modelos, aprendizaje continuo y deriva |
+| [Reto SolarLab](4-ia/solarlab/README.md) · [.docx](4-ia/solarlab/Reto_SolarLab_IA_ES.docx) | La misma capa con otra fuente (OPC UA): recogida, plantilla de entrenamiento, tiempo real y propuesta para otro simulador |
+
+Índice completo en [`4-ia/README.md`](4-ia/README.md).
 
 ## Fundición: una planta completa con 11 activos por OPC UA
 
@@ -99,6 +110,8 @@ Los guiones de las series 1 y 3 están escritos también para instalaciones suel
 | Web de ThingsBoard | `http://localhost:8080` (`tenant@thingsboard.org` / `tenant`) |
 | Dashboard 2.0 | `http://localhost:1880/dashboard` |
 | Copias (snapshots) | `http://localhost:8090` |
+| Servicio de IA (serie 4) | desde Node-RED `http://ia:8000`; documentación en `http://localhost:8100/docs` |
+| Jupyter (serie 4) | `http://localhost:8888/?token=lab` |
 
 Los flujos de la biblioteca de Node-RED (**Import → Local → LabMonitorizacion**) ya traen estos hosts. Ningún flujo incluye tokens: cada grupo pega el suyo.
 

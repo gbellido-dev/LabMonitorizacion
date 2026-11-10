@@ -122,12 +122,26 @@ def encode_holding_registers(commands: TurbineCommands) -> list[int]:
     return values
 
 
-def decode_modbus_commands(coils: list[bool], holding: list[int]) -> tuple[dict[str, Any], bool]:
+def decode_modbus_commands(
+    coils: list[bool], holding: list[int], written: str | None = None
+) -> tuple[dict[str, Any], bool]:
+    """Traduce coils + holding registers a órdenes.
+
+    El modo manual está en dos sitios (coil 4 y holding 40001). Manda el que se
+    acaba de escribir (``written`` = "coil" o "holding"): si no, al reflejarse
+    uno en el otro, una vez en manual no se podría volver a automático.
+    """
     reset_requested = bool(coils[2]) if len(coils) > 2 else False
+    if written == "coil":
+        manual = bool(coils[3])
+    elif written == "holding":
+        manual = bool(holding[0])
+    else:
+        manual = bool(coils[3]) or bool(holding[0])
     values: dict[str, Any] = {
         "run_command": bool(coils[0]),
         "brake_command": bool(coils[1]),
-        "manual_mode": bool(coils[3]) or bool(holding[0]),
+        "manual_mode": manual,
         "wind_speed_mps": holding[1] / 10.0,
         "pitch_command_deg": holding[2] / 100.0,
         "yaw_command_deg": holding[3] / 10.0,

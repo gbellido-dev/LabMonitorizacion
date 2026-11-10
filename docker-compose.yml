@@ -172,6 +172,35 @@ services:
       retries: 20
     restart: unless-stopped
 
+  # ------------------------------------------------- capa de IA (opcional)
+  # Solo arranca con:  docker compose --profile ia up -d
+  ia:
+    profiles: ["ia"]
+    build: plataforma/ia
+    image: labmonitorizacion/ia
+    command: ["servicio"]
+    environment:
+      TZ: Europe/Madrid
+    volumes:
+      - ia-lab:/lab
+    ports:
+      - "8100:8000"   # API REST (documentación en /docs); Node-RED usa http://ia:8000
+    restart: unless-stopped
+
+  jupyter:
+    profiles: ["ia"]
+    image: labmonitorizacion/ia
+    depends_on: [ia]
+    command: ["jupyter"]
+    environment:
+      TZ: Europe/Madrid
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-lab}
+    volumes:
+      - ia-lab:/lab
+    ports:
+      - "8888:8888"   # http://localhost:8888/?token=lab
+    restart: unless-stopped
+
   # ------------------------------------------------- copias de seguridad (web)
   copias:
     build: plataforma/copias
@@ -197,3 +226,4 @@ volumes:
   tb-postgres-data:
   copias:
   copias-intercambio:
+  ia-lab:

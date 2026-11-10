@@ -1,0 +1,11 @@
+# Mismas versiones en el servicio y en Jupyter: un modelo guardado en un lado
+# se carga en el otro sin sorpresas (joblib/pickle dependen de la versión).
+numpy==2.5.4
+scipy==1.18.1
+pandas==3.1.0
+scikit-learn==1.9.1
+joblib==1.6.0
+river==0.26.1
+requests==2.34.2
+fastapi==0.162.0
+uvicorn==0.54.0

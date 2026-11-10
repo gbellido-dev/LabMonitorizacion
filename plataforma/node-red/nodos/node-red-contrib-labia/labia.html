@@ -1,0 +1,192 @@
+<!-- ═══════════════════════════════ servidor ═══════════════════════════════ -->
+<script type="text/javascript">
+    RED.nodes.registerType("ia-servidor", {
+        category: "config",
+        defaults: { name: { value: "" }, url: { value: "http://ia:8000", required: true } },
+        label: function () { return this.name || this.url; }
+    });
+</script>
+<script type="text/html" data-template-name="ia-servidor">
+    <div class="form-row"><label for="node-config-input-url"><i class="fa fa-globe"></i> URL</label>
+        <input type="text" id="node-config-input-url" placeholder="http://ia:8000"></div>
+    <div class="form-row"><label for="node-config-input-name"><i class="fa fa-tag"></i> Nombre</label>
+        <input type="text" id="node-config-input-name"></div>
+</script>
+<script type="text/html" data-help-name="ia-servidor">
+    <p>Dirección del servicio de IA del laboratorio.</p>
+    <p>Dentro del Docker del laboratorio es <code>http://ia:8000</code> (desde el navegador del equipo,
+        <code>http://localhost:8100/docs</code>). Hay que arrancarlo con <code>docker compose --profile ia up -d</code>.</p>
+</script>
+
+<!-- ═══════════════════════════════ registrar ══════════════════════════════ -->
+<script type="text/javascript">
+    RED.nodes.registerType("ia-registrar", {
+        category: "IA",
+        color: "#C7E9C0",
+        defaults: {
+            name: { value: "" },
+            servidor: { value: "", type: "ia-servidor", required: false },
+            conjunto: { value: "", required: false },
+            lote: { value: 1, validate: RED.validators.number() }
+        },
+        inputs: 1, outputs: 1, icon: "db.svg",
+        label: function () { return this.name || ("registrar " + (this.conjunto || "")); },
+        paletteLabel: "ia registrar"
+    });
+</script>
+<script type="text/html" data-template-name="ia-registrar">
+    <div class="form-row"><label for="node-input-servidor"><i class="fa fa-server"></i> Servicio</label>
+        <input type="text" id="node-input-servidor"></div>
+    <div class="form-row"><label for="node-input-conjunto"><i class="fa fa-table"></i> Conjunto</label>
+        <input type="text" id="node-input-conjunto" placeholder="aerolab"></div>
+    <div class="form-row"><label for="node-input-lote"><i class="fa fa-cubes"></i> Lote</label>
+        <input type="number" id="node-input-lote" min="1" style="width:80px"> lecturas por envío</div>
+    <div class="form-row"><label for="node-input-name"><i class="fa fa-tag"></i> Nombre</label>
+        <input type="text" id="node-input-name"></div>
+</script>
+<script type="text/html" data-help-name="ia-registrar">
+    <p>Guarda cada lectura como una fila del <b>conjunto de datos</b> indicado (un CSV en
+        <code>/lab/datos/&lt;conjunto&gt;.csv</code>), que luego se abre en Jupyter con
+        <code>datos("&lt;conjunto&gt;")</code>.</p>
+    <h3>Entrada</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">objeto | lista</span></dt>
+        <dd>Las lecturas, por ejemplo <code>{"viento": 9.4, "potencia": 2950, "averia": 0}</code>. Los objetos anidados
+            se aplanan (<code>a.b</code>). Si no trae <code>ts</code>, se pone la hora actual.</dd>
+        <dt class="optional">conjunto <span class="property-type">texto</span></dt>
+        <dd>Sustituye al conjunto configurado.</dd>
+    </dl>
+    <h3>Salida</h3>
+    <p>El mismo mensaje, con <code>msg.ia</code> = <code>{conjunto, añadidas, filas}</code>.</p>
+    <p><b>Lote</b>: con 10, el nodo envía las lecturas de 10 en 10 (menos peticiones).</p>
+</script>
+
+<!-- ═══════════════════════════════ predecir ═══════════════════════════════ -->
+<script type="text/javascript">
+    RED.nodes.registerType("ia-predecir", {
+        category: "IA",
+        color: "#C7E9C0",
+        defaults: {
+            name: { value: "" },
+            servidor: { value: "", type: "ia-servidor", required: false },
+            modelo: { value: "", required: false },
+            prefijo: { value: "" },
+            salida: { value: "unir" }
+        },
+        inputs: 1, outputs: 1, icon: "font-awesome/fa-magic",
+        label: function () { return this.name || ("predecir " + (this.modelo || "")); },
+        paletteLabel: "ia predecir"
+    });
+</script>
+<script type="text/html" data-template-name="ia-predecir">
+    <div class="form-row"><label for="node-input-servidor"><i class="fa fa-server"></i> Servicio</label>
+        <input type="text" id="node-input-servidor"></div>
+    <div class="form-row"><label for="node-input-modelo"><i class="fa fa-cube"></i> Modelo</label>
+        <input type="text" id="node-input-modelo" placeholder="aerolab-curva"></div>
+    <div class="form-row"><label for="node-input-salida"><i class="fa fa-sign-out"></i> Resultado</label>
+        <select id="node-input-salida">
+            <option value="unir">añadido a msg.payload</option>
+            <option value="aparte">solo en msg.prediccion</option>
+        </select></div>
+    <div class="form-row"><label for="node-input-prefijo"><i class="fa fa-font"></i> Prefijo</label>
+        <input type="text" id="node-input-prefijo" placeholder="(ninguno)"></div>
+    <div class="form-row"><label for="node-input-name"><i class="fa fa-tag"></i> Nombre</label>
+        <input type="text" id="node-input-name"></div>
+</script>
+<script type="text/html" data-help-name="ia-predecir">
+    <p>Aplica un <b>modelo entrenado en Jupyter</b> y publicado con
+        <code>guardar(modelo, "nombre", entradas=[...], tipo=...)</code>.
+        Si se vuelve a guardar el modelo, el servicio usa la versión nueva sin reiniciar nada.</p>
+    <h3>Entrada</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">objeto | lista</span></dt>
+        <dd>Debe contener las <b>entradas</b> del modelo con los mismos nombres que en el entrenamiento.</dd>
+        <dt class="optional">modelo <span class="property-type">texto</span></dt>
+        <dd>Sustituye al modelo configurado.</dd>
+    </dl>
+    <h3>Salida</h3>
+    <p>Según el tipo de modelo:</p>
+    <ul>
+        <li>regresión: <code>prediccion</code></li>
+        <li>clasificación: <code>clase</code> y <code>probabilidad</code></li>
+        <li>anomalías: <code>anomalia</code> (true/false) y <code>puntuacion</code> (&gt; 0, más raro de lo normal)</li>
+    </ul>
+    <p>Se añaden a <code>msg.payload</code> (con el <b>prefijo</b>, si se indica, para usar varios modelos
+        en el mismo mensaje) y siempre están en <code>msg.prediccion</code>.</p>
+</script>
+
+<!-- ═══════════════════════════════ aprender ═══════════════════════════════ -->
+<script type="text/javascript">
+    RED.nodes.registerType("ia-aprender", {
+        category: "IA",
+        color: "#C7E9C0",
+        defaults: {
+            name: { value: "" },
+            servidor: { value: "", type: "ia-servidor", required: false },
+            modelo: { value: "", required: true },
+            tipo: { value: "regresion" },
+            objetivo: { value: "" },
+            entradas: { value: "" },
+            umbral: { value: 1.5, validate: RED.validators.number() },
+            aprender: { value: true },
+            prefijo: { value: "" },
+            salida: { value: "unir" }
+        },
+        inputs: 1, outputs: 1, icon: "font-awesome/fa-graduation-cap",
+        label: function () { return this.name || ("aprender " + (this.modelo || "")); },
+        paletteLabel: "ia aprender",
+        oneditprepare: function () {
+            $("#node-input-tipo").on("change", function () {
+                const an = $(this).val() === "anomalias";
+                $(".ia-objetivo").toggle(!an); $(".ia-umbral").toggle(an);
+            }).trigger("change");
+        }
+    });
+</script>
+<script type="text/html" data-template-name="ia-aprender">
+    <div class="form-row"><label for="node-input-servidor"><i class="fa fa-server"></i> Servicio</label>
+        <input type="text" id="node-input-servidor"></div>
+    <div class="form-row"><label for="node-input-modelo"><i class="fa fa-cube"></i> Modelo</label>
+        <input type="text" id="node-input-modelo" placeholder="aerolab-continuo"></div>
+    <div class="form-row"><label for="node-input-tipo"><i class="fa fa-sitemap"></i> Tipo</label>
+        <select id="node-input-tipo">
+            <option value="regresion">regresión (predecir un número)</option>
+            <option value="clasificacion">clasificación (predecir una clase)</option>
+            <option value="anomalias">anomalías (sin objetivo)</option>
+        </select></div>
+    <div class="form-row ia-objetivo"><label for="node-input-objetivo"><i class="fa fa-bullseye"></i> Objetivo</label>
+        <input type="text" id="node-input-objetivo" placeholder="potencia"></div>
+    <div class="form-row"><label for="node-input-entradas"><i class="fa fa-list"></i> Entradas</label>
+        <input type="text" id="node-input-entradas" placeholder="viento (vacío: todas las numéricas)"></div>
+    <div class="form-row ia-umbral"><label for="node-input-umbral"><i class="fa fa-sliders"></i> Umbral</label>
+        <input type="number" id="node-input-umbral" step="0.1" style="width:80px"></div>
+    <div class="form-row"><label>&nbsp;</label>
+        <input type="checkbox" id="node-input-aprender" style="width:auto; margin:0 6px 0 0">
+        <label for="node-input-aprender" style="width:auto">Aprender con cada lectura</label></div>
+    <div class="form-row"><label for="node-input-salida"><i class="fa fa-sign-out"></i> Resultado</label>
+        <select id="node-input-salida">
+            <option value="unir">añadido a msg.payload</option>
+            <option value="aparte">solo en msg.prediccion</option>
+        </select></div>
+    <div class="form-row"><label for="node-input-prefijo"><i class="fa fa-font"></i> Prefijo</label>
+        <input type="text" id="node-input-prefijo" placeholder="(ninguno)"></div>
+    <div class="form-row"><label for="node-input-name"><i class="fa fa-tag"></i> Nombre</label>
+        <input type="text" id="node-input-name"></div>
+</script>
+<script type="text/html" data-help-name="ia-aprender">
+    <p><b>Aprendizaje continuo</b>: el modelo se crea la primera vez que llega un mensaje y aprende de cada
+        lectura. No hace falta Jupyter.</p>
+    <p>Con cada lectura primero <b>predice</b> y después, si la lectura trae el valor del <b>objetivo</b>,
+        <b>aprende</b>. Así el error publicado es siempre sobre datos que el modelo no había visto.</p>
+    <h3>Salida</h3>
+    <ul>
+        <li>regresión: <code>prediccion</code>, <code>error</code> y <code>mae</code> (error medio de las últimas 200)</li>
+        <li>clasificación: <code>clase</code> y <code>acierto</code></li>
+        <li>anomalías: <code>anomalia</code> y <code>puntuacion</code> (1 = tan raro como el 1 % más raro de lo
+            normal; avisa por encima del <b>umbral</b>). Solo aprende de las lecturas que considera normales.</li>
+        <li>siempre: <code>deriva</code> (true en la lectura en la que el error empeora de forma significativa),
+            <code>derivas</code> y <code>aprendidas</code></li>
+    </ul>
+    <p><code>msg.aprender = false</code> hace que esa lectura solo se prediga. Para empezar de cero:
+        <code>DELETE http://ia:8000/continuo/&lt;modelo&gt;</code>.</p>
+</script>
