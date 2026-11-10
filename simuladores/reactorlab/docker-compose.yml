@@ -1,0 +1,15 @@
+services:
+  reactorlab:
+    build: .
+    ports:
+      - "8030:8030"
+    environment:
+      REACTORLAB_API_KEY: reactorlab
+      REACTORLAB_ESCALA_TIEMPO: "120"
+      REACTORLAB_DATOS: /data
+    volumes:
+      - reactorlab-data:/data
+    restart: unless-stopped
+
+volumes:
+  reactorlab-data:

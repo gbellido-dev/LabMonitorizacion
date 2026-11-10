@@ -10,10 +10,11 @@
 #                                     Mosquitto)   Mosquitto    mqtt://localhost:1883  WS 9001
 #   SolarLab   http://localhost:8000  OPC UA 4840  Copias       http://localhost:8090
 #   Fundición  http://localhost:3000  OPC UA 4841
+#   ReactorLab http://localhost:8030  REST · WebSocket · SSE · webhooks
 #
 # Dentro de la red de Docker cada servicio se alcanza por su nombre
 # (aerolab:1502, mosquitto:1883, solarlab:4840, fundicion-opcua:4841,
-# thingsboard:1883 ...).
+# reactorlab:8030, thingsboard:1883 ...).
 
 name: labmonitorizacion
 
@@ -52,6 +53,19 @@ services:
     ports:
       - "8000:8000"   # web 3D + API
       - "4840:4840"   # OPC UA
+    restart: unless-stopped
+
+  reactorlab:
+    build: simuladores/reactorlab
+    image: labmonitorizacion/reactorlab
+    environment:
+      REACTORLAB_API_KEY: ${REACTORLAB_API_KEY:-reactorlab}   # clave para las órdenes (cabecera X-API-Key)
+      REACTORLAB_ESCALA_TIEMPO: "120"                         # 1 s real = 2 min de proceso
+      REACTORLAB_DATOS: /data                                 # webhooks registrados
+    volumes:
+      - reactorlab-data:/data
+    ports:
+      - "8030:8030"   # web + REST + WebSocket + SSE (protocolos web)
     restart: unless-stopped
 
   fundicion-web:
@@ -164,6 +178,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  reactorlab-data:
   mosquitto-data:
   nodered-data:
   tb-logs:
