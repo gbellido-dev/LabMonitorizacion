@@ -36,7 +36,7 @@ Las prácticas están organizadas en **tres series** (más una **serie 4 de anal
 
 ## Serie 4 · Analítica e IA
 
-Una capa de IA **genérica** y opcional ([`plataforma/ia`](../plataforma/ia/README.md), `docker compose --profile ia up -d`): Node-RED registra los datos, **Jupyter** entrena los modelos y Node-RED los usa en tiempo real con los nodos **ia predecir** e **ia aprender**.
+Una capa de IA **genérica** ([`plataforma/ia`](../plataforma/ia/README.md), servicios `ia` y `jupyter`, que arrancan con el resto): Node-RED registra los datos, **Jupyter** entrena los modelos y Node-RED los usa en tiempo real con los nodos **ia predecir** e **ia aprender**.
 
 | Práctica | Contenido |
 |---|---|

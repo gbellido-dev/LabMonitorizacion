@@ -3,10 +3,10 @@
 Una capa **genérica** de analítica e IA: no sabe nada de ningún simulador. Trabaja con **conjuntos de datos** y
 **modelos** por nombre, así que sirve para AeroLab, SolarLab, la Fundición o cualquier dato que pase por Node-RED.
 
-Es **opcional**: no arranca con el resto del laboratorio.
+Arranca con el resto del laboratorio (`docker compose up -d`). Para levantar solo esta parte:
 
 ```bash
-docker compose --profile ia up -d        # servicio de IA + Jupyter
+docker compose up -d ia jupyter nodered
 ```
 
 | Servicio | Dirección | Qué hace |

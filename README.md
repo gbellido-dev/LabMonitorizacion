@@ -41,7 +41,7 @@ flowchart LR
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
 | [`plataforma/thingsboard`](plataforma/thingsboard) | ThingsBoard CE 4.3.1 que se instala solo en el primer arranque | nuevo |
 | [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED y ThingsBoard | nuevo |
-| [`plataforma/ia`](plataforma/ia) | Capa de IA opcional (perfil `ia`): servicio REST para Node-RED, Jupyter con cuadernos y nodos **IA** de Node-RED | nuevo |
+| [`plataforma/ia`](plataforma/ia) | Capa de IA: servicio REST para Node-RED, Jupyter con cuadernos y nodos **IA** de Node-RED | nuevo |
 | [`practicas`](practicas) | Guiones, soluciones y flujos de las prácticas | repos anteriores y sesiones previas |
 | [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx) de cada protocolo: OPC UA, Modbus TCP, MQTT, protocolos web y un panorama comparativo | nuevo |
 
@@ -74,8 +74,8 @@ También se puede arrancar solo una parte, por ejemplo `docker compose up -d aer
 | Mosquitto | MQTT `localhost:1883` · WS `localhost:9001` | `mosquitto:1883` |
 | ThingsBoard | http://localhost:8080 | `thingsboard:8080` · MQTT de dispositivos `thingsboard:1883` |
 | Copias | http://localhost:8090 (solo desde el propio equipo) | — |
-| Servicio de IA (perfil `ia`) | http://localhost:8100/docs | `http://ia:8000` |
-| Jupyter (perfil `ia`) | http://localhost:8888/?token=lab | — |
+| Servicio de IA | http://localhost:8100/docs | `http://ia:8000` |
+| Jupyter | http://localhost:8888/?token=lab | — |
 
 Cambios respecto a los repositorios originales, necesarios para que todo conviva en el mismo equipo:
 

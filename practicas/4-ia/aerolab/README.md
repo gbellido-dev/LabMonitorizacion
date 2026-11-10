@@ -39,10 +39,10 @@ empresa se analiza un histórico. El servicio de IA (`ia`) y Jupyter comparten l
 
 ## Preparación
 
-1. Arranca la capa de IA (solo hace falta una vez):
+1. La capa de IA arranca con el resto del laboratorio (servicios `ia` y `jupyter`). Si la has parado:
 
    ```bash
-   docker compose --profile ia up -d
+   docker compose up -d ia jupyter
    ```
 
 2. Comprueba que responden:

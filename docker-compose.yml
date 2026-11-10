@@ -172,10 +172,8 @@ services:
       retries: 20
     restart: unless-stopped
 
-  # ------------------------------------------------- capa de IA (opcional)
-  # Solo arranca con:  docker compose --profile ia up -d
+  # ------------------------------------------------- capa de IA (serie 4)
   ia:
-    profiles: ["ia"]
     build: plataforma/ia
     image: labmonitorizacion/ia
     command: ["servicio"]
@@ -188,7 +186,6 @@ services:
     restart: unless-stopped
 
   jupyter:
-    profiles: ["ia"]
     image: labmonitorizacion/ia
     depends_on: [ia]
     command: ["jupyter"]

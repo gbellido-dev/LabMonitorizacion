@@ -5,11 +5,7 @@ analizan y se usan para entrenar modelos en **Jupyter**, y esos modelos vuelven 
 **tiempo real** y generar alarmas en **ThingsBoard**.
 
 La capa es genérica ([`plataforma/ia`](../../plataforma/ia/README.md)): los mismos nodos y cuadernos sirven para
-cualquier simulador. Se arranca aparte:
-
-```bash
-docker compose --profile ia up -d
-```
+cualquier simulador. Arranca con el resto del laboratorio (servicios `ia` y `jupyter`).
 
 | Práctica | Simulador | Contenido | Material |
 |---|---|---|---|
