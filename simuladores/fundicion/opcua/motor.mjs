@@ -481,7 +481,9 @@ export class Planta {
     v["DES-01.FrecuenciaVibracion"] = round(d.marcha ? 24 + g(0.3) : 0, 1);
     v["DES-01.OEE"] = round(d.disparado ? 0 : 81.6 + g(0.4), 1);
     f["DES-01.Marcha"] = d.marcha;
-    e["DES-01"] = d.disparado ? "ALARM" : vib > 13 ? "WARN" : d.marcha ? "RUN" : "IDLE";
+    // el aviso depende del estado del rodamiento (vibración que tendría en marcha), no de si vibra ahora
+    const vibEnMarcha = 8.6 + 9 * Math.pow(Math.max(0, d.desgaste - 0.05), 1.6) * 3.2;
+    e["DES-01"] = d.disparado ? "ALARM" : vibEnMarcha > 13 ? "WARN" : d.marcha ? "RUN" : "IDLE";
     v["ROB-02.TiempoCiclo"] = round(21.2 + g(0.25), 2);
     v["ROB-02.Temperatura"] = round(44 + g(0.5), 1);
     v["ROB-02.Potencia"] = round((d.marcha ? 14 : 7) + g(0.6), 2);

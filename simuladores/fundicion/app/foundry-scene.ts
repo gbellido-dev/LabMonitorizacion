@@ -29,6 +29,25 @@ const lkpi = (s: LiveSnapshot | null, name: string) => {
   return typeof v === "number" ? v : null;
 };
 
+/* Color del metal según su temperatura (aproximación al cuerpo negro). */
+const STOPS: [number, number][] = [[1100, 0x5a0c00], [1250, 0xa82000], [1380, 0xff4a10], [1470, 0xff7a20], [1560, 0xffb458]];
+const _ca = new THREE.Color(), _cb = new THREE.Color();
+function colorMetal(t: number, out: THREE.Color) {
+  if (t <= STOPS[0][0]) return out.setHex(STOPS[0][1]);
+  for (let i = 1; i < STOPS.length; i++) {
+    if (t <= STOPS[i][0]) {
+      const k = (t - STOPS[i - 1][0]) / (STOPS[i][0] - STOPS[i - 1][0]);
+      return out.copy(_ca.setHex(STOPS[i - 1][1])).lerp(_cb.setHex(STOPS[i][1]), k);
+    }
+  }
+  return out.setHex(STOPS[STOPS.length - 1][1]);
+}
+// id de la escena → código del activo en OPC UA
+const SHORT: Record<string, string> = {
+  "if-01": "IF-01", "if-02": "IF-02", "mp-01": "MP-01", "mp-02": "MP-02", "pour-01": "COL-01", "rob-01": "ROB-01",
+  "rob-03": "ROB-03", "cool-01": "ENF-01", "shake-01": "DES-01", "rob-02": "ROB-02", "qc-01": "QC-01",
+};
+
 /* ---------------------------------- procedural textures ---------------------------------- */
 
 function concreteTexture() {
@@ -245,7 +264,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     lightSteel: sm(0x93a0a6, 0.34, 0.82),
     chrome: sm(0xd9dee1, 0.15, 1),
     copper: sm(0xb2652c, 0.3, 0.95),
-    refract: sm(0xc9bfae, 0.92, 0.05),
+    refract: sm(0x8f877a, 0.92, 0.05),
     sand: sm(0x8a6f47, 0.95, 0.02),
     yellow: sm(0xd6a02a, 0.55, 0.35),
     robotOrange: sm(0xd6661a, 0.4, 0.32),
@@ -272,7 +291,41 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     group.userData.assetId = id;
     group.traverse(o => { o.userData.assetId = id; if ((o as THREE.Mesh).isMesh) clickable.push(o); });
     scene.add(group);
+    anilloEstado(id, group);
   };
+  // Anillo en el suelo según el Estado OPC UA del activo: rojo pulsante en ALARM, ámbar en WARN
+  function anilloEstado(id: string, group: THREE.Group) {
+    const short = SHORT[id];
+    if (!short) return;
+    group.updateMatrixWorld(true);
+    const caja = new THREE.Box3(), b = new THREE.Box3(), c = new THREE.Vector3();
+    group.traverse(o => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh || !m.geometry) return;
+      b.setFromObject(m); b.getCenter(c);
+      if (c.y < 4.5) caja.union(b);                       // sin campanas ni conductos altos
+    });
+    const tam = caja.getSize(new THREE.Vector3());
+    const radio = Math.min(4.6, Math.max(tam.x, tam.z) / 2 + 0.55);
+    const centro = caja.getCenter(new THREE.Vector3());
+    const mat = new THREE.MeshBasicMaterial({ color: 0xff3b3b, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+    const anillo = new THREE.Mesh(new THREE.RingGeometry(radio, radio + 0.32, 48), mat);
+    anillo.rotation.x = -Math.PI / 2;
+    anillo.position.set(centro.x, 0.035, centro.z);
+    anillo.visible = false;
+    scene.add(anillo);
+    updaters.push(f => {
+      const est = lval(f.live, short, "Estado");
+      anillo.visible = est === "ALARM" || est === "WARN";
+      if (!anillo.visible) return;
+      const alarma = est === "ALARM";
+      mat.color.setHex(alarma ? 0xff3b3b : 0xffb84d);
+      const pulso = 0.5 + 0.5 * Math.sin(f.wall * (alarma ? 6 : 2.5));
+      mat.opacity = alarma ? 0.45 + 0.45 * pulso : 0.22 + 0.2 * pulso;
+      const k = 1 + (alarma ? 0.06 : 0.02) * pulso;
+      anillo.scale.set(k, k, 1);
+    });
+  }
 
   /* ---- floor & zone paint ---- */
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 36), new THREE.MeshStandardMaterial({ map: texConcrete, roughness: 0.93, metalness: 0.04 }));
@@ -359,7 +412,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
 
   // high-bay lamps
   const lampPositions: [number, number, boolean][] = [
-    [-20, -6, true], [-8, -6, false], [4, -6, true], [16, -6, false],
+    [-20, -6, false], [-8, -6, true], [4, -6, true], [16, -6, false],   // sobre los hornos no: ya iluminan su zona
     [-20, 6, false], [-8, 6, true], [4, 6, false], [16, 6, true], [26, 6, true],
   ];
   for (const [lx, lz, hasLight] of lampPositions) {
@@ -391,13 +444,73 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   craneLadle.add(mesh(new THREE.TorusGeometry(0.98, 0.07, 8, 24), M.darkSteel, 0, 6.95, 0));
   (craneLadle.children[1] as THREE.Mesh).rotation.x = Math.PI / 2;
   craneLadle.add(box(2.3, 0.09, 0.09, M.steel, 0, 7, 0));
+  const craneMeltMat = sm(0xff5a14, 0.55, 0, { emissive: 0xff3800, emissiveIntensity: 0 });
+  const craneMelt = new THREE.Mesh(new THREE.CircleGeometry(0.86, 20), craneMeltMat);
+  craneMelt.rotation.x = -Math.PI / 2; craneMelt.position.y = 6.75; craneMelt.visible = false;
+  craneLadle.add(craneMelt);
+  const craneGlow = new THREE.PointLight(0xff5a14, 0, 9, 1.8); craneGlow.position.y = 7.4; craneLadle.add(craneGlow);
   trolley.add(cableL, cableR, hookBlock, craneLadle);
   crane.add(trolley);
   scene.add(crane);
+  // La grúa sigue al proceso (COL-01.CambioCuchara): va al horno que sangra, baja la cuchara, se
+  // llena, la sube, la lleva a la estación de colada y vuelve a su sitio.
+  const HORNOS = [{ short: "IF-01", x: -20, z: -7 }, { short: "IF-02", x: -13.5, z: -7 }];
+  const grua = { x: -6, z: -1, gancho: 0, lleno: 0, estado: "espera", t: 0, horno: HORNOS[0] };
   updaters.push(f => {
-    crane.position.x = -9.5 + Math.sin(f.sim * 0.06) * 10.5;
-    trolley.position.z = -1 + Math.sin(f.sim * 0.045 + 1.2) * 8.5;
+    const cambio = lval(f.live, "COL-01", "CambioCuchara") === true;
+    const vel = Math.min(8, Math.max(1, Number(f.live?.sim?.Velocidad ?? 1)));
+    const paso = f.dt * 4.5 * vel;                       // unidades por fotograma
+    let tx = -6, tz = -1, gancho = 0;
+    if (!f.live) {                                      // sin datos: paseo de demostración
+      tx = -9.5 + Math.sin(f.sim * 0.06) * 10.5; tz = -1 + Math.sin(f.sim * 0.045 + 1.2) * 8.5;
+    } else if (grua.estado === "espera") {
+      if (cambio) {
+        grua.horno = HORNOS.find(h => (lnum(f.live, h.short, "Inclinacion") ?? 0) > 2)
+          ?? HORNOS.find(h => lval(f.live, h.short, "Fase") === "LISTO") ?? HORNOS[0];
+        grua.estado = "al-horno";
+      }
+    }
+    if (f.live) {
+      if (grua.estado === "al-horno" || grua.estado === "llenando") {
+        tx = grua.horno.x; tz = grua.horno.z + 3.05;
+        if (Math.hypot(grua.x - tx, grua.z - tz) < 0.3) grua.estado = "llenando";
+        if (grua.estado === "llenando") {
+          gancho = -3.1;
+          if ((lnum(f.live, grua.horno.short, "Inclinacion") ?? 0) > 20) grua.lleno = Math.min(1, grua.lleno + f.dt * 0.6 * vel);
+          if (!cambio) { grua.lleno = 1; grua.estado = "a-colada"; }
+        }
+      } else if (grua.estado === "a-colada" || grua.estado === "vaciando") {
+        tx = 1.55; tz = 2.9;
+        if (Math.hypot(grua.x - tx, grua.z - tz) < 0.3) grua.estado = "vaciando";
+        if (grua.estado === "vaciando") {
+          gancho = -0.8;
+          grua.lleno = Math.max(0, grua.lleno - f.dt * 0.8 * vel);
+          if (grua.lleno === 0) grua.estado = "espera";
+        }
+      }
+    }
+    // movimiento: primero sube el gancho, luego traslación (puente y carro), luego baja
+    const dGancho = gancho - grua.gancho;
+    const enDestino = Math.hypot(grua.x - tx, grua.z - tz) < 0.05;
+    if (!enDestino && grua.gancho < -0.05 && f.live) grua.gancho = Math.min(0, grua.gancho + paso * 0.8);
+    else {
+      const dx = tx - grua.x, dz = tz - grua.z, d = Math.hypot(dx, dz);
+      if (d > 0) { const k = Math.min(1, paso / d); grua.x += dx * k; grua.z += dz * k; }
+      if (enDestino || !f.live) grua.gancho += Math.sign(dGancho) * Math.min(Math.abs(dGancho), paso * 0.6);
+    }
+    crane.position.x = grua.x;
+    trolley.position.z = grua.z;
+    craneLadle.position.y = grua.gancho;
+    hookBlock.position.y = 7.25 + grua.gancho;
+    for (const c of [cableL, cableR]) { c.scale.y = (4.6 - grua.gancho) / 4.6; c.position.y = 9.7 + grua.gancho / 2; }
     craneLadle.rotation.z = Math.sin(f.sim * 0.6) * 0.02;
+    craneMelt.visible = grua.lleno > 0.02;
+    craneMelt.position.y = 6.0 + 0.8 * grua.lleno;
+    const t = lnum(f.live, grua.horno.short, "TemperaturaMetal") ?? 1460;
+    colorMetal(t - 60, craneMeltMat.emissive);
+    craneMeltMat.emissiveIntensity = 1.3 * grua.lleno;
+    craneGlow.color.copy(craneMeltMat.emissive);
+    craneGlow.intensity = 9 * grua.lleno;
   });
 
   /* ---- status beacon (stack light) ---- */
@@ -513,27 +626,45 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     const ring = new THREE.Mesh(new THREE.RingGeometry(2.7, 3.5, 40), new THREE.MeshBasicMaterial({ map: texHazard, transparent: true, opacity: 0.65, depthWrite: false }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.022; g.add(ring);
     g.add(cyl(2.5, 2.6, 0.5, M.darkSteel, 0, 0.25, 0, 30));
-    g.add(cyl(2.1, 2.32, 3.1, M.lining, 0, 2.05, 0, 30));
+    // el cuerpo del horno bascula hacia la colada (+z) sobre el pico de sangrado
+    const pivot = new THREE.Group(); pivot.position.set(0, 3.8, 2.3); g.add(pivot);
+    const cuerpo = new THREE.Group(); cuerpo.position.set(0, -3.8, -2.3); pivot.add(cuerpo);
+    cuerpo.add(cyl(2.1, 2.32, 3.1, M.lining, 0, 2.05, 0, 30));
     for (let i = 0; i < 5; i++) {
       const coil = mesh(new THREE.TorusGeometry(2.24, 0.12, 10, 34), M.copper, 0, 1.15 + i * 0.42, 0);
       coil.rotation.x = Math.PI / 2;
-      g.add(coil);
+      cuerpo.add(coil);
     }
-    g.add(cyl(2.32, 2.32, 0.38, M.refract, 0, 3.8, 0, 30));
+    cuerpo.add(cyl(2.32, 2.32, 0.38, M.refract, 0, 3.8, 0, 30));
+    cuerpo.add(box(0.7, 0.32, 0.9, M.refract, 0, 3.78, 2.35));          // pico de sangrado
     const meltMat = sm(0xff5a12, 0.55, 0, { emissive: 0xff3800, emissiveIntensity: 2.2 });
     const melt = cyl(1.62, 1.62, 0.16, meltMat, 0, 4.02, 0, 28);
     melt.castShadow = false;
-    g.add(melt);
+    cuerpo.add(melt);
     const glowL = new THREE.PointLight(0xff5a14, 26, 15, 1.8);
-    glowL.position.set(0, 4.8, 0); g.add(glowL);
-    // brillo del baño proporcional a la temperatura OPC UA del horno
-    const nomT = id === "if-01" ? 1487 : 1362;
+    glowL.position.set(0, 6.4, 0); cuerpo.add(glowL);
+    meltMat.color.setHex(0x1a0500);   // el baño se ve por su propia emisión, no por la luz que recibe
+    // chorro de sangrado (del pico a la cuchara de la grúa)
+    const tapMat = sm(0xff6a18, 0.5, 0, { emissive: 0xff4000, emissiveIntensity: 2.6 });
+    const tap = cyl(0.12, 0.08, 1.6, tapMat, 0, 3.05, 3.05, 10); tap.castShadow = false; tap.visible = false; g.add(tap);
+    // color, nivel e inclinación según OPC UA: TemperaturaMetal, NivelCarga e Inclinacion
     const fShort = (id as string).toUpperCase();
+    let incl = 0;
     updaters.push(f => {
-      const t = lnum(f.live, fShort, "TemperaturaMetal") ?? nomT;
-      const heat = Math.max(0.25, Math.min(1.35, (t - 1230) / 250));
-      meltMat.emissiveIntensity = (2 + Math.sin(f.wall * 6.5 + fx) * 0.28 + Math.sin(f.wall * 13.1) * 0.16) * heat;
-      glowL.intensity = (22 + Math.sin(f.wall * 9.2 + fz) * 5 + Math.sin(f.wall * 23.7) * 2.5) * heat;
+      const t = lnum(f.live, fShort, "TemperaturaMetal") ?? 1460;
+      const nivel = lnum(f.live, fShort, "NivelCarga") ?? 80;
+      const objetivo = (lnum(f.live, fShort, "Inclinacion") ?? 0) * 0.45 * Math.PI / 180;   // 95° reales → ~43° visibles
+      incl += (objetivo - incl) * Math.min(1, f.dt * 2.5);
+      pivot.rotation.x = incl;
+      melt.position.y = 2.35 + 1.62 * Math.min(1, nivel / 100);
+      colorMetal(t - 30, meltMat.emissive);
+      // los colores claros (metal muy caliente) ya brillan por sí mismos: menos intensidad para no deslumbrar
+      const heat = Math.max(0.3, Math.min(1, (t - 1200) / 300));
+      meltMat.emissiveIntensity = (1.25 + Math.sin(f.wall * 6.5 + fx) * 0.18 + Math.sin(f.wall * 13.1) * 0.1) * heat;
+      glowL.color.copy(meltMat.emissive);
+      glowL.intensity = (13 + Math.sin(f.wall * 9.2 + fz) * 3 + Math.sin(f.wall * 23.7) * 1.5) * heat;
+      tap.visible = incl > 0.25;
+      if (tap.visible) { colorMetal(t - 40, tapMat.emissive); tapMat.emissiveIntensity = 1.5 + Math.sin(f.wall * 21) * 0.3; }
     });
     // fume hood + ducting
     const hood = mesh(new THREE.ConeGeometry(2.75, 2.2, 26, 1, true), sm(0x2a3339, 0.5, 0.55, { side: THREE.DoubleSide }), 0, 6.3, 0);
@@ -551,13 +682,14 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
       g.add(piston, sleeve);
     });
     // operator platform + stairs + railing
-    const plat = box(6, 0.14, 2.4, M.lightSteel, 0, 2.35, 3.1);
+    // (en la parte trasera: el frente queda libre para el sangrado)
+    const plat = box(6, 0.14, 2.4, M.lightSteel, 0, 2.35, -3.4);
     g.add(plat);
-    g.add(box(6, 0.1, 0.1, M.yellow, 0, 3.4, 4.25));
-    g.add(box(6, 0.07, 0.07, M.yellow, 0, 2.95, 4.25));
-    for (let px = -2.9; px <= 2.9; px += 1.45) g.add(box(0.07, 1.1, 0.07, M.yellow, px, 2.9, 4.25));
-    for (let s = 0; s < 6; s++) g.add(box(1.1, 0.09, 0.34, M.lightSteel, 3.6, 0.35 + s * 0.4, 4.05 - s * 0.36));
-    [[-2.9], [2.9]].forEach(([px]) => g.add(box(0.16, 2.35, 0.16, M.steel, px, 1.17, 3.1)));
+    g.add(box(6, 0.1, 0.1, M.yellow, 0, 3.4, -4.55));
+    g.add(box(6, 0.07, 0.07, M.yellow, 0, 2.95, -4.55));
+    for (let px = -2.9; px <= 2.9; px += 1.45) g.add(box(0.07, 1.1, 0.07, M.yellow, px, 2.9, -4.55));
+    for (let s = 0; s < 6; s++) g.add(box(1.1, 0.09, 0.34, M.lightSteel, 3.6, 0.35 + s * 0.4, -4.35 + s * 0.36));
+    [[-2.9], [2.9]].forEach(([px]) => g.add(box(0.16, 2.35, 0.16, M.steel, px, 1.17, -3.4)));
     beacon(fShort, st, -3.4, 3.6, g);
     addAsset(id, g);
     // humo sobre el horno: solo en fases activas (FUSION / AFINO) según OPC UA
@@ -741,10 +873,19 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   beacon("COL-01", "RUN", -3.4, 2.4, pour);
   addAsset("pour-01", pour);
   let tilt = 0.12;
+  const colorCol = new THREE.Color();
   updaters.push(f => {
-    const targetTilt = f.pouring ? 0.5 : 0.1;
+    // la cuchara bascula más cuanto más vacía está (para que el metal llegue al pico)
+    const peso = lnum(f.live, "COL-01", "PesoCuchara") ?? 900;
+    const lleno = Math.max(0, Math.min(1, peso / 1450));
+    const targetTilt = f.pouring ? 0.42 + (1 - lleno) * 0.3 : 0.1;
     tilt += (targetTilt - tilt) * Math.min(1, f.sdt * 2.2);
     tiltGroup.rotation.z = -tilt;
+    // nivel y color del metal según PesoCuchara y TemperaturaColada (pirómetro de la colada)
+    ladleMelt.visible = peso > 20;
+    ladleMelt.position.y = -0.95 + 1.45 * lleno;
+    colorMetal((lnum(f.live, "COL-01", "TemperaturaColada") ?? 1440) - 40, colorCol);
+    ladleMeltMat.emissive.copy(colorCol); streamMat.emissive.copy(colorCol); pourGlow.color.copy(colorCol);
     stream.visible = f.pouring;
     splash.visible = f.pouring;
     pourGlow.intensity = f.pouring ? 26 + Math.sin(f.wall * 17) * 7 : 0;
@@ -754,6 +895,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     stream: () => { const v = new THREE.Vector3(); stream.getWorldPosition(v); return [+v.x.toFixed(2), +v.y.toFixed(2), +v.z.toFixed(2)]; },
     splash: () => { const v = new THREE.Vector3(); splash.getWorldPosition(v); return [+v.x.toFixed(2), +v.z.toFixed(2)]; },
     moulds: () => mouldUnits.map(m => +m.g.position.x.toFixed(2)),
+    grua: () => ({ ...grua, horno: grua.horno.short, x: +grua.x.toFixed(2), z: +grua.z.toFixed(2) }),
   };
   const pourSparks = makeSparks(160, texGlow, 0xffa24a, 0.14);
   scene.add(pourSparks.points);
@@ -826,15 +968,17 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   shake.add(grate);
   // vibra solo cuando DES-01 está en MARCHA según OPC UA, a su frecuencia real
   const shakeRunning = (f: Frame) => {
-    const est = lval(f.live, "DES-01", "Estado");
-    return f.running && (typeof est === "string" ? est === "RUN" : true);
+    const marcha = lval(f.live, "DES-01", "Marcha");
+    return f.running && (typeof marcha === "boolean" ? marcha : true);
   };
   let shPh = 0;
   updaters.push(f => {
     if (shakeRunning(f)) {
       shPh += f.sdt * 42 * ((lnum(f.live, "DES-01", "FrecuenciaVibracion") ?? 24) / 24);
-      grate.position.x = Math.sin(shPh) * 0.03;
-      grate.position.y = 1.55 + Math.abs(Math.sin(shPh)) * 0.02;
+      // amplitud proporcional a la vibración medida: con el rodamiento dañado se ve temblar más
+      const amp = 0.03 * Math.max(0.5, Math.min(3, (lnum(f.live, "DES-01", "Vibracion") ?? 8.6) / 8.6));
+      grate.position.x = Math.sin(shPh) * amp + Math.sin(shPh * 2.7) * amp * 0.25;
+      grate.position.y = 1.55 + Math.abs(Math.sin(shPh)) * amp * 0.7;
     } else {
       grate.position.x = 0;
       grate.position.y = 1.55;
@@ -893,12 +1037,21 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   const scanLight = new THREE.PointLight(0x2ce0da, 9, 8, 1.8);
   scanLight.position.set(-0.4, 2.6, 0);
   qc.add(scanLight);
-  let qcPh = 0;
+  let qcPh = 0, ultimaPieza: string | undefined, destello = 0, destelloOk = true;
+  const qcBase = new THREE.Color(0x2ce0da), qcOk = new THREE.Color(0x30d99b), qcMal = new THREE.Color(0xff3b3b);
   updaters.push(f => {
     if (lrun(f.live, "QC-01") ?? true) qcPh += f.sdt;
     turntable.rotation.y = qcPh * 0.7;
     scanHead.position.z = Math.sin(qcPh * 0.65) * 1.7;
-    scanLight.intensity = 7 + Math.sin(f.wall * 5.2) * 2.5;
+    // cada pieza inspeccionada (Trazabilidad.UltimaPieza) destella en verde (OK) o rojo (RECHAZO)
+    const id = f.live?.traz?.Id;
+    if (id && id !== ultimaPieza) {
+      if (ultimaPieza !== undefined) { destello = 1; destelloOk = f.live?.traz?.Resultado === "OK"; }
+      ultimaPieza = id;
+    }
+    destello = Math.max(0, destello - f.dt * 0.8);
+    scanLight.color.copy(qcBase).lerp(destelloOk ? qcOk : qcMal, destello);
+    scanLight.intensity = 7 + Math.sin(f.wall * 5.2) * 2.5 + destello * 30;
   });
   // operator console
   qc.add(box(0.5, 1.1, 0.5, M.cabinet, 3.6, 0.55, 1.4));
@@ -1025,6 +1178,30 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   canvas.addEventListener("contextmenu", ctx);
   window.addEventListener("resize", resize);
 
+  // Vistas predefinidas: window.dispatchEvent(new CustomEvent("fundicion:camara", { detail: "fusion" }))
+  const VISTAS: Record<string, { t: [number, number, number]; az: number; el: number; d: number }> = {
+    general: { t: [0, 1.6, 0], az: 0.62, el: 0.5, d: 56 },
+    fusion: { t: [-16.5, 3, -4.5], az: -0.95, el: 0.5, d: 17 },
+    colada: { t: [-1, 3, 1.5], az: -0.55, el: 0.42, d: 22 },
+    acabado: { t: [22, 1.8, 8], az: 0.55, el: 0.42, d: 25 },
+  };
+  let anim: { t0: THREE.Vector3; t1: THREE.Vector3; a0: number; a1: number; e0: number; e1: number; d0: number; d1: number; k: number } | null = null;
+  const irA = (e: Event) => {
+    const v = VISTAS[(e as CustomEvent<string>).detail];
+    if (!v) return;
+    anim = { t0: target.clone(), t1: new THREE.Vector3(...v.t), a0: azimuth, a1: v.az, e0: elevation, e1: v.el, d0: distance, d1: v.d, k: 0 };
+  };
+  window.addEventListener("fundicion:camara", irA);
+  updaters.push(f => {
+    if (!anim) return;
+    anim.k = Math.min(1, anim.k + f.dt / 1.2);
+    const k = anim.k * anim.k * (3 - 2 * anim.k);
+    target.lerpVectors(anim.t0, anim.t1, k);
+    azimuth = anim.a0 + (anim.a1 - anim.a0) * k; elevation = anim.e0 + (anim.e1 - anim.e0) * k; distance = anim.d0 + (anim.d1 - anim.d0) * k;
+    updateCamera();
+    if (anim.k >= 1) anim = null;
+  });
+
   /* ---- main loop ---- */
   const clock = new THREE.Clock();
   let sim = 0, raf = 0;
@@ -1047,6 +1224,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   return () => {
     cancelAnimationFrame(raf);
     window.removeEventListener("resize", resize);
+    window.removeEventListener("fundicion:camara", irA);
     canvas.removeEventListener("pointerdown", down);
     canvas.removeEventListener("pointermove", move);
     canvas.removeEventListener("pointerup", up);

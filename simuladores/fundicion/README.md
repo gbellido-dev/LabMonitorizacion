@@ -4,12 +4,30 @@ La Fundición simula la **Planta Norte** de una fundición de hierro completa: d
 
 Es el simulador con más activos del laboratorio: sirve para practicar el **descubrimiento** de un espacio de direcciones grande, el modelado de una planta como **jerarquía de activos** y los indicadores de planta (OEE, producción, energía).
 
+<img src="docs/img/gemelo-3d.png" width="100%" alt="Gemelo digital 3D de la Fundición con datos en vivo" />
+
+## El gemelo digital (http://localhost:3000)
+
+Todo lo que se ve sale del motor de proceso por OPC UA (a través del puente WebSocket); no hay valores fijos.
+
+| Vista | Qué muestra |
+|---|---|
+| **Planta 3D** | La escena se mueve con el proceso: los hornos **se inclinan al sangrar** (`Inclinacion`) y el color del baño sigue su temperatura; la **grúa** va al horno que sangra, baja la cuchara, la llena, la lleva a la colada y la vacía (`CambioCuchara`); la cuchara de colada muestra su peso y la temperatura del metal; el desmoldeo vibra con una amplitud proporcional a su vibración; el escáner destella en verde o rojo con cada pieza; un **anillo en el suelo** pulsa en rojo (`ALARM`) o ámbar (`WARN`). Vistas de cámara: general, fusión, colada y acabado |
+| **Sinóptico** | Esquema de operador con hornos, cuchara, línea, moldeo, túnel, desmoldeo (barra de vibración con umbrales 12 y 18 mm/s), calidad y KPIs; cada equipo se enmarca en ámbar o rojo según su estado |
+| **Trazabilidad** | Las piezas inspeccionadas con su colada, molde, temperatura de colada, humedad, inoculación, tiempo de túnel, temperatura de desmoldeo y desviación; las condiciones fuera de lo habitual en rojo; rechazos por defecto y por colada |
+
+En la cabecera: **velocidad** de la simulación (×1–×20) y **avería** (0–7), que el puente escribe en
+`Simulacion.Velocidad` y `Mantenimiento.Averia` (solo esas dos variables: lista cerrada). Abajo, la tendencia de la
+última media hora y los **eventos** detectados (cambios de estado, averías y piezas rechazadas).
+
+<img src="docs/img/sinoptico.png" width="49%" alt="Sinóptico de operador" /> <img src="docs/img/trazabilidad.png" width="49%" alt="Trazabilidad pieza a pieza" />
+
 ## Servicios
 
 | Servicio (compose) | Puerto | Qué hace |
 |---|---|---|
 | `fundicion-opcua` | `4841` | Servidor OPC UA: `opc.tcp://localhost:4841/UA/Fundicion` (desde otro contenedor, `opc.tcp://fundicion-opcua:4841/UA/Fundicion`) |
-| `fundicion-bridge` | `8081` | Puente OPC UA → WebSocket: se suscribe a las variables y envía una instantánea cada segundo a la escena 3D |
+| `fundicion-bridge` | `8081` | Puente OPC UA → WebSocket: se suscribe a las variables y envía una instantánea cada segundo al gemelo digital; acepta las órdenes de velocidad y avería |
 | `fundicion-web` | `3000` | Gemelo digital 3D: `http://localhost:3000` |
 | `fundicion-s7` | `102` | PLC Siemens S7 simulado (S7comm): las `TagsS7` en sus DB, y DB100 para órdenes (ver [docs/S7_INTEGRATION.md](docs/S7_INTEGRATION.md)) |
 
