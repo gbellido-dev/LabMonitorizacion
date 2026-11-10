@@ -1,0 +1,8 @@
+services:
+  solarlab:
+    build: .
+    ports:
+      - "8000:8000"
+      - "4840:4840"
+    environment:
+      OPCUA_PUBLIC_HOST: localhost
