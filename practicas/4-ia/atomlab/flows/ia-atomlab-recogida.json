@@ -1,0 +1,153 @@
+[
+    {
+        "id": "6e2a789f42df3d87",
+        "type": "tab",
+        "label": "Serie 4 · AtomLab · Generar datos",
+        "disabled": false,
+        "info": "Flujo de recogida de la serie 4 con AtomLab (practicas/4-ia/atomlab)."
+    },
+    {
+        "id": "a243be306cde77ad",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "3979a7aede94d090",
+        "type": "comment",
+        "z": "6e2a789f42df3d87",
+        "name": "FASE 1 · Generar los datos (conjunto «atomlab-az5»)",
+        "info": "Cada lote: AtomLab simula N estados al azar y pulsa el AZ-5 en cada uno. Pulsa 3 veces «500 casos».",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "dfe14401891d598b",
+        "type": "inject",
+        "z": "6e2a789f42df3d87",
+        "name": "500 casos",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "500",
+        "payloadType": "str",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "1d64abefe4de8590"
+            ]
+        ]
+    },
+    {
+        "id": "005525a63c45571a",
+        "type": "inject",
+        "z": "6e2a789f42df3d87",
+        "name": "50 casos (prueba)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "50",
+        "payloadType": "str",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "1d64abefe4de8590"
+            ]
+        ]
+    },
+    {
+        "id": "1d64abefe4de8590",
+        "type": "function",
+        "z": "6e2a789f42df3d87",
+        "name": "Lote de simulaciones",
+        "func": "// ENTRADA: el número de casos (botón)\n// SALIDA:  POST /api/v1/simulacion/lote: AtomLab inventa estados de operación al azar y pulsa el AZ-5 en cada uno\n// No toca la central de la sala de control: cada caso es una central nueva. 500 casos tardan unos 20 s.\n\nconst lotes = (flow.get(\"lotes\") || 0) + 1;\nflow.set(\"lotes\", lotes);\nmsg.method = \"POST\";\nmsg.url = \"http://atomlab:8040/api/v1/simulacion/lote\";\nmsg.headers = { \"Content-Type\": \"application/json\" };\nmsg.payload = { casos: Number(msg.payload), semilla: lotes };     // otra semilla en cada lote: casos distintos\nmsg.requestTimeout = 120000;\nnode.status({ fill: \"yellow\", shape: \"ring\", text: `lote ${lotes}: simulando ${msg.payload.casos} casos…` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 120,
+        "wires": [
+            [
+                "8299a2caccac7e49"
+            ]
+        ]
+    },
+    {
+        "id": "8299a2caccac7e49",
+        "type": "http request",
+        "z": "6e2a789f42df3d87",
+        "name": "POST simulacion/lote",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 540,
+        "y": 120,
+        "wires": [
+            [
+                "c569fc9d7f68272d"
+            ]
+        ]
+    },
+    {
+        "id": "c569fc9d7f68272d",
+        "type": "function",
+        "z": "6e2a789f42df3d87",
+        "name": "Filas",
+        "func": "// ENTRADA: la respuesta del lote { casos: [ { escenario, medidas, az5_pico_mwt, az5_pico_rel, az5_danado } ] }\n// SALIDA:  msg.payload = una lista de filas planas para el conjunto \"atomlab-az5\"\n\nconst r = msg.payload;\nmsg.payload = r.casos.map(c => ({\n    ...c.medidas,                                  // lo que se veía en la sala de control antes del AZ-5\n    // la etiqueta: lo que pasó al pulsar el AZ-5\n    az5_pico_rel: c.az5_pico_rel,                  // pico de potencia / potencia antes del AZ-5\n    az5_danado: c.az5_danado ? 1 : 0               // rotura de canales\n}));\nconst n = msg.payload.filter(f => f.az5_danado).length;\nnode.status({ fill: \"green\", shape: \"dot\", text: `${r.casos.length} casos en ${r.segundos_cpu} s · ${n} explosiones` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 120,
+        "wires": [
+            [
+                "dd2c59d2f43b3c64"
+            ]
+        ]
+    },
+    {
+        "id": "dd2c59d2f43b3c64",
+        "type": "ia-registrar",
+        "z": "6e2a789f42df3d87",
+        "name": "",
+        "servidor": "a243be306cde77ad",
+        "conjunto": "atomlab-az5",
+        "lote": 1,
+        "x": 940,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    }
+]

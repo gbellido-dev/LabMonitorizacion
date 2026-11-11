@@ -43,7 +43,7 @@ flowchart LR
 | [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED, ThingsBoard y la capa de IA | nuevo |
 | [`plataforma/ia`](plataforma/ia) | Capa de IA: servicio REST para Node-RED, Jupyter con cuadernos y nodos **IA** de Node-RED | nuevo |
 | [`practicas`](practicas) | Guiones, soluciones y flujos de las prácticas | repos anteriores y sesiones previas |
-| [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx) de cada protocolo: OPC UA, Modbus TCP, MQTT, protocolos web y un panorama comparativo | nuevo |
+| [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx): OPC UA, Modbus TCP, MQTT, protocolos web, S7, OPC UA avanzado, IA en planta y un panorama comparativo | nuevo |
 
 El historial de commits de los cuatro repositorios originales se ha conservado (`git log -- simuladores/aerolab`).
 

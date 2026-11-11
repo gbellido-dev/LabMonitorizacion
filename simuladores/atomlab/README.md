@@ -122,6 +122,17 @@ Three.js (MIT) se instala con npm al construir la imagen y se sirve desde `/vend
 
 La API REST de la web está documentada en `http://localhost:8040/docs` (`GET /api/v1/planta`, `/medidas`, `/historico`, `/alarmas`, `/eventos`, `/opcua` y los mandos en `/api/v1/mandos/...`). El protocolo de las prácticas es OPC UA.
 
+## Simulación rápida (serie 4 · IA)
+
+Dos endpoints que **no tocan** la central de la sala de control (trabajan con copias):
+
+| Endpoint | Qué hace |
+|---|---|
+| `POST /api/v1/simulacion/lote` `{"casos": 500, "semilla": 1}` | Inventa `casos` estados de operación al azar (potencia, cada grupo de barras, xenón, bombas, subenfriamiento, prueba de inercia), pulsa el AZ-5 en cada uno y devuelve las medidas de antes (las mismas claves que `GET /api/v1/medidas`) y el resultado: `az5_pico_mwt`, `az5_pico_rel`, `az5_danado`. ~0,04 s de CPU por caso, en un proceso aparte (la sala de control no se frena). Máximo 1000 casos por petición |
+| `POST /api/v1/simulacion/que-pasaria` | Lo mismo desde el estado **actual**: «¿qué pasaría si pulso el AZ-5 ahora?» (unas decenas de milisegundos) |
+
+Con ellos se entrena y se comprueba el modelo sustituto de [`practicas/4-ia/atomlab`](../../practicas/4-ia/atomlab/README.md).
+
 ## Puesta en marcha
 
 Con el laboratorio completo: `docker compose up -d atomlab` desde la raíz del repositorio.

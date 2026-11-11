@@ -42,6 +42,9 @@ Una capa de IA **genérica** ([`plataforma/ia`](../plataforma/ia/README.md), ser
 |---|---|
 | [AeroLab](4-ia/aerolab/README.md) · [.docx](4-ia/aerolab/Practica_AeroLab_IA_ES.docx) | Campaña de datos etiquetados, red neuronal (curva de potencia), detector de anomalías, despliegue a ThingsBoard con alarmas sobre los modelos, aprendizaje continuo y deriva |
 | [ReactorLab](4-ia/reactorlab/README.md) · [.docx](4-ia/reactorlab/Practica_ReactorLab_IA_ES.docx) | Planta con control automático: sensor virtual de presión, diagnóstico de averías con indicadores de ventana, tiempo real y alarmas sobre los modelos |
+| [Fundición](4-ia/fundicion/README.md) · [.docx](4-ia/fundicion/Practica_Fundicion_IA_ES.docx) | Riesgo de rechazo de cada molde al colarlo (47 min antes del escáner): reglas del experto frente a un árbol de decisión y comprobación en producción |
+| [AtomLab](4-ia/atomlab/README.md) · [.docx](4-ia/atomlab/Practica_AtomLab_IA_ES.docx) | Modelo sustituto entrenado con simulaciones: ¿es seguro pulsar el AZ-5 ahora? Reglamento frente a modelo |
+| [OceanLab](4-ia/oceanlab/README.md) · [.docx](4-ia/oceanlab/Practica_OceanLab_IA_ES.docx) | Previsión del oleaje a 10 minutos con el tiempo acoplado; persistencia frente a modelo |
 | [Reto SolarLab](4-ia/solarlab/README.md) · [.docx](4-ia/solarlab/Reto_SolarLab_IA_ES.docx) | La misma capa con otra fuente (OPC UA): recogida, plantilla de entrenamiento, tiempo real y propuesta para otro simulador |
 
 Índice completo en [`4-ia/README.md`](4-ia/README.md).

@@ -1,0 +1,511 @@
+[
+    {
+        "id": "8c088fc4618a1c57",
+        "type": "tab",
+        "label": "Serie 4 · Fundición · IA (solución)",
+        "disabled": false,
+        "info": "Solución de la serie 4 con la Fundición (practicas/4-ia/fundicion). Pega el token del dispositivo Fundicion-IA en el broker de ThingsBoard. El modelo fundicion-riesgo se publica desde Jupyter (cuaderno 07)."
+    },
+    {
+        "id": "400e9a30497d2924",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "07c7d35961e686fe",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "dffcf7658e6b795f",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Fundicion-IA",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-fundicion-ia",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "c7caf0b8f25cffde",
+        "type": "comment",
+        "z": "8c088fc4618a1c57",
+        "name": "FASE 1 · Recoger datos (conjunto «fundicion»)",
+        "info": "Una fila por pieza inspeccionada, con las condiciones de su molde. La campaña acelera la planta a ×20 y alterna las averías 5, 6 y 7.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "9a2813720e34da68",
+        "type": "inject",
+        "z": "8c088fc4618a1c57",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "5fba7eba92170966"
+            ]
+        ]
+    },
+    {
+        "id": "5fba7eba92170966",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Suscribir",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  una suscripción por variable: la última pieza inspeccionada, el último molde colado y la avería activa\n\nconst PIEZA = { Id: \"String\", Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\",\n                TiempoEnfriamiento: \"Double\", TemperaturaDesmoldeo: \"Double\",\n                Desviacion: \"Double\", Resultado: \"String\", Defecto: \"String\" };\nconst COLADA = { Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                 TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\" };\nconst m = [];\nfor (const [v, t] of Object.entries(PIEZA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaPieza.\" + v, datatype: t });\nfor (const [v, t] of Object.entries(COLADA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaColada.\" + v, datatype: t });\nm.push({ topic: \"ns=1;s=Mantenimiento.Averia\", datatype: \"Int32\" });\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "5d370bc18c5bf7b6"
+            ]
+        ]
+    },
+    {
+        "id": "5d370bc18c5bf7b6",
+        "type": "OpcUa-Client",
+        "z": "8c088fc4618a1c57",
+        "endpoint": "07c7d35961e686fe",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 100,
+        "wires": [
+            [
+                "7930534b293d0f43"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "7930534b293d0f43",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 100,
+        "wires": [
+            [
+                "be84fa84cfad6fe1",
+                "e07a2e56ad1c84c6"
+            ]
+        ]
+    },
+    {
+        "id": "be84fa84cfad6fe1",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Pieza nueva",
+        "func": "// ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)\n// SALIDA:  la pieza, una sola vez, cuando QC-01 inspecciona una nueva y ya han llegado todos sus campos\n\nconst p = (msg.payload.Trazabilidad || {}).UltimaPieza;\nif (!p || !p.Id) return null;\n// los campos de una pieza llegan como varios cambios OPC UA seguidos: esperamos a que esté completa\nif (p.Id === context.get(\"ultima\")) return null;\nconst campos = [\"Lote\", \"TemperaturaColada\", \"HumedadArena\", \"Inoculada\", \"TiempoEnfriamiento\",\n                \"TemperaturaDesmoldeo\", \"Desviacion\", \"Resultado\", \"Defecto\"];\nif (campos.some(c => p[c] === undefined)) return null;\nclearTimeout(context.get(\"t\"));\ncontext.set(\"t\", setTimeout(() => {               // 300 ms: que lleguen todos los campos de la misma pieza\n    const actual = flow.get(\"planta\").Trazabilidad.UltimaPieza;\n    if (actual.Id === context.get(\"ultima\")) return;\n    context.set(\"ultima\", actual.Id);\n    node.send({ payload: Object.assign({}, actual), contexto: flow.get(\"planta\") });\n}, 300));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 160,
+        "wires": [
+            [
+                "05dda5dab8c9ee9f"
+            ]
+        ]
+    },
+    {
+        "id": "05dda5dab8c9ee9f",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Fila plana",
+        "func": "// ENTRADA: la pieza inspeccionada (msg.payload) y la planta (msg.contexto)\n// SALIDA:  msg.payload = una fila plana para el conjunto \"fundicion\"\n\nconst p = msg.payload;\nmsg.payload = {\n    pieza:          p.Id,\n    molde:          p.Molde,\n    lote:           p.Lote,\n    // condiciones que se conocen AL COLAR (47 min antes de la inspección)\n    t_colada:       p.TemperaturaColada,\n    humedad:        p.HumedadArena,\n    inoculada:      p.Inoculada ? 1 : 0,\n    // lo que se sabe después\n    t_enfriamiento: p.TiempoEnfriamiento,\n    t_desmoldeo:    p.TemperaturaDesmoldeo,\n    desviacion:     p.Desviacion,\n    // la etiqueta: lo que dijo el escáner\n    rechazo:        p.Resultado === \"RECHAZO\" ? 1 : 0,\n    defecto:        p.Defecto,\n    // la avería activa EN EL MOMENTO DE LA INSPECCIÓN (no cuando se coló la pieza)\n    averia:         (msg.contexto.Mantenimiento || {}).Averia ?? 0\n};\nnode.status({ fill: msg.payload.rechazo ? \"red\" : \"green\", shape: \"dot\", text: `${p.Id} · ${p.Resultado}` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 160,
+        "wires": [
+            [
+                "fe65e0540439694a",
+                "d45d786a37b069a9",
+                "82905d523332d44a"
+            ]
+        ]
+    },
+    {
+        "id": "fe65e0540439694a",
+        "type": "ia-registrar",
+        "z": "8c088fc4618a1c57",
+        "name": "",
+        "servidor": "400e9a30497d2924",
+        "conjunto": "fundicion",
+        "lote": 1,
+        "x": 730,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d45d786a37b069a9",
+        "type": "debug",
+        "z": "8c088fc4618a1c57",
+        "name": "Pieza",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "66fc51d51a1046cf",
+        "type": "inject",
+        "z": "8c088fc4618a1c57",
+        "name": "Empezar campaña",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "empezar",
+        "payloadType": "str",
+        "x": 140,
+        "y": 240,
+        "wires": [
+            [
+                "a47e5ad6575b9de9"
+            ]
+        ]
+    },
+    {
+        "id": "19cf6d9e8fb9377a",
+        "type": "inject",
+        "z": "8c088fc4618a1c57",
+        "name": "Parar campaña",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "parar",
+        "payloadType": "str",
+        "x": 140,
+        "y": 280,
+        "wires": [
+            [
+                "a47e5ad6575b9de9"
+            ]
+        ]
+    },
+    {
+        "id": "a47e5ad6575b9de9",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Campaña de averías",
+        "func": "// ENTRADA: \"empezar\" o \"parar\" (botones)\n// SALIDA:  escrituras OPC UA: velocidad ×20 y la avería de cada tramo\n// Cada tramo dura 3 min reales = 1 h de planta. 7 tramos ≈ 21 min ≈ 430 piezas.\n\nconst TRAMOS = [0, 5, 0, 6, 0, 7, 0];     // 5 humedad de arena · 6 inoculación · 7 termopar de IF-01\nconst MINUTOS = 3;\nconst escribir = (id, tipo, valor) => ({ topic: \"ns=1;s=\" + id, datatype: tipo, payload: valor });\nconst fin = [escribir(\"Mantenimiento.Averia\", \"Int32\", 0), escribir(\"Simulacion.Velocidad\", \"Double\", 1)];\n\nclearInterval(context.get(\"reloj\"));\nif (msg.payload !== \"empezar\") {\n    node.status({ fill: \"grey\", shape: \"dot\", text: \"campaña parada\" });\n    return [fin];\n}\nlet paso = 0;\nconst tramo = () => {\n    if (paso >= TRAMOS.length) {\n        clearInterval(context.get(\"reloj\"));\n        node.status({ fill: \"grey\", shape: \"dot\", text: \"campaña terminada\" });\n        node.send([fin]);\n        return;\n    }\n    node.status({ fill: TRAMOS[paso] ? \"orange\" : \"green\", shape: \"dot\",\n                  text: `tramo ${paso + 1}/${TRAMOS.length} · avería ${TRAMOS[paso]}` });\n    const ordenes = [escribir(\"Mantenimiento.Averia\", \"Int32\", TRAMOS[paso])];\n    if (paso === 0) ordenes.push(escribir(\"Simulacion.Velocidad\", \"Double\", 20));\n    node.send([ordenes]);\n    paso++;\n};\ntramo();\ncontext.set(\"reloj\", setInterval(tramo, MINUTOS * 60 * 1000));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 260,
+        "wires": [
+            [
+                "82896f7648783d66"
+            ]
+        ]
+    },
+    {
+        "id": "82896f7648783d66",
+        "type": "OpcUa-Client",
+        "z": "8c088fc4618a1c57",
+        "endpoint": "07c7d35961e686fe",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 600,
+        "y": 260,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "80a8a52982f275ff",
+        "type": "comment",
+        "z": "8c088fc4618a1c57",
+        "name": "FASE 2 · Riesgo de rechazo AL COLAR y comprobación en el escáner → ThingsBoard",
+        "info": "",
+        "x": 250,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "e07a2e56ad1c84c6",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Colada nueva",
+        "func": "// ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)\n// SALIDA:  el molde recién colado, una sola vez, con sus condiciones (las entradas del modelo)\n\nconst c = (msg.payload.Trazabilidad || {}).UltimaColada;\nif (!c || !c.Molde || c.Molde === context.get(\"ultimo\")) return null;\nclearTimeout(context.get(\"t\"));\ncontext.set(\"t\", setTimeout(() => {               // 300 ms: que lleguen todos los campos del mismo molde\n    const a = flow.get(\"planta\").Trazabilidad.UltimaColada;\n    if (a.Molde === context.get(\"ultimo\")) return;\n    context.set(\"ultimo\", a.Molde);\n    node.send({ payload: { molde: a.Molde, lote: a.Lote, t_colada: a.TemperaturaColada,\n                           humedad: a.HumedadArena, inoculada: a.Inoculada ? 1 : 0 } });\n}, 300));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 160,
+        "y": 420,
+        "wires": [
+            [
+                "06ba63f98e3752d6"
+            ]
+        ]
+    },
+    {
+        "id": "06ba63f98e3752d6",
+        "type": "ia-predecir",
+        "z": "8c088fc4618a1c57",
+        "name": "Riesgo de rechazo",
+        "servidor": "400e9a30497d2924",
+        "modelo": "fundicion-riesgo",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 360,
+        "y": 420,
+        "wires": [
+            [
+                "4afb62c55e6ffe1a"
+            ]
+        ]
+    },
+    {
+        "id": "4afb62c55e6ffe1a",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Riesgo del molde",
+        "func": "// ENTRADA: el molde + msg.prediccion = { clase, probabilidad } del modelo fundicion-riesgo\n// SALIDA:  telemetría del molde para ThingsBoard; guarda el riesgo para compararlo con su pieza\n// UMBRAL: el que elegiste en el cuaderno 07 (a partir de qué riesgo avisar)\n\nconst UMBRAL = 0.15;\nconst m = msg.payload, r = msg.prediccion;\n// probabilidad de RECHAZO (el servicio da la probabilidad de la clase elegida)\nconst riesgo = r.clase === 1 ? r.probabilidad : 1 - r.probabilidad;\nconst pendientes = flow.get(\"pendientes\") || {};\npendientes[m.molde] = riesgo;\nconst claves = Object.keys(pendientes);\nif (claves.length > 200) delete pendientes[claves[0]];      // el túnel tiene ~55 moldes: sobra\nflow.set(\"pendientes\", pendientes);\n// cuántos de los últimos 10 moldes colados tienen riesgo: una cuenta de moldes, no de segundos,\n// así la regla de ThingsBoard funciona igual a ×1 que a ×20\nconst ult = context.get(\"ultimos\") || [];\nult.push(riesgo >= UMBRAL ? 1 : 0);\nwhile (ult.length > 10) ult.shift();\ncontext.set(\"ultimos\", ult);\nnode.status({ fill: riesgo >= UMBRAL ? \"red\" : \"green\", shape: \"dot\", text: `${m.molde} · riesgo ${(100 * riesgo).toFixed(0)} %` });\nmsg.payload = { ts: Date.now(), values: {\n    molde: m.molde, lote: m.lote, t_colada: m.t_colada, humedad: m.humedad, inoculada: m.inoculada,\n    riesgo_pct: Math.round(1000 * riesgo) / 10, aviso: riesgo >= UMBRAL,\n    moldes_riesgo_ultimos_10: ult.reduce((x, y) => x + y, 0) } };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 420,
+        "wires": [
+            [
+                "1280863be1fcb736"
+            ]
+        ]
+    },
+    {
+        "id": "1280863be1fcb736",
+        "type": "mqtt out",
+        "z": "8c088fc4618a1c57",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "dffcf7658e6b795f",
+        "x": 800,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "82905d523332d44a",
+        "type": "function",
+        "z": "8c088fc4618a1c57",
+        "name": "Comprobar en el escáner",
+        "func": "// ENTRADA: la fila plana de una pieza inspeccionada\n// SALIDA:  la telemetría de la pieza con el riesgo que se le predijo al colarla y el balance de aciertos\n\nconst UMBRAL = 0.15;                              // el mismo que en «Riesgo del molde»\nconst p = msg.payload;\nconst pendientes = flow.get(\"pendientes\") || {};\nconst riesgo = pendientes[p.molde];\nif (riesgo === undefined) return null;            // se coló antes de desplegar el flujo\ndelete pendientes[p.molde];\nflow.set(\"pendientes\", pendientes);\n\nconst aviso = riesgo >= UMBRAL;\nconst b = flow.get(\"balance\") || { avisos: 0, avisos_bien: 0, rechazos: 0, rechazos_avisados: 0, piezas: 0 };\nb.piezas++;\nif (aviso) { b.avisos++; if (p.rechazo) b.avisos_bien++; }\nif (p.rechazo) { b.rechazos++; if (aviso) b.rechazos_avisados++; }\nflow.set(\"balance\", b);\nconst pct = (a, n) => n ? Math.round(1000 * a / n) / 10 : null;\nmsg.payload = { ts: Date.now(), values: {\n    pieza: p.pieza, molde: p.molde, rechazo: p.rechazo, defecto: p.defecto,\n    riesgo_predicho_pct: Math.round(1000 * riesgo) / 10, avisada: aviso,\n    acierto: aviso === (p.rechazo === 1),\n    precision_pct: pct(b.avisos_bien, b.avisos),             // de los moldes avisados, cuántos salieron mal\n    deteccion_pct: pct(b.rechazos_avisados, b.rechazos),     // de los rechazos, cuántos se avisaron al colar\n    piezas_comprobadas: b.piezas } };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 480,
+        "wires": [
+            [
+                "825ec118d0a20ae2",
+                "f9f644fe54a87235"
+            ]
+        ]
+    },
+    {
+        "id": "825ec118d0a20ae2",
+        "type": "mqtt out",
+        "z": "8c088fc4618a1c57",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "dffcf7658e6b795f",
+        "x": 800,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "f9f644fe54a87235",
+        "type": "debug",
+        "z": "8c088fc4618a1c57",
+        "name": "Comprobación",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 530,
+        "wires": []
+    },
+    {
+        "id": "33cb1483487e5713",
+        "type": "catch",
+        "z": "8c088fc4618a1c57",
+        "name": "Errores de la IA",
+        "scope": [
+            "06ba63f98e3752d6"
+        ],
+        "uncaught": false,
+        "x": 160,
+        "y": 530,
+        "wires": [
+            [
+                "dd0f10804de82a71"
+            ]
+        ]
+    },
+    {
+        "id": "dd0f10804de82a71",
+        "type": "debug",
+        "z": "8c088fc4618a1c57",
+        "name": "Error de la IA",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 530,
+        "wires": []
+    }
+]

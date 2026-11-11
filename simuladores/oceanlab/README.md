@@ -13,6 +13,24 @@ OceanLab es un banco de prácticas para la asignatura **Monitorización de Máqu
 - Inyección de tormenta, batería baja, desconexión y restablecimiento.
 - API HTTP, WebSocket, OpenAPI y modo demostración del frontend.
 
+## El tiempo meteorológico
+
+Las variables de cada boya no son ruido independiente: salen de un tiempo **acoplado** (`backend/app/model.py`).
+
+| Variable | De qué depende |
+|---|---|
+| Presión | La de su latitud (altas subtropicales, bajas subpolares) más la depresión de las **borrascas** cercanas (14 a la vez, que nacen, se mueven hacia el este o hacia el polo, se profundizan y se rellenan) |
+| Viento | El de fondo de su latitud (alisios, ponientes) más el de las borrascas: crece con el gradiente de presión y gira alrededor del centro (al revés en cada hemisferio) |
+| Oleaje | Tiende al de un mar desarrollado para ese viento (≈ 0,0214·U², Pierson-Moskowitz) más el mar de fondo; sube en unas 4 h y baja en unas 9 h |
+| Temperatura del aire, humedad | Ciclo diario según la hora solar de cada boya; con tormenta, más fría y más húmeda |
+| Batería, cobertura | Carga solar de día y consumo constante; la cobertura empeora con el oleaje |
+
+**Escala de tiempo**: 1 s real = 1 min de mar (variable `OCEANLAB_ESCALA`, por defecto 60). **Simular tormenta** coloca
+una borrasca profunda junto a la boya (8,4 m, ~29 m/s, 975 hPa al instante) que dura unos 30 minutos y se rellena en
+otros 30; **Restablecer** la quita. En la flota hay casi siempre alguna boya con mal tiempo de verdad.
+
+Es la base de la práctica de previsión del oleaje de la serie 4 ([`practicas/4-ia/oceanlab`](../../practicas/4-ia/oceanlab/README.md)).
+
 ## Puesta en marcha local
 
 Requisitos: Python 3.12 o posterior y Node.js 22 o posterior.

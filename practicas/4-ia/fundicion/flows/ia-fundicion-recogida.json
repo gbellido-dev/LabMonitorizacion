@@ -1,0 +1,308 @@
+[
+    {
+        "id": "ec348350604cf16a",
+        "type": "tab",
+        "label": "Serie 4 · Fundición · Recoger datos",
+        "disabled": false,
+        "info": "Flujo de recogida de la serie 4 con la Fundición (practicas/4-ia/fundicion)."
+    },
+    {
+        "id": "a706bd1bfba5b9c7",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "41bf2ca1cb7f81c9",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://fundicion-opcua:4841/UA/Fundicion",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "a734a05425b79735",
+        "type": "comment",
+        "z": "ec348350604cf16a",
+        "name": "FASE 1 · Recoger datos (conjunto «fundicion»)",
+        "info": "Una fila por pieza inspeccionada, con las condiciones de su molde. La campaña acelera la planta a ×20 y alterna las averías 5, 6 y 7.",
+        "x": 220,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "70f5abe60fa38442",
+        "type": "inject",
+        "z": "ec348350604cf16a",
+        "name": "Iniciar",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "befe3762723c61fb"
+            ]
+        ]
+    },
+    {
+        "id": "befe3762723c61fb",
+        "type": "function",
+        "z": "ec348350604cf16a",
+        "name": "Suscribir",
+        "func": "// ENTRADA: el inject \"Iniciar\"\n// SALIDA:  una suscripción por variable: la última pieza inspeccionada, el último molde colado y la avería activa\n\nconst PIEZA = { Id: \"String\", Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\",\n                TiempoEnfriamiento: \"Double\", TemperaturaDesmoldeo: \"Double\",\n                Desviacion: \"Double\", Resultado: \"String\", Defecto: \"String\" };\nconst COLADA = { Molde: \"String\", Prensa: \"String\", Lote: \"String\",\n                 TemperaturaColada: \"Double\", HumedadArena: \"Double\", Inoculada: \"Boolean\" };\nconst m = [];\nfor (const [v, t] of Object.entries(PIEZA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaPieza.\" + v, datatype: t });\nfor (const [v, t] of Object.entries(COLADA)) m.push({ topic: \"ns=1;s=Trazabilidad.UltimaColada.\" + v, datatype: t });\nm.push({ topic: \"ns=1;s=Mantenimiento.Averia\", datatype: \"Int32\" });\nnode.status({ text: m.length + \" variables\" });\nreturn [m];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "5348b7b40bd03074"
+            ]
+        ]
+    },
+    {
+        "id": "5348b7b40bd03074",
+        "type": "OpcUa-Client",
+        "z": "ec348350604cf16a",
+        "endpoint": "41bf2ca1cb7f81c9",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Suscribir",
+        "x": 560,
+        "y": 100,
+        "wires": [
+            [
+                "32557a0802217714"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "32557a0802217714",
+        "type": "function",
+        "z": "ec348350604cf16a",
+        "name": "Agrupar",
+        "func": "// ENTRADA: un mensaje por variable (msg.topic = NodeId, msg.payload = valor)\n// SALIDA:  msg.payload = todas las variables recibidas, agrupadas por activo\n\nif (!String(msg.topic).startsWith(\"ns=\")) {\n    return null;          // avisos del propio cliente (p. ej. subscriptionId): no son datos\n}\nlet valor = msg.payload;\n// algunas versiones envían el valor dentro de { value: ... }\nwhile (valor !== null && typeof valor === \"object\" && \"value\" in valor) {\n    valor = valor.value;\n}\nif (typeof valor === \"number\") {\n    valor = Math.round(valor * 1000) / 1000;      // 3 decimales\n}\n\n// \"ns=1;s=IF-01.TemperaturaMetal\"  →  [\"IF-01\", \"TemperaturaMetal\"]\nconst partes = String(msg.topic).split(\"s=\").pop().split(\".\");\nconst variable = partes.pop();\n\nconst central = flow.get(\"planta\") || {};\nlet sitio = central;\nfor (const p of partes) {                         // crea IF-01, COL-01, KPIs...\n    sitio[p] = sitio[p] || {};\n    sitio = sitio[p];\n}\nsitio[variable] = valor;\ncentral.timestamp = new Date().toISOString();\nflow.set(\"planta\", central);\n\nmsg.payload = central;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 100,
+        "wires": [
+            [
+                "235d3f0af76cf808"
+            ]
+        ]
+    },
+    {
+        "id": "235d3f0af76cf808",
+        "type": "function",
+        "z": "ec348350604cf16a",
+        "name": "Pieza nueva",
+        "func": "// ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)\n// SALIDA:  la pieza, una sola vez, cuando QC-01 inspecciona una nueva y ya han llegado todos sus campos\n\nconst p = (msg.payload.Trazabilidad || {}).UltimaPieza;\nif (!p || !p.Id) return null;\n// los campos de una pieza llegan como varios cambios OPC UA seguidos: esperamos a que esté completa\nif (p.Id === context.get(\"ultima\")) return null;\nconst campos = [\"Lote\", \"TemperaturaColada\", \"HumedadArena\", \"Inoculada\", \"TiempoEnfriamiento\",\n                \"TemperaturaDesmoldeo\", \"Desviacion\", \"Resultado\", \"Defecto\"];\nif (campos.some(c => p[c] === undefined)) return null;\nclearTimeout(context.get(\"t\"));\ncontext.set(\"t\", setTimeout(() => {               // 300 ms: que lleguen todos los campos de la misma pieza\n    const actual = flow.get(\"planta\").Trazabilidad.UltimaPieza;\n    if (actual.Id === context.get(\"ultima\")) return;\n    context.set(\"ultima\", actual.Id);\n    node.send({ payload: Object.assign({}, actual), contexto: flow.get(\"planta\") });\n}, 300));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 160,
+        "wires": [
+            [
+                "8df6cd6a3cd9b402"
+            ]
+        ]
+    },
+    {
+        "id": "8df6cd6a3cd9b402",
+        "type": "function",
+        "z": "ec348350604cf16a",
+        "name": "Fila plana",
+        "func": "// ENTRADA: la pieza inspeccionada (msg.payload) y la planta (msg.contexto)\n// SALIDA:  msg.payload = una fila plana para el conjunto \"fundicion\"\n\nconst p = msg.payload;\nmsg.payload = {\n    pieza:          p.Id,\n    molde:          p.Molde,\n    lote:           p.Lote,\n    // condiciones que se conocen AL COLAR (47 min antes de la inspección)\n    t_colada:       p.TemperaturaColada,\n    humedad:        p.HumedadArena,\n    inoculada:      p.Inoculada ? 1 : 0,\n    // lo que se sabe después\n    t_enfriamiento: p.TiempoEnfriamiento,\n    t_desmoldeo:    p.TemperaturaDesmoldeo,\n    desviacion:     p.Desviacion,\n    // la etiqueta: lo que dijo el escáner\n    rechazo:        p.Resultado === \"RECHAZO\" ? 1 : 0,\n    defecto:        p.Defecto,\n    // la avería activa EN EL MOMENTO DE LA INSPECCIÓN (no cuando se coló la pieza)\n    averia:         (msg.contexto.Mantenimiento || {}).Averia ?? 0\n};\nnode.status({ fill: msg.payload.rechazo ? \"red\" : \"green\", shape: \"dot\", text: `${p.Id} · ${p.Resultado}` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 160,
+        "wires": [
+            [
+                "e4465229210edd2b",
+                "79fcac08262f1eb5"
+            ]
+        ]
+    },
+    {
+        "id": "e4465229210edd2b",
+        "type": "ia-registrar",
+        "z": "ec348350604cf16a",
+        "name": "",
+        "servidor": "a706bd1bfba5b9c7",
+        "conjunto": "fundicion",
+        "lote": 1,
+        "x": 730,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "79fcac08262f1eb5",
+        "type": "debug",
+        "z": "ec348350604cf16a",
+        "name": "Pieza",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "9363c7086949375c",
+        "type": "inject",
+        "z": "ec348350604cf16a",
+        "name": "Empezar campaña",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "empezar",
+        "payloadType": "str",
+        "x": 140,
+        "y": 240,
+        "wires": [
+            [
+                "be891297b2bba353"
+            ]
+        ]
+    },
+    {
+        "id": "dd642a9640ebcd6d",
+        "type": "inject",
+        "z": "ec348350604cf16a",
+        "name": "Parar campaña",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "parar",
+        "payloadType": "str",
+        "x": 140,
+        "y": 280,
+        "wires": [
+            [
+                "be891297b2bba353"
+            ]
+        ]
+    },
+    {
+        "id": "be891297b2bba353",
+        "type": "function",
+        "z": "ec348350604cf16a",
+        "name": "Campaña de averías",
+        "func": "// ENTRADA: \"empezar\" o \"parar\" (botones)\n// SALIDA:  escrituras OPC UA: velocidad ×20 y la avería de cada tramo\n// Cada tramo dura 3 min reales = 1 h de planta. 7 tramos ≈ 21 min ≈ 430 piezas.\n\nconst TRAMOS = [0, 5, 0, 6, 0, 7, 0];     // 5 humedad de arena · 6 inoculación · 7 termopar de IF-01\nconst MINUTOS = 3;\nconst escribir = (id, tipo, valor) => ({ topic: \"ns=1;s=\" + id, datatype: tipo, payload: valor });\nconst fin = [escribir(\"Mantenimiento.Averia\", \"Int32\", 0), escribir(\"Simulacion.Velocidad\", \"Double\", 1)];\n\nclearInterval(context.get(\"reloj\"));\nif (msg.payload !== \"empezar\") {\n    node.status({ fill: \"grey\", shape: \"dot\", text: \"campaña parada\" });\n    return [fin];\n}\nlet paso = 0;\nconst tramo = () => {\n    if (paso >= TRAMOS.length) {\n        clearInterval(context.get(\"reloj\"));\n        node.status({ fill: \"grey\", shape: \"dot\", text: \"campaña terminada\" });\n        node.send([fin]);\n        return;\n    }\n    node.status({ fill: TRAMOS[paso] ? \"orange\" : \"green\", shape: \"dot\",\n                  text: `tramo ${paso + 1}/${TRAMOS.length} · avería ${TRAMOS[paso]}` });\n    const ordenes = [escribir(\"Mantenimiento.Averia\", \"Int32\", TRAMOS[paso])];\n    if (paso === 0) ordenes.push(escribir(\"Simulacion.Velocidad\", \"Double\", 20));\n    node.send([ordenes]);\n    paso++;\n};\ntramo();\ncontext.set(\"reloj\", setInterval(tramo, MINUTOS * 60 * 1000));\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 260,
+        "wires": [
+            [
+                "09ae8c39a06eea83"
+            ]
+        ]
+    },
+    {
+        "id": "09ae8c39a06eea83",
+        "type": "OpcUa-Client",
+        "z": "ec348350604cf16a",
+        "endpoint": "41bf2ca1cb7f81c9",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 0,
+        "time": 1,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": true,
+        "keepsessionalive": true,
+        "name": "OPC UA · Escribir",
+        "x": 600,
+        "y": 260,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    }
+]
