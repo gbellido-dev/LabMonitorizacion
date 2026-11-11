@@ -79,6 +79,9 @@ class Buoy:
     sequence: int = 0
     # estado interno del modelo (no se publica)
     swell_m: float = field(default=0.8, repr=False)
+    ola_m: float = field(default=1.0, repr=False)        # estado real del oleaje (sin redondear)
+    bateria: float = field(default=80.0, repr=False)     # estado real de la batería (sin redondear)
+    agua_c: float = field(default=15.0, repr=False)
     p_ruido: float = field(default=0.0, repr=False)
     tormenta: float = field(default=0.0, repr=False)
 
@@ -161,6 +164,7 @@ class OceanModel:
                 humidity_pct=75.0, signal_rssi_dbm=round(self.random.uniform(-80, -50), 0),
                 swell_m=self.random.uniform(0.4, 1.4),
             ))
+            result[-1].bateria, result[-1].agua_c = result[-1].battery_pct, result[-1].water_temperature_c
         return result
 
     def _nueva_borrasca(self, edad_aleatoria: bool = False) -> Borrasca:
@@ -221,21 +225,24 @@ class OceanModel:
         b.wind_direction_deg = round((math.degrees(math.atan2(-ve, -vn)) + 360) % 360, 1)
         # oleaje: tiende al de un mar desarrollado con horas de retraso (sube en ~4 h, baja en ~9 h)
         h_eq = min(9.0, math.hypot(0.0214 * u * u, b.swell_m))
+        # el estado se integra sin redondear (los cambios por paso son de milésimas); el ruido es solo de la medida
         if inicial:
-            b.wave_height_m = round(h_eq, 2)
+            b.ola_m = h_eq
         else:
-            tau = 4.0 if h_eq > b.wave_height_m else 9.0
-            h = b.wave_height_m + (h_eq - b.wave_height_m) * min(1.0, dt_h / tau)
-            b.wave_height_m = round(max(0.1, min(9.0, h + r.gauss(0, 0.02))), 2)
+            tau = 4.0 if h_eq > b.ola_m else 9.0
+            b.ola_m = max(0.1, min(9.0, b.ola_m + (h_eq - b.ola_m) * min(1.0, dt_h / tau)))
+        b.wave_height_m = round(max(0.1, min(9.0, b.ola_m * (1 + r.gauss(0, 0.03)))), 2)
         b.swell_m = max(0.3, min(2.0, b.swell_m + r.gauss(0, 0.03) * math.sqrt(max(dt_h, 1e-9))))
         # hora solar local: ciclo diario de la temperatura del aire, la humedad y la carga solar
         hora = (self.t_sim_h + b.longitude / 15.0) % 24
         sol = max(0.0, math.sin(math.pi * (hora - 6) / 12))
-        b.water_temperature_c = round(b.water_temperature_c + r.gauss(0, 0.01) * math.sqrt(max(dt_h, 1e-9)), 2)
-        b.air_temperature_c = round(b.water_temperature_c + 2.2 * sol - 0.8 - 3.0 * tormenta + r.gauss(0, 0.1), 2)
+        b.agua_c += r.gauss(0, 0.01) * math.sqrt(max(dt_h, 1e-9))
+        b.water_temperature_c = round(b.agua_c, 2)
+        b.air_temperature_c = round(b.agua_c + 2.2 * sol - 0.8 - 3.0 * tormenta + r.gauss(0, 0.1), 2)
         b.humidity_pct = round(max(40.0, min(100.0, 78 - 10 * sol + 18 * tormenta + r.gauss(0, 0.8))), 1)
         carga = 1.6 * sol * (1 - 0.6 * tormenta) - 0.55                    # %/h: panel solar menos consumo
-        b.battery_pct = round(max(0.0, min(100.0, b.battery_pct + carga * dt_h)), 2)
+        b.bateria = max(0.0, min(100.0, b.bateria + carga * dt_h))
+        b.battery_pct = round(b.bateria, 2)
         b.signal_rssi_dbm = round(max(-110.0, min(-40.0, -55 - 3.5 * b.wave_height_m + r.gauss(0, 1.5))), 0)
 
     def _mover_borrascas(self, dt_h: float) -> None:
@@ -290,7 +297,7 @@ class OceanModel:
                 "tcp_port": int(os.getenv("BUOYLAB_MQTT_PUBLIC_PORT", "1883")),
                 "ws_port": int(os.getenv("BUOYLAB_MQTT_PUBLIC_WS_PORT", "8083")),
                 "topic_pattern": "oceanlab/buoys/{buoy_id}/telemetry"},
-            "buoys": [{k: v for k, v in asdict(buoy).items() if k not in ("swell_m", "p_ruido", "tormenta")}
+            "buoys": [{k: v for k, v in asdict(buoy).items() if k not in ("swell_m", "p_ruido", "tormenta", "ola_m", "bateria", "agua_c")}
                       for buoy in self.buoys],
         }
 
@@ -302,7 +309,7 @@ class OceanModel:
         if buoy is None:
             raise KeyError(buoy_id)
         if fault == "battery":
-            buoy.battery_pct = 8.0
+            buoy.battery_pct = buoy.bateria = 8.0
         elif fault == "storm":
             # una borrasca profunda centrada en la boya (se rellena en unas 60 h simuladas)
             self.borrascas = [c for c in self.borrascas if c.anclada != buoy.id]
@@ -313,13 +320,14 @@ class OceanModel:
             self.borrascas.append(Borrasca(centro_lat, buoy.longitude, -(base - 975.0) / math.exp(-0.5), radio,
                                            0.0, 0.0, 60.0, edad_h=10.0, anclada=buoy.id))
             buoy.wave_height_m, buoy.wind_speed_mps, buoy.pressure_hpa = 8.4, 29.0, 975.0
+            buoy.ola_m = 8.4
         elif fault == "offline":
             buoy.status = "offline"
         elif fault == "reset":
             self.borrascas = [c for c in self.borrascas if c.anclada != buoy.id]
             buoy.status = "online"
-            buoy.battery_pct = 82.0
-            buoy.wave_height_m = 1.4
+            buoy.battery_pct = buoy.bateria = 82.0
+            buoy.wave_height_m = buoy.ola_m = 1.4
         else:
             raise ValueError(fault)
         return buoy
