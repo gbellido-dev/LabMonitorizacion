@@ -1,0 +1,106 @@
+[
+    {
+        "id": "3c7a33b1dc7a385d",
+        "type": "tab",
+        "label": "Serie 4 · OceanLab · Recoger datos",
+        "disabled": false,
+        "info": "Flujo de recogida de la serie 4 con OceanLab (practicas/4-ia/oceanlab)."
+    },
+    {
+        "id": "319c46b46f3e9285",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "f729b2caff75873e",
+        "type": "comment",
+        "z": "3c7a33b1dc7a385d",
+        "name": "FASE 1 · Recoger datos (conjunto «oceanlab»): las 96 boyas, una muestra cada 30 s",
+        "info": "",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "571a01857a45eca4",
+        "type": "mqtt-broker",
+        "name": "Mosquitto (OceanLab)",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "938296c3cbbf2d96",
+        "type": "mqtt in",
+        "z": "3c7a33b1dc7a385d",
+        "name": "Todas las boyas",
+        "topic": "oceanlab/buoys/+/telemetry",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "571a01857a45eca4",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "fb8555fb5e4d508b"
+            ]
+        ]
+    },
+    {
+        "id": "fb8555fb5e4d508b",
+        "type": "function",
+        "z": "3c7a33b1dc7a385d",
+        "name": "Una muestra cada 30 s",
+        "func": "// ENTRADA: la telemetría de una boya (cada 2 s, las 96 boyas)\n// SALIDA:  una fila por boya cada 30 s para el conjunto \"oceanlab\"\n// Con 96 boyas cada 2 s serían 2880 filas por minuto: para el oleaje basta una muestra cada 30 s.\n\nconst p = msg.payload;\nif (!p || !p.weather || p.device.status !== \"online\") return null;\nconst ultimas = context.get(\"ultimas\") || {};\nconst ahora = Date.now();\nif (ahora - (ultimas[p.buoy_id] || 0) < 30000) return null;\nultimas[p.buoy_id] = ahora;\ncontext.set(\"ultimas\", ultimas);\nmsg.payload = {\n    boya:    p.buoy_id,\n    latitud: p.location.latitude,\n    ola:     p.weather.wave_height_m,\n    viento:  p.weather.wind_speed_mps,\n    presion: p.weather.pressure_hpa,\n    humedad: p.weather.humidity_pct\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "d01c58126957dd7c"
+            ]
+        ]
+    },
+    {
+        "id": "d01c58126957dd7c",
+        "type": "ia-registrar",
+        "z": "3c7a33b1dc7a385d",
+        "name": "",
+        "servidor": "319c46b46f3e9285",
+        "conjunto": "oceanlab",
+        "lote": 20,
+        "x": 620,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    }
+]

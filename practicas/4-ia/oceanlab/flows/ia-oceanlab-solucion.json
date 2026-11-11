@@ -1,0 +1,270 @@
+[
+    {
+        "id": "0cee4a497fef8892",
+        "type": "tab",
+        "label": "Serie 4 · OceanLab · IA (solución)",
+        "disabled": false,
+        "info": "Solución de la serie 4 con OceanLab (practicas/4-ia/oceanlab). Pega el token del dispositivo Flota-IA en el broker de ThingsBoard. El modelo oceanlab-oleaje se publica desde Jupyter (cuaderno 09)."
+    },
+    {
+        "id": "6f4bdde04a59fbc7",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "e3334566623f5ae6",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Flota-IA",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-flota-ia",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "d9e02afcd913fc1e",
+        "type": "comment",
+        "z": "0cee4a497fef8892",
+        "name": "FASE 1 · Recoger datos (conjunto «oceanlab»): las 96 boyas, una muestra cada 30 s",
+        "info": "",
+        "x": 230,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "2bbea7e3d106a241",
+        "type": "mqtt-broker",
+        "name": "Mosquitto (OceanLab)",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "2e87533e2ae30b14",
+        "type": "mqtt in",
+        "z": "0cee4a497fef8892",
+        "name": "Todas las boyas",
+        "topic": "oceanlab/buoys/+/telemetry",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "2bbea7e3d106a241",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "c7413caae533afd7"
+            ]
+        ]
+    },
+    {
+        "id": "c7413caae533afd7",
+        "type": "function",
+        "z": "0cee4a497fef8892",
+        "name": "Una muestra cada 30 s",
+        "func": "// ENTRADA: la telemetría de una boya (cada 2 s, las 96 boyas)\n// SALIDA:  una fila por boya cada 30 s para el conjunto \"oceanlab\"\n// Con 96 boyas cada 2 s serían 2880 filas por minuto: para el oleaje basta una muestra cada 30 s.\n\nconst p = msg.payload;\nif (!p || !p.weather || p.device.status !== \"online\") return null;\nconst ultimas = context.get(\"ultimas\") || {};\nconst ahora = Date.now();\nif (ahora - (ultimas[p.buoy_id] || 0) < 30000) return null;\nultimas[p.buoy_id] = ahora;\ncontext.set(\"ultimas\", ultimas);\nmsg.payload = {\n    boya:    p.buoy_id,\n    latitud: p.location.latitude,\n    ola:     p.weather.wave_height_m,\n    viento:  p.weather.wind_speed_mps,\n    presion: p.weather.pressure_hpa,\n    humedad: p.weather.humidity_pct\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "1e218e1b3ddb5798",
+                "d819702bc19bffe3"
+            ]
+        ]
+    },
+    {
+        "id": "1e218e1b3ddb5798",
+        "type": "ia-registrar",
+        "z": "0cee4a497fef8892",
+        "name": "",
+        "servidor": "6f4bdde04a59fbc7",
+        "conjunto": "oceanlab",
+        "lote": 20,
+        "x": 620,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d8dd076b1ff38aa2",
+        "type": "comment",
+        "z": "0cee4a497fef8892",
+        "name": "FASE 2 · ¿Qué ola habrá dentro de 10 minutos? (cada boya) → ThingsBoard",
+        "info": "",
+        "x": 240,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "d819702bc19bffe3",
+        "type": "function",
+        "z": "0cee4a497fef8892",
+        "name": "Ventana de 10 min",
+        "func": "// ENTRADA: la muestra de una boya (cada 30 s)\n// SALIDA:  las entradas del modelo: lo de ahora y cuánto han cambiado la presión y el viento en 10 min\n// IMPORTANTE: el cuaderno 09 calcula dp y dv igual (la muestra más cercana a 10 min antes)\n\nconst HORIZONTE = 10 * 60 * 1000;\nconst p = msg.payload, ahora = Date.now();\nconst hist = flow.get(\"historial\") || {};\nconst h = hist[p.boya] || [];\nh.push({ t: ahora, presion: p.presion, viento: p.viento, ola: p.ola });\nwhile (h.length && ahora - h[0].t > HORIZONTE + 60000) h.shift();      // guarda poco más de 10 min\nhist[p.boya] = h;\nflow.set(\"historial\", hist);\n// la muestra más cercana a 10 min antes (tolerancia: 1 min)\nconst antes = h.reduce((mejor, x) => Math.abs(ahora - x.t - HORIZONTE) < Math.abs(ahora - mejor.t - HORIZONTE) ? x : mejor, h[0]);\nif (Math.abs(ahora - antes.t - HORIZONTE) > 60000) {\n    node.status({ fill: \"yellow\", shape: \"ring\", text: `${p.boya}: llenando 10 min de historia` });\n    return null;\n}\nmsg.boya = p.boya;\nmsg.actual = p;\nmsg.payload = { ola: p.ola, viento: p.viento, presion: p.presion,\n                dp: Math.round((p.presion - antes.presion) * 100) / 100,\n                dv: Math.round((p.viento - antes.viento) * 100) / 100 };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "0d0861d4df822687"
+            ]
+        ]
+    },
+    {
+        "id": "0d0861d4df822687",
+        "type": "ia-predecir",
+        "z": "0cee4a497fef8892",
+        "name": "Ola dentro de 10 min",
+        "servidor": "6f4bdde04a59fbc7",
+        "modelo": "oceanlab-oleaje",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 410,
+        "y": 220,
+        "wires": [
+            [
+                "63094a03c39f2962"
+            ]
+        ]
+    },
+    {
+        "id": "63094a03c39f2962",
+        "type": "function",
+        "z": "0cee4a497fef8892",
+        "name": "Previsión de la flota",
+        "func": "// ENTRADA: msg.prediccion.prediccion = ola prevista dentro de 10 min (m) para msg.boya\n// SALIDA:  cada 5 s, un resumen de la flota para ThingsBoard; comprueba las previsiones de hace 10 min\n\nconst HORIZONTE = 10 * 60 * 1000, PELIGRO = 6;\nconst ahora = Date.now(), boya = msg.boya, ola = msg.actual.ola;\nconst prevista = Math.max(0.1, msg.prediccion.prediccion);\nconst flota = flow.get(\"prevision\") || {};\nconst pend = flow.get(\"pendientes\") || [];\n// ¿hay previsiones de esta boya hechas hace ~10 min? Compararlas con lo que mide ahora\nconst b = flow.get(\"balance\") || { n: 0, err_modelo: [], err_persistencia: [] };\nfor (let i = pend.length - 1; i >= 0; i--) {\n    const x = pend[i];\n    if (x.boya !== boya || ahora - x.t < HORIZONTE) continue;\n    pend.splice(i, 1);\n    if (ahora - x.t > HORIZONTE + 60000) continue;               // demasiado vieja\n    b.err_modelo.push(Math.abs(ola - x.prevista));\n    b.err_persistencia.push(Math.abs(ola - x.ola_entonces));     // «mañana igual que hoy»\n    if (b.err_modelo.length > 300) { b.err_modelo.shift(); b.err_persistencia.shift(); }\n    b.n++;\n}\npend.push({ boya, t: ahora, prevista, ola_entonces: ola });\nflow.set(\"pendientes\", pend.slice(-2000));\nflow.set(\"balance\", b);\nflota[boya] = { prevista, ola };\nflow.set(\"prevision\", flota);\n\nif (ahora - (context.get(\"ultimo\") || 0) < 5000) return null;    // un resumen cada 5 s\ncontext.set(\"ultimo\", ahora);\nconst filas = Object.entries(flota);\nconst peor = filas.reduce((m, f) => f[1].prevista > m[1].prevista ? f : m, filas[0]);\nconst media = a => a.length ? Math.round(1000 * a.reduce((s, x) => s + x, 0) / a.length) / 1000 : null;\nnode.status({ text: `${filas.length} boyas · peor ${peor[0]} ${peor[1].prevista.toFixed(1)} m` });\nmsg.payload = { ts: ahora, values: {\n    boyas_con_prevision: filas.length,\n    boyas_peligro_previsto: filas.filter(f => f[1].prevista > PELIGRO).length,\n    boyas_peligro_ahora: filas.filter(f => f[1].ola > PELIGRO).length,\n    peor_boya: peor[0], peor_ola_prevista_m: Math.round(10 * peor[1].prevista) / 10, peor_ola_ahora_m: peor[1].ola,\n    mae_modelo_m: media(b.err_modelo), mae_persistencia_m: media(b.err_persistencia), comprobadas: b.n } };\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 220,
+        "wires": [
+            [
+                "16bf7a63a462ba4a",
+                "d7b1e8fb4083c2b7"
+            ]
+        ]
+    },
+    {
+        "id": "16bf7a63a462ba4a",
+        "type": "mqtt out",
+        "z": "0cee4a497fef8892",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "e3334566623f5ae6",
+        "x": 840,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d7b1e8fb4083c2b7",
+        "type": "debug",
+        "z": "0cee4a497fef8892",
+        "name": "Flota",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 270,
+        "wires": []
+    },
+    {
+        "id": "999131f2327ab0ec",
+        "type": "catch",
+        "z": "0cee4a497fef8892",
+        "name": "Errores de la IA",
+        "scope": [
+            "0d0861d4df822687"
+        ],
+        "uncaught": false,
+        "x": 200,
+        "y": 280,
+        "wires": [
+            [
+                "c98483ccbc71ff6b"
+            ]
+        ]
+    },
+    {
+        "id": "c98483ccbc71ff6b",
+        "type": "debug",
+        "z": "0cee4a497fef8892",
+        "name": "Error de la IA",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 280,
+        "wires": []
+    }
+]

@@ -52,7 +52,7 @@ module.exports = {
 
     { tipo: "cuadricula", titulo: "Comparar siempre con algo sencillo",
       celdas: [
-        { icono: "MdWaves", titulo: "Persistencia", sub: "OceanLab", etiqueta: "0,55 → 0,44 m", texto: "«Dentro de 10 min, la misma ola». Error 0,55 m; el modelo, 0,44 m. Gana sobre todo cuando el mar **cambia**." },
+        { icono: "MdWaves", titulo: "Persistencia", sub: "OceanLab", etiqueta: "0,26 → 0,18 m", texto: "«Dentro de 10 min, la misma ola». Error 0,26 m; el modelo, 0,18 m. Con el mar en calma gana la persistencia; cuando **cambia**, el modelo." },
         { icono: "MdRule", titulo: "Reglas del experto", sub: "Fundición", etiqueta: "≈ empate", texto: "Colada ≥ 1405 °C, humedad ≤ 4,3 %, inoculada. El árbol aprende **casi los mismos límites**, sin el experto." },
         { icono: "MdGavel", titulo: "El reglamento", sub: "AtomLab", etiqueta: "ORM ≥ 15", texto: "ORM ≥ 15 barras: detecta todo con muchas falsas alarmas. Es **conservador a propósito**." },
         { icono: "MdShowChart", titulo: "Una recta", sub: "AeroLab", etiqueta: "516 → 223 kW", texto: "La curva de potencia no es una recta: la red neuronal reduce el error de 516 a 223 kW." },
@@ -73,7 +73,7 @@ module.exports = {
               ["ReactorLab", "Sensor virtual + diagnóstico", "Regresión lineal + bosque", "El control tapa la avería; la mediana separa deriva y válvula"],
               ["Fundición", "Riesgo al colar", "Árbol de decisión", "Las reglas del experto ya eran buenas; el árbol las redescubre"],
               ["AtomLab", "Modelo sustituto", "Bosque (datos simulados)", "500 veces más rápido que el simulador; no sustituye al reglamento"],
-              ["OceanLab", "Previsión", "Regresión lineal", "La persistencia es difícil de batir"]], altoFila: 0.85 },
+              ["OceanLab", "Previsión", "Bosque aleatorio", "La persistencia es difícil de batir con el mar en calma"]], altoFila: 0.85 },
 
     { tipo: "tarjetas", titulo: "Llevarlo a la planta", columnas: 3,
       items: [
