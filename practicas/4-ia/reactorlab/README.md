@@ -362,7 +362,16 @@ Resultados en el laboratorio (modelos del cuaderno 06, averías inyectadas por l
 
 | Avería oculta | «No cuadran» | «Avería diagnosticada» | Diagnóstico |
 |---|---|---|---|
-| *(verificación en curso)* | | | |
+| Deriva del sensor de presión | 70 s | 60 s | `deriva-presion` (43 de 60 lecturas) |
+| Válvula de purga sucia (3 min) | no salta | no salta | `normal` (60 de 60) |
+| Válvula de purga sucia (5 min, repetición) | 42 s | — ¹ | `purga-sucia` (63 de 100), a ratos `deriva-presion` o `normal` |
+| Analizador congelado | no salta (no afecta a la presión) | 42 s | `analizador-congelado` (49 de 60) |
+| Ruido en el nivel | no salta | 30 s | `ruido-nivel` (54 de 60) |
+
+¹ La alarma de la avería anterior aún no se había borrado.
+
+La válvula sucia es la avería difícil: mientras el lazo tiene margen la compensa abriendo más, y solo se nota en
+los transitorios grandes (los picos del residuo). En la primera prueba no hubo ninguno en 3 minutos.
 
 <img src="img/panel-reactor-ia.png" style="width:6.3in" />
 
