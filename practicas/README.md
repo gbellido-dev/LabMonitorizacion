@@ -41,6 +41,7 @@ Una capa de IA **genérica** ([`plataforma/ia`](../plataforma/ia/README.md), ser
 | Práctica | Contenido |
 |---|---|
 | [AeroLab](4-ia/aerolab/README.md) · [.docx](4-ia/aerolab/Practica_AeroLab_IA_ES.docx) | Campaña de datos etiquetados, red neuronal (curva de potencia), detector de anomalías, despliegue a ThingsBoard con alarmas sobre los modelos, aprendizaje continuo y deriva |
+| [ReactorLab](4-ia/reactorlab/README.md) · [.docx](4-ia/reactorlab/Practica_ReactorLab_IA_ES.docx) | Planta con control automático: sensor virtual de presión, diagnóstico de averías con indicadores de ventana, tiempo real y alarmas sobre los modelos |
 | [Reto SolarLab](4-ia/solarlab/README.md) · [.docx](4-ia/solarlab/Reto_SolarLab_IA_ES.docx) | La misma capa con otra fuente (OPC UA): recogida, plantilla de entrenamiento, tiempo real y propuesta para otro simulador |
 
 Índice completo en [`4-ia/README.md`](4-ia/README.md).

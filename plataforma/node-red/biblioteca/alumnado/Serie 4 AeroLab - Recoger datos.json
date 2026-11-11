@@ -4,7 +4,7 @@
         "type": "tab",
         "label": "Serie 4 · AeroLab · Recoger datos",
         "disabled": false,
-        "info": "Flujo de recogida de la serie 4 (practicas/4-ia/aerolab). Necesita el servicio de IA: docker compose --profile ia up -d"
+        "info": "Flujo de recogida de la serie 4 (practicas/4-ia/aerolab). Necesita el servicio de IA: docker compose up -d ia jupyter"
     },
     {
         "id": "45326fab6c3cd475",

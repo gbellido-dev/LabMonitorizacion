@@ -1,0 +1,631 @@
+[
+    {
+        "id": "4d822a2861d96a4f",
+        "type": "tab",
+        "label": "Serie 4 · ReactorLab · IA (solución)",
+        "disabled": false,
+        "info": "Solución de la serie 4 con ReactorLab (practicas/4-ia/reactorlab). Variable de entorno de la pestaña: REACTORLAB_KEY (credencial). Pega el token del dispositivo Reactor-IA en el broker de ThingsBoard. Los modelos reactorlab-presion y reactorlab-averias se publican desde Jupyter (cuaderno 06).",
+        "env": [
+            {
+                "name": "REACTORLAB_KEY",
+                "value": "",
+                "type": "cred"
+            }
+        ]
+    },
+    {
+        "id": "29b262c4be0227e7",
+        "type": "ia-servidor",
+        "name": "IA del laboratorio",
+        "url": "http://ia:8000"
+    },
+    {
+        "id": "a70f7d2c63f0f151",
+        "type": "mqtt-broker",
+        "name": "ThingsBoard · Reactor-IA",
+        "broker": "thingsboard",
+        "port": "1883",
+        "clientid": "nodered-reactor-ia",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {}
+    },
+    {
+        "id": "be9ceada3edefe5d",
+        "type": "comment",
+        "z": "4d822a2861d96a4f",
+        "name": "FASE 1 · Recoger datos (conjunto «reactorlab»)",
+        "info": "Cada segundo una fila en /lab/datos/reactorlab.csv. La campaña cambia las consignas cada 30 s; los botones fijan el escenario (la etiqueta). Clave de la API: variable de entorno REACTORLAB_KEY de la pestaña (credencial).",
+        "x": 200,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "ddab49ddf31244c3",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Cada 1 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "b3ac03cb12a4cdc8"
+            ]
+        ]
+    },
+    {
+        "id": "b3ac03cb12a4cdc8",
+        "type": "http request",
+        "z": "4d822a2861d96a4f",
+        "name": "GET /api/v1/proceso",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://reactorlab:8030/api/v1/proceso",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 320,
+        "y": 100,
+        "wires": [
+            [
+                "b1cec8a4a435bf4a"
+            ]
+        ]
+    },
+    {
+        "id": "b1cec8a4a435bf4a",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Fila plana",
+        "func": "// ENTRADA: msg.payload = GET /api/v1/proceso (medidas, válvulas y consignas)\n// SALIDA:  msg.payload = una fila plana para el conjunto \"reactorlab\" + la etiqueta\n\nconst p = msg.payload, m = p.medidas, v = p.valvulas, c = p.consignas;\nif (!p.estado.en_marcha || p.estado.paro_emergencia) {\n    node.status({ fill: \"grey\", shape: \"ring\", text: \"planta parada: no se registra\" });\n    return null;\n}\nmsg.payload = {\n    // medidas (lo que dicen los instrumentos)\n    presion:         m.presion_kpa,\n    nivel:           m.nivel_pct,\n    caudal_f1:       m.caudal_kmolh.f1,\n    caudal_f2:       m.caudal_kmolh.f2,\n    caudal_purga:    m.caudal_kmolh.purga,\n    caudal_producto: m.caudal_kmolh.producto,\n    a_purga:         m.composicion_purga_pct.A,\n    b_purga:         m.composicion_purga_pct.B,\n    c_purga:         m.composicion_purga_pct.C,\n    coste:           m.coste_relativo,\n    // posiciones de las válvulas (lo que hace el control)\n    v_f1:            v.f1.posicion_pct,\n    v_f2:            v.f2.posicion_pct,\n    v_purga:         v.purga.posicion_pct,\n    v_producto:      v.producto.posicion_pct,\n    // consignas (lo que se le pide a la planta)\n    sp_presion:      c.presion_kpa,\n    sp_producto:     c.caudal_producto_kmolh,\n    sp_nivel:        c.nivel_pct,\n    sp_a:            c.a_purga_pct,\n    // etiqueta: lo que está pasando DE VERDAD (lo fija el botón de escenario)\n    escenario:       flow.get(\"escenario\") || \"normal\"\n};\nnode.status({ text: `${msg.payload.presion} kPa · ${msg.payload.escenario}` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 100,
+        "wires": [
+            [
+                "f6971243124fc469",
+                "c14f4fc65b7c93b2",
+                "84113bb6dc2b044f"
+            ]
+        ]
+    },
+    {
+        "id": "f6971243124fc469",
+        "type": "ia-registrar",
+        "z": "4d822a2861d96a4f",
+        "name": "",
+        "servidor": "29b262c4be0227e7",
+        "conjunto": "reactorlab",
+        "lote": 1,
+        "x": 740,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c14f4fc65b7c93b2",
+        "type": "debug",
+        "z": "4d822a2861d96a4f",
+        "name": "Fila",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "d9250f1581c5203c",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Cada 30 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 180,
+        "wires": [
+            [
+                "06719bbb6f220912"
+            ]
+        ]
+    },
+    {
+        "id": "06719bbb6f220912",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Campaña de consignas",
+        "func": "// ENTRADA: un pulso cada 30 s\n// SALIDA:  PUT /api/v1/consignas con consignas nuevas al azar\n// En régimen estacionario los lazos de control dejan las medidas QUIETAS en la consigna:\n// sin cambios no hay nada que aprender. La campaña \"excita\" la planta.\n// La clave NO está en el código: variable de entorno REACTORLAB_KEY de la pestaña (tipo credencial)\n\nconst azar = (min, max, dec = 0) => Number((min + Math.random() * (max - min)).toFixed(dec));\nmsg.method  = \"PUT\";\nmsg.url     = \"http://reactorlab:8030/api/v1/consignas\";\nmsg.headers = { \"X-API-Key\": env.get(\"REACTORLAB_KEY\"), \"Content-Type\": \"application/json\" };\nmsg.payload = {\n    presion_kpa:           azar(2600, 2800),\n    caudal_producto_kmolh: azar(90, 110),\n    nivel_pct:             azar(40, 50),\n    a_purga_pct:           azar(45, 50, 1)\n};\nnode.status({ text: `${msg.payload.presion_kpa} kPa · ${msg.payload.caudal_producto_kmolh} kmol/h` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 180,
+        "wires": [
+            [
+                "11a5f3a379e8d463"
+            ]
+        ]
+    },
+    {
+        "id": "11a5f3a379e8d463",
+        "type": "http request",
+        "z": "4d822a2861d96a4f",
+        "name": "Orden a ReactorLab",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 590,
+        "y": 180,
+        "wires": [
+            [
+                "9ece7ef30e678e0a"
+            ]
+        ]
+    },
+    {
+        "id": "9ece7ef30e678e0a",
+        "type": "debug",
+        "z": "4d822a2861d96a4f",
+        "name": "Respuesta",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "45d19d4357c895a6",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Escenario",
+        "func": "// ENTRADA: msg.payload = nombre del escenario (botones de la izquierda)\n// SALIDA:  DELETE /api/v1/averias (quita la avería anterior); msg.plan = averías del escenario nuevo\n\nconst PLANES = {\n    \"normal\":               [],\n    // el transmisor de presión deriva 30 kPa/h (1 kPa por segundo real a la escala 120)\n    \"deriva-presion\":       [{ tipo: \"sensor\", objetivo: \"presion\", modo: \"deriva\", valor: 30 }],\n    // la válvula de purga pierde la mitad de su capacidad: el lazo la abre más para compensar\n    \"purga-sucia\":          [{ tipo: \"valvula_sucia\", objetivo: \"purga\", valor: 0.5 }],\n    // el analizador se queda con su último valor\n    \"analizador-congelado\": [{ tipo: \"sensor\", objetivo: \"analizador\", modo: \"congelado\" }],\n    // el transmisor de nivel mete ±3 % de ruido\n    \"ruido-nivel\":          [{ tipo: \"sensor\", objetivo: \"nivel\", modo: \"ruido\", valor: 3 }]\n};\nconst escenario = msg.payload;\nif (!(escenario in PLANES)) {\n    node.warn(\"Escenario desconocido: \" + escenario);\n    return null;\n}\nflow.set(\"escenario\", escenario);\nnode.status({ fill: escenario === \"normal\" ? \"green\" : \"orange\", shape: \"dot\", text: escenario });\n\nmsg.plan    = PLANES[escenario];\nmsg.method  = \"DELETE\";\nmsg.url     = \"http://reactorlab:8030/api/v1/averias\";\nmsg.headers = { \"X-API-Key\": env.get(\"REACTORLAB_KEY\") };\nmsg.payload = \"\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 300,
+        "wires": [
+            [
+                "59fe3f868a3b20ef"
+            ]
+        ]
+    },
+    {
+        "id": "59fe3f868a3b20ef",
+        "type": "http request",
+        "z": "4d822a2861d96a4f",
+        "name": "Quitar averías",
+        "method": "use",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 590,
+        "y": 300,
+        "wires": [
+            [
+                "ccc3f4e6e5cb85f5"
+            ]
+        ]
+    },
+    {
+        "id": "ccc3f4e6e5cb85f5",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Inyectar",
+        "func": "// ENTRADA: la respuesta del DELETE, con msg.plan\n// SALIDA:  un POST /api/v1/averias por cada avería del plan\n\nconst headers = { \"X-API-Key\": env.get(\"REACTORLAB_KEY\"), \"Content-Type\": \"application/json\" };\nreturn [msg.plan.map(a => ({ method: \"POST\", url: \"http://reactorlab:8030/api/v1/averias\", headers, payload: a }))];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 300,
+        "wires": [
+            [
+                "cec9d7118123b451"
+            ]
+        ]
+    },
+    {
+        "id": "cec9d7118123b451",
+        "type": "http request",
+        "z": "4d822a2861d96a4f",
+        "name": "Avería nueva",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 970,
+        "y": 300,
+        "wires": [
+            [
+                "727d9fa6a14d1669"
+            ]
+        ]
+    },
+    {
+        "id": "727d9fa6a14d1669",
+        "type": "debug",
+        "z": "4d822a2861d96a4f",
+        "name": "Avería inyectada",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "8e2ad1e2af096776",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Normal",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "normal",
+        "payloadType": "str",
+        "x": 150,
+        "y": 240,
+        "wires": [
+            [
+                "45d19d4357c895a6"
+            ]
+        ]
+    },
+    {
+        "id": "d1a37b54e94f2280",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Deriva del sensor de presión",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "deriva-presion",
+        "payloadType": "str",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "45d19d4357c895a6"
+            ]
+        ]
+    },
+    {
+        "id": "e1cd9c400177bad1",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Válvula de purga sucia",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "purga-sucia",
+        "payloadType": "str",
+        "x": 150,
+        "y": 320,
+        "wires": [
+            [
+                "45d19d4357c895a6"
+            ]
+        ]
+    },
+    {
+        "id": "fea5edb4a70e385b",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Analizador congelado",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "analizador-congelado",
+        "payloadType": "str",
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "45d19d4357c895a6"
+            ]
+        ]
+    },
+    {
+        "id": "0862e5266286c33e",
+        "type": "inject",
+        "z": "4d822a2861d96a4f",
+        "name": "Ruido en el nivel",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "ruido-nivel",
+        "payloadType": "str",
+        "x": 150,
+        "y": 400,
+        "wires": [
+            [
+                "45d19d4357c895a6"
+            ]
+        ]
+    },
+    {
+        "id": "853652e223c82cdb",
+        "type": "comment",
+        "z": "4d822a2861d96a4f",
+        "name": "FASE 2 · Sensor virtual y diagnóstico en tiempo real → ThingsBoard",
+        "info": "",
+        "x": 230,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "84113bb6dc2b044f",
+        "type": "ia-predecir",
+        "z": "4d822a2861d96a4f",
+        "name": "Presión virtual",
+        "servidor": "29b262c4be0227e7",
+        "modelo": "reactorlab-presion",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 330,
+        "y": 580,
+        "wires": [
+            [
+                "c247035cd47103b6"
+            ]
+        ]
+    },
+    {
+        "id": "c247035cd47103b6",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Residuo y ventana de 30 s",
+        "func": "// ENTRADA: la fila plana + msg.prediccion (la presión que el modelo calcula con las demás medidas)\n// SALIDA:  msg.payload = los 6 indicadores de los últimos 30 s (las entradas del clasificador)\n//          msg.fila    = la fila con la presión virtual y el residuo\n// IMPORTANTE: el cuaderno 06 calcula los indicadores EXACTAMENTE igual (función ventanas)\n\nconst N = 30;                                    // filas de la ventana (una por segundo)\nconst p = msg.payload;\np.presion_virtual = Math.round(msg.prediccion.prediccion * 10) / 10;\np.residuo = Math.round((p.presion - p.presion_virtual) * 10) / 10;\nmsg.fila = p;\n\nlet v = context.get(\"ventana\") || [];\nconst ahora = Date.now();\nif (v.length && ahora - v[v.length - 1].t > 5000) v = [];   // hueco en los datos: se empieza de cero\nv.push({ t: ahora, residuo: p.residuo, a_purga: p.a_purga, nivel: p.nivel, v_producto: p.v_producto });\nif (v.length > N) v.shift();\ncontext.set(\"ventana\", v);\nif (v.length < N) {\n    node.status({ fill: \"yellow\", shape: \"ring\", text: `llenando la ventana ${v.length}/${N}` });\n    return null;\n}\n\nconst r = v.map(x => x.residuo);\n// mediana: el desvío que se mantiene (no le afectan los picos sueltos)\nconst ord = [...r].sort((a, b) => a - b);\nconst mediana = (ord[N / 2 - 1] + ord[N / 2]) / 2;\n// pendiente de la recta de mínimos cuadrados (kPa por segundo)\nconst tm = (N - 1) / 2;\nlet num = 0, den = 0;\nr.forEach((x, i) => { num += (i - tm) * x; den += (i - tm) ** 2; });\n// suma y media de los saltos entre filas consecutivas\nconst saltos = k => v.slice(1).map((x, i) => Math.abs(x[k] - v[i][k]));\nconst suma = a => a.reduce((s, x) => s + x, 0);\n\nmsg.payload = {\n    res_mediana:   mediana,                                        // ¿la presión medida se aparta de la virtual?\n    res_pendiente: num / den,                                      // ¿se aparta cada vez más?\n    res_pico:      Math.max(...r) - mediana,                       // ¿hay picos (transitorios que no cuadran)?\n    a_variacion:   suma(saltos(\"a_purga\")),                        // ¿se mueve el analizador?\n    nivel_salto:   suma(saltos(\"nivel\")) / (N - 1),                // ¿salta el nivel de un segundo a otro?\n    vprod_salto:   suma(saltos(\"v_producto\")) / (N - 1)            // ¿persigue el lazo de nivel ese ruido?\n};\nnode.status({ text: `residuo (mediana) ${mediana.toFixed(1)} kPa` });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 540,
+        "y": 580,
+        "wires": [
+            [
+                "6a60d055e70f5eb4"
+            ]
+        ]
+    },
+    {
+        "id": "6a60d055e70f5eb4",
+        "type": "ia-predecir",
+        "z": "4d822a2861d96a4f",
+        "name": "¿Qué avería?",
+        "servidor": "29b262c4be0227e7",
+        "modelo": "reactorlab-averias",
+        "prefijo": "",
+        "salida": "aparte",
+        "x": 760,
+        "y": 580,
+        "wires": [
+            [
+                "9b2f9791306e880e"
+            ]
+        ]
+    },
+    {
+        "id": "9b2f9791306e880e",
+        "type": "function",
+        "z": "4d822a2861d96a4f",
+        "name": "Diagnóstico",
+        "func": "// ENTRADA: msg.prediccion = { clase, probabilidad } del clasificador, msg.fila, msg.payload (indicadores)\n// SALIDA:  la telemetría para ThingsBoard\n// Un clasificador se equivoca de vez en cuando: el diagnóstico es la clase más votada de los últimos 15 s.\n\nconst VOTOS = 15;\nlet h = context.get(\"historial\") || [];\nh.push(msg.prediccion.clase);\nif (h.length > VOTOS) h.shift();\ncontext.set(\"historial\", h);\nconst cuenta = {};\nh.forEach(c => cuenta[c] = (cuenta[c] || 0) + 1);\nconst [diagnostico, votos] = Object.entries(cuenta).sort((a, b) => b[1] - a[1])[0];\n\nconst f = msg.fila, ind = msg.payload;\nnode.status({ fill: diagnostico === \"normal\" ? \"green\" : \"red\", shape: \"dot\", text: `${diagnostico} (${votos}/${h.length})` });\nmsg.payload = {\n    ts: Date.now(),\n    values: {\n        presion:          f.presion,\n        presion_virtual:  f.presion_virtual,\n        sp_presion:       f.sp_presion,\n        residuo:          f.residuo,\n        residuo_30s:      Math.round(ind.res_mediana * 10) / 10,\n        desacuerdo_kpa:   Math.round(Math.abs(ind.res_mediana) * 10) / 10,\n        v_purga:          f.v_purga,\n        coste:            f.coste,\n        clase_ia:         msg.prediccion.clase,\n        probabilidad:     msg.prediccion.probabilidad,\n        diagnostico:      diagnostico,\n        averia_ia:        diagnostico !== \"normal\",\n        escenario:        f.escenario              // la etiqueta: solo para comprobar al profesor\n    }\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 950,
+        "y": 580,
+        "wires": [
+            [
+                "739b702e6ee11e4c",
+                "4b4d118ac852be8a"
+            ]
+        ]
+    },
+    {
+        "id": "739b702e6ee11e4c",
+        "type": "mqtt out",
+        "z": "4d822a2861d96a4f",
+        "name": "Telemetría → ThingsBoard",
+        "topic": "v1/devices/me/telemetry",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "a70f7d2c63f0f151",
+        "x": 1170,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "4b4d118ac852be8a",
+        "type": "debug",
+        "z": "4d822a2861d96a4f",
+        "name": "Diagnóstico",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1150,
+        "y": 630,
+        "wires": []
+    },
+    {
+        "id": "15cfac60a8cfe85a",
+        "type": "catch",
+        "z": "4d822a2861d96a4f",
+        "name": "Errores de la IA",
+        "scope": [
+            "84113bb6dc2b044f",
+            "6a60d055e70f5eb4"
+        ],
+        "uncaught": false,
+        "x": 330,
+        "y": 640,
+        "wires": [
+            [
+                "b8d5b4b64a50ef2b"
+            ]
+        ]
+    },
+    {
+        "id": "b8d5b4b64a50ef2b",
+        "type": "debug",
+        "z": "4d822a2861d96a4f",
+        "name": "Error de la IA",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 640,
+        "wires": []
+    }
+]

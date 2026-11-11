@@ -130,7 +130,7 @@ Cuatro series para los seis simuladores: AeroLab (Modbus TCP), OceanLab (MQTT), 
 | [1 · Node-RED + Dashboard](practicas/README.md) | Adquisición con Node-RED y dashboard con alarmas en Dashboard 2.0 (guías paso a paso, con .docx) |
 | [2 · Node-RED + ThingsBoard](practicas/README.md#serie-2--contenido-de-cada-práctica) | Node-RED como pasarela hacia ThingsBoard: telemetría, atributos, paneles, reglas de alarma, inactividad, órdenes RPC y API de gateway (guías paso a paso, con .docx, flujos y paneles resueltos) |
 | [3 · Reto](practicas/README.md#retos-serie-3) | La misma integración, menos guiada, con flujo inicial, solución y rúbrica de evaluación (AeroLab, OceanLab, SolarLab, ReactorLab y AtomLab) |
-| [4 · Analítica e IA](practicas/4-ia/README.md) | Capa de IA genérica y opcional: Node-RED registra datos, Jupyter entrena (red neuronal, anomalías), Node-RED predice en tiempo real y ThingsBoard alarma sobre los modelos; aprendizaje continuo y deriva |
+| [4 · Analítica e IA](practicas/4-ia/README.md) | Capa de IA genérica (arranca con el laboratorio): Node-RED registra datos, Jupyter entrena (red neuronal, anomalías, sensor virtual, clasificador de averías), Node-RED predice en tiempo real y ThingsBoard alarma sobre los modelos; aprendizaje continuo y deriva |
 
 Índice completo, valores para el entorno Docker y pruebas realizadas en [`practicas/README.md`](practicas/README.md).
 
