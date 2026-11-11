@@ -89,6 +89,7 @@
         <textarea id="descripcion" maxlength="500"></textarea>
         <label class="check"><input type="checkbox" id="c-nodered" checked><span>Node-RED<small>Flujos, credenciales, biblioteca y contexto</small></span></label>
         <label class="check"><input type="checkbox" id="c-tb" checked><span>ThingsBoard<small>Dispositivos, tokens, paneles, alarmas, reglas y usuarios</small></span></label>
+        <label class="check"><input type="checkbox" id="c-ia" checked><span>Capa de IA<small>Datos recogidos, modelos publicados y cuadernos de Jupyter</small></span></label>
         <label class="check"><input type="checkbox" id="c-telemetria"><span>Incluir histórico de telemetría<small>Los últimos valores se guardan siempre; el histórico puede ocupar mucho</small></span></label>
         <div class="acciones" style="margin-top:10px"><button class="primario" type="submit">Crear snapshot</button></div>
       </form>
@@ -121,6 +122,7 @@
     <p style="color:var(--muted)">Se sustituirá lo que haya ahora en este equipo por el contenido del snapshot. Los servicios se reiniciarán.</p>
     <label class="check"><input type="checkbox" id="r-nodered"><span>Node-RED</span></label>
     <label class="check"><input type="checkbox" id="r-tb"><span>ThingsBoard</span></label>
+    <label class="check"><input type="checkbox" id="r-ia"><span>Capa de IA (datos, modelos y cuadernos)</span></label>
     <label class="check"><input type="checkbox" id="r-previa" checked><span>Hacer antes una copia automática del estado actual</span></label>
     <div class="acciones" style="justify-content:flex-end;margin-top:14px">
       <button value="cancelar">Cancelar</button>
@@ -162,7 +164,7 @@ function bloquear(si, texto = "") {
 async function cargarEstado() {
   try {
     const e = await api("/api/estado");
-    const nombres = { nodered: "Node-RED", thingsboard: "ThingsBoard", postgres: "PostgreSQL (ThingsBoard)" };
+    const nombres = { nodered: "Node-RED", thingsboard: "ThingsBoard", postgres: "PostgreSQL (ThingsBoard)", ia: "IA y Jupyter" };
     $("estado").innerHTML = "";
     for (const [k, s] of Object.entries(e.servicios)) {
       const ok = s.estado === "running";
@@ -191,7 +193,7 @@ async function cargarLista() {
   for (const s of lista) {
     const tr = document.createElement("tr");
     const c = s.contenido || {};
-    const chips = [c.nodered && "Node-RED", c.thingsboard && "ThingsBoard", c.telemetria && "histórico", s.automatico && "automática"].filter(Boolean);
+    const chips = [c.nodered && "Node-RED", c.thingsboard && "ThingsBoard", c.ia && "IA", c.telemetria && "histórico", s.automatico && "automática"].filter(Boolean);
     tr.innerHTML = `<td><b class="n"></b><br><small class="d"></small></td>
       <td>${chips.map((t) => `<span class="chip">${t}</span>`).join("")}</td>
       <td>${fmtFecha(s.creado)}</td><td>${fmtTam(s.tamano)}</td>
@@ -218,7 +220,7 @@ $("crear").addEventListener("submit", async (ev) => {
     const s = await api("/api/snapshots", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: $("nombre").value, descripcion: $("descripcion").value,
-        nodered: $("c-nodered").checked, thingsboard: $("c-tb").checked, telemetria: $("c-telemetria").checked }),
+        nodered: $("c-nodered").checked, thingsboard: $("c-tb").checked, telemetria: $("c-telemetria").checked, ia: $("c-ia").checked }),
     });
     aviso(`Snapshot «${s.nombre}» creado (${fmtTam(s.tamano)}).`);
     $("crear").reset();
@@ -251,6 +253,7 @@ function abrirRestaurar(s) {
   $("r-nombre").textContent = "«" + (s.nombre || s.id) + "»";
   $("r-nodered").checked = !!c.nodered; $("r-nodered").disabled = !c.nodered;
   $("r-tb").checked = !!c.thingsboard; $("r-tb").disabled = !c.thingsboard;
+  $("r-ia").checked = !!c.ia; $("r-ia").disabled = !c.ia;
   $("dlg-restaurar").showModal();
 }
 $("dlg-restaurar").addEventListener("close", async () => {
@@ -259,7 +262,7 @@ $("dlg-restaurar").addEventListener("close", async () => {
   try {
     const r = await api(`/api/snapshots/${encodeURIComponent(aRestaurar.id)}/restaurar`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nodered: $("r-nodered").checked, thingsboard: $("r-tb").checked, copia_previa: $("r-previa").checked }),
+      body: JSON.stringify({ nodered: $("r-nodered").checked, thingsboard: $("r-tb").checked, ia: $("r-ia").checked, copia_previa: $("r-previa").checked }),
     });
     aviso(["Restauración completada.", ...r.avisos].join(" "), false, 12000);
   } catch (err) { aviso(err.message, true, 12000); }

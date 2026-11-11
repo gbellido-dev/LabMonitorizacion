@@ -1,4 +1,4 @@
-"""Copias de seguridad (snapshots) de Node-RED y ThingsBoard para LabMonitorizacion.
+"""Copias de seguridad (snapshots) de Node-RED, ThingsBoard y la capa de IA para LabMonitorizacion.
 
 Un snapshot es un único archivo ``.tar.gz`` que se puede descargar, llevar a otro
 equipo e importar. Contiene:
@@ -7,6 +7,8 @@ equipo e importar. Contiene:
     nodered/...                   ficheros del directorio de usuario de Node-RED
                                   (flows.json, flows_cred.json, lib/, context/...)
     thingsboard/thingsboard.dump  volcado pg_dump (formato custom) de ThingsBoard
+    ia/...                        datos, modelos, modelos continuos y cuadernos de Jupyter
+                                  (volumen ia-lab de los servicios ia y jupyter)
 
 El servicio necesita acceso al socket de Docker para parar y arrancar los
 contenedores durante una restauración y para lanzar pg_dump / pg_restore dentro
@@ -49,6 +51,10 @@ SERVICIO_NODERED = os.getenv("SERVICIO_NODERED", "nodered")
 SERVICIO_TB = os.getenv("SERVICIO_THINGSBOARD", "thingsboard")
 SERVICIO_PG = os.getenv("SERVICIO_POSTGRES", "tb-postgres")
 NODERED_UID = int(os.getenv("NODERED_UID", "1000"))
+IA_DATA = Path(os.getenv("IA_DATA", "/ia-lab"))
+SERVICIOS_IA = [s for s in os.getenv("SERVICIOS_IA", "ia,jupyter").split(",") if s]
+IA_UID = int(os.getenv("IA_UID", "1000"))
+IA_CARPETAS = ("datos", "modelos", "continuo", "cuadernos")
 
 # Ficheros de /data de Node-RED que no forman parte del snapshot
 NODERED_EXCLUIR_RAIZ = {"node_modules", ".npm", "settings.js", ".config.runtime.json", ".config.nodes.json"}
@@ -154,8 +160,8 @@ def validar_tar(ruta: Path) -> dict:
                 continue
             if not (m.isfile() or m.isdir()):
                 raise ValueError(f"Entrada no permitida: {m.name}")
-            if ruta_segura(m.name, "nodered") is None and ruta_segura(m.name, "thingsboard") is None:
-                if m.name not in ("nodered", "thingsboard"):
+            if all(ruta_segura(m.name, x) is None for x in ("nodered", "thingsboard", "ia")):
+                if m.name not in ("nodered", "thingsboard", "ia"):
                     raise ValueError(f"Ruta no permitida: {m.name}")
     return manifest
 
@@ -195,11 +201,28 @@ def ficheros_nodered():
             yield Path(raiz) / f, rel.as_posix()
 
 
+def ficheros_ia():
+    for carpeta in IA_CARPETAS:
+        base = IA_DATA / carpeta
+        if not base.is_dir():
+            continue
+        for raiz, dirs, ficheros in os.walk(base):
+            dirs[:] = [d for d in dirs if d not in (".ipynb_checkpoints", "__pycache__")]
+            for f in ficheros:
+                ruta = Path(raiz) / f
+                yield ruta, ruta.relative_to(IA_DATA).as_posix()
+
+
+def ia_disponible() -> bool:
+    return IA_DATA.is_dir()
+
+
 # ----------------------------------------------------------------- operaciones
 def crear_snapshot(nombre: str, descripcion: str, nodered: bool, thingsboard: bool,
-                   telemetria: bool, automatico: bool = False) -> dict:
-    if not (nodered or thingsboard):
-        raise HTTPException(400, "Elige al menos Node-RED o ThingsBoard")
+                   telemetria: bool, automatico: bool = False, ia: bool = False) -> dict:
+    ia = ia and ia_disponible()
+    if not (nodered or thingsboard or ia):
+        raise HTTPException(400, "Elige al menos Node-RED, ThingsBoard o la capa de IA")
     SNAPSHOTS.mkdir(parents=True, exist_ok=True)
     ahora = datetime.now(timezone.utc)
     ident = f"{ahora.astimezone().strftime('%Y%m%d-%H%M%S')}-{slug(nombre)}"
@@ -210,7 +233,8 @@ def crear_snapshot(nombre: str, descripcion: str, nodered: bool, thingsboard: bo
         "descripcion": descripcion,
         "creado": ahora.isoformat(),
         "automatico": automatico,
-        "contenido": {"nodered": nodered, "thingsboard": thingsboard, "telemetria": thingsboard and telemetria},
+        "contenido": {"nodered": nodered, "thingsboard": thingsboard, "telemetria": thingsboard and telemetria,
+                      "ia": ia},
         "thingsboard_version": None,
         "nodered_flujos": None,
     }
@@ -241,6 +265,9 @@ def crear_snapshot(nombre: str, descripcion: str, nodered: bool, thingsboard: bo
                     tar.add(origen, arcname=f"nodered/{rel}", recursive=False)
             if thingsboard:
                 tar.add(dump, arcname="thingsboard/thingsboard.dump")
+            if ia:
+                for origen, rel in ficheros_ia():
+                    tar.add(origen, arcname=f"ia/{rel}", recursive=False)
         temporal.rename(destino)
     except RuntimeError as exc:
         raise HTTPException(500, str(exc)) from exc
@@ -340,6 +367,44 @@ def restaurar_thingsboard(ruta: Path, manifest: dict) -> list[str]:
     return avisos
 
 
+def restaurar_ia(ruta: Path) -> list[str]:
+    """Sustituye datos, modelos y cuadernos de la capa de IA (con ia y jupyter parados)."""
+    if not ia_disponible():
+        raise HTTPException(409, "Este equipo no tiene la capa de IA (volumen ia-lab)")
+    parados = []
+    for servicio in SERVICIOS_IA:
+        c = contenedor(servicio)
+        if c is not None and c.status == "running":
+            c.stop(timeout=15)
+            esperar_estado(c, "exited", 30)
+            parados.append(c)
+    try:
+        for carpeta in IA_CARPETAS:
+            destino = IA_DATA / carpeta
+            if destino.is_dir():
+                shutil.rmtree(destino)
+            destino.mkdir(parents=True, exist_ok=True)
+        with tarfile.open(ruta, "r:gz") as tar:
+            for m in tar:
+                rel = ruta_segura(m.name, "ia")
+                if rel is None or rel.parts[0] not in IA_CARPETAS:
+                    continue
+                destino = IA_DATA / rel
+                if m.isdir():
+                    destino.mkdir(parents=True, exist_ok=True)
+                elif m.isfile():
+                    destino.parent.mkdir(parents=True, exist_ok=True)
+                    with tar.extractfile(m) as origen, open(destino, "wb") as salida:
+                        shutil.copyfileobj(origen, salida)
+        for raiz, dirs, ficheros in os.walk(IA_DATA):
+            for nombre in dirs + ficheros:
+                os.chown(Path(raiz) / nombre, IA_UID, IA_UID)
+    finally:
+        for c in parados:
+            c.start()
+    return ["La capa de IA se ha restaurado: los modelos continuos vuelven al punto en que se guardaron."]
+
+
 # ------------------------------------------------------------------------ API
 class NuevoSnapshot(BaseModel):
     nombre: str = Field(min_length=1, max_length=80)
@@ -347,11 +412,13 @@ class NuevoSnapshot(BaseModel):
     nodered: bool = True
     thingsboard: bool = True
     telemetria: bool = False
+    ia: bool = True
 
 
 class Restauracion(BaseModel):
     nodered: bool = True
     thingsboard: bool = True
+    ia: bool = True
     copia_previa: bool = True
 
 
@@ -387,6 +454,8 @@ def estado() -> dict:
     if v and v.isdigit() and len(v) >= 10:  # 4003001008 -> 4.3.1
         v = f"{int(v[:-9])}.{int(v[-9:-6])}.{int(v[-6:-3])}"
     servicios["thingsboard"]["version"] = v
+    ia = contenedor(SERVICIOS_IA[0]) if SERVICIOS_IA else None
+    servicios["ia"] = {"estado": ia.status if ia else "ausente", "volumen": ia_disponible()}
     libre = shutil.disk_usage(SNAPSHOTS)
     return {"servicios": servicios, "ocupado": lock.locked(), "disco_libre": libre.free}
 
@@ -406,7 +475,7 @@ def listar() -> list[dict]:
 @app.post("/api/snapshots", status_code=201)
 def crear(datos: NuevoSnapshot) -> dict:
     return con_bloqueo(crear_snapshot, datos.nombre.strip(), datos.descripcion.strip(),
-                       datos.nodered, datos.thingsboard, datos.telemetria)
+                       datos.nodered, datos.thingsboard, datos.telemetria, ia=datos.ia)
 
 
 @app.get("/api/snapshots/{ident}/descargar")
@@ -444,7 +513,8 @@ def restaurar(ident: str, datos: Restauracion) -> dict:
     contenido = manifest.get("contenido", {})
     hacer_nr = datos.nodered and contenido.get("nodered")
     hacer_tb = datos.thingsboard and contenido.get("thingsboard")
-    if not (hacer_nr or hacer_tb):
+    hacer_ia = datos.ia and contenido.get("ia")
+    if not (hacer_nr or hacer_tb or hacer_ia):
         raise HTTPException(400, "No hay nada que restaurar con esa selección")
 
     def operacion() -> dict:
@@ -453,12 +523,14 @@ def restaurar(ident: str, datos: Restauracion) -> dict:
         if datos.copia_previa:
             previa = crear_snapshot(f"Antes de restaurar {manifest.get('nombre', ident)}",
                                     "Copia automática previa a una restauración",
-                                    bool(hacer_nr), bool(hacer_tb), True, automatico=True)
+                                    bool(hacer_nr), bool(hacer_tb), True, automatico=True, ia=bool(hacer_ia))
         if hacer_tb:
             avisos += restaurar_thingsboard(ruta, manifest)
         if hacer_nr:
             avisos += restaurar_nodered(ruta)
-        return {"restaurado": {"nodered": bool(hacer_nr), "thingsboard": bool(hacer_tb)},
+        if hacer_ia:
+            avisos += restaurar_ia(ruta)
+        return {"restaurado": {"nodered": bool(hacer_nr), "thingsboard": bool(hacer_tb), "ia": bool(hacer_ia)},
                 "copia_previa": previa["id"] if previa else None, "avisos": avisos}
 
     return con_bloqueo(operacion)

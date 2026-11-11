@@ -40,7 +40,7 @@ flowchart LR
 | [`plataforma/node-red`](plataforma/node-red) | Imagen Node-RED con Modbus, OPC UA y Dashboard 2.0 + biblioteca de flujos | nuevo |
 | [`plataforma/mosquitto`](plataforma/mosquitto) | Broker MQTT único del aula (OceanLab publica aquí) | nuevo |
 | [`plataforma/thingsboard`](plataforma/thingsboard) | ThingsBoard CE 4.3.1 que se instala solo en el primer arranque | nuevo |
-| [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED y ThingsBoard | nuevo |
+| [`plataforma/copias`](plataforma/copias) | Web de snapshots: crear, descargar, importar y restaurar Node-RED, ThingsBoard y la capa de IA | nuevo |
 | [`plataforma/ia`](plataforma/ia) | Capa de IA: servicio REST para Node-RED, Jupyter con cuadernos y nodos **IA** de Node-RED | nuevo |
 | [`practicas`](practicas) | Guiones, soluciones y flujos de las prácticas | repos anteriores y sesiones previas |
 | [`docs/presentaciones`](docs/presentaciones) | Presentaciones (.pptx) de cada protocolo: OPC UA, Modbus TCP, MQTT, protocolos web y un panorama comparativo | nuevo |
@@ -49,7 +49,7 @@ El historial de commits de los cuatro repositorios originales se ha conservado (
 
 ## Puesta en marcha con Docker
 
-Requisitos: Docker Desktop (o Docker Engine + Compose v2) y unos **8 GB de RAM** libres (ThingsBoard necesita ~4 GB).
+Requisitos: Docker Desktop (o Docker Engine + Compose v2) y unos **10 GB de RAM** libres (ThingsBoard necesita ~4 GB; la capa de IA y Jupyter, ~1 GB).
 
 ```bash
 cp .env.example .env              # opcional: IP pública, soluciones en Node-RED...
@@ -57,6 +57,11 @@ docker compose up -d --build      # Windows: doble clic en start_lab.cmd
 ```
 
 No hay pasos previos: la primera vez que arranca, ThingsBoard crea su base de datos solo (tarda 1–3 minutos más que los arranques siguientes).
+
+**Red durante la primera construcción.** `--build` descarga imágenes de Docker Hub, paquetes de **npm** y **PyPI**,
+las fuentes de **Google Fonts** (web de la Fundición) y un paquete alojado en **`dl.cloudsmith.io`** (dependencia de
+`node-red-contrib-modbus`). Si la red del centro filtra el tráfico, hay que permitir esos servidores o construir las
+imágenes en otra red y llevarlas con `docker save` / `docker load`.
 
 También se puede arrancar solo una parte, por ejemplo `docker compose up -d aerolab nodered` o `docker compose up -d solarlab nodered thingsboard`.
 
@@ -110,9 +115,9 @@ Se usa **ThingsBoard CE 4.3.1** (`thingsboard/tb-node:4.3.1.8`), envuelto en una
 
 http://localhost:8090 permite:
 
-- **Crear** un snapshot de Node-RED (flujos, credenciales, biblioteca, contexto) y/o ThingsBoard (dispositivos, tokens, paneles, alarmas, reglas, usuarios y, opcionalmente, el histórico de telemetría).
+- **Crear** un snapshot de Node-RED (flujos, credenciales, biblioteca, contexto) ThingsBoard (dispositivos, tokens, paneles, alarmas, reglas, usuarios y, opcionalmente, el histórico de telemetría) y la capa de IA (datos recogidos, modelos y cuadernos de Jupyter).
 - **Descargar** el snapshot como un único `.tar.gz` (entregar una práctica, llevarla a casa, pasarla a otro PC).
-- **Importar** un `.tar.gz` y **restaurarlo**: se puede elegir Node-RED, ThingsBoard o ambos, y por defecto se guarda antes una copia automática del estado actual.
+- **Importar** un `.tar.gz` y **restaurarlo**: se puede elegir qué partes (Node-RED, ThingsBoard, IA), y por defecto se guarda antes una copia automática del estado actual.
 
 Detalles y limitaciones en [`plataforma/copias`](plataforma/copias/README.md).
 

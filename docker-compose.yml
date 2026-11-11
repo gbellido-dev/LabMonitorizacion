@@ -221,6 +221,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - copias:/snapshots
       - nodered-data:/nodered-data
+      - ia-lab:/ia-lab
       - copias-intercambio:/intercambio
     ports:
       # Solo accesible desde este equipo: quien la use puede borrar y restaurar
