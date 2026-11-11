@@ -15,7 +15,7 @@
     "test:motor": "node --test tests/motor.test.mjs",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "modelos": "node modelos/robot-6ejes.mjs"
+    "modelos": "node modelos/robot-6ejes.mjs && node modelos/equipos.mjs"
   },
   "dependencies": {
     "@types/three": "^0.185.1",

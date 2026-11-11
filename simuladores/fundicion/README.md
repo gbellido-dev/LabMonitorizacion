@@ -29,9 +29,20 @@ La vista de cámara **MOLDEO** encuadra el robot de machos ROB-03.
 
 <img src="docs/img/robot-antes-despues.png" alt="Robot sencillo frente al modelo glTF de 6 ejes" />
 
+**Equipos detallados (glTF).** Los hornos de inducción, el puente grúa con su carro, motón y cuchara, y el
+desmoldeo vibrante también tienen modelo detallado: `public/modelos/equipos.glb` (`modelos/equipos.mjs`, ~37 000
+triángulos). Cada pieza (`HornoCuerpo`, `HornoBase`, `GruaPuente`, `GruaCarro`, `GruaGancho`, `GruaCuchara`,
+`DesmoldeoBastidor`, `DesmoldeoRejilla`) está en las coordenadas del grupo de la escena en el que se monta: la escena
+la añade a ese grupo (el que bascula, se traslada o vibra) y oculta las mallas sencillas que sustituye. Lo que cambia
+con el proceso sigue siendo de la escena: el baño (color según `TemperaturaMetal`, nivel según `NivelCarga`), el
+chorro de sangrado, las luces, el metal de la cuchara y las piezas calientes. Con `?equipos=simple` (o en calidad
+baja) se ven los sencillos. `npm run modelos` regenera los dos `.glb`.
+
+<img src="docs/img/equipos-antes-despues.png" alt="Hornos, grúa y desmoldeo: sencillos frente a detallados" />
+
 El mismo método sirve para el resto de máquinas: un script que construye la pieza con nombres en las partes que se
 mueven, la exporta a `.glb` y la escena la carga y la anima por nombre. Un modelo hecho en Blender u otra herramienta
-también vale si respeta los mismos nombres.
+también vale si respeta los mismos nombres y las cotas del grupo donde se monta.
 
 **Calidad gráfica.** En la barra de la escena, el botón **CALIDAD ALTA / BAJA** (o `?calidad=baja` en la dirección)
 quita sombras, brillo (*bloom*), antialias y los focos del techo y dibuja a resolución 1:1: para los PCs del aula con

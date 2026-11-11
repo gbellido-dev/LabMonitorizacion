@@ -456,13 +456,18 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     }
   }
 
+  /* ---- equipos detallados: dónde va cada pieza del glTF y qué mallas sencillas sustituye ---- */
+  const vestidos: { destino: THREE.Object3D; nodo: string; simples: THREE.Object3D[] }[] = [];
+
   /* ---- overhead crane with ladle ---- */
   const crane = new THREE.Group();
   [[-13.1], [13.1]].forEach(([tz]) => crane.add(box(1.6, 0.5, 1.2, M.yellow, 0, 11.5, tz)));
   crane.add(box(0.5, 0.85, 26.4, M.yellow, -0.62, 11.62, 0));
   crane.add(box(0.5, 0.85, 26.4, M.yellow, 0.62, 11.62, 0));
+  vestidos.push({ destino: crane, nodo: "GruaPuente", simples: crane.children.slice() });
   const trolley = new THREE.Group();
   trolley.add(box(1.7, 0.55, 1.5, M.darkSteel, 0, 12.3, 0));
+  vestidos.push({ destino: trolley, nodo: "GruaCarro", simples: trolley.children.slice() });
   const cableL = cyl(0.025, 0.025, 4.6, M.black, -0.28, 9.7, 0, 6);
   const cableR = cyl(0.025, 0.025, 4.6, M.black, 0.28, 9.7, 0, 6);
   const hookBlock = box(0.5, 0.55, 0.35, M.darkSteel, 0, 7.25, 0);
@@ -471,12 +476,14 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   craneLadle.add(mesh(new THREE.TorusGeometry(0.98, 0.07, 8, 24), M.darkSteel, 0, 6.95, 0));
   (craneLadle.children[1] as THREE.Mesh).rotation.x = Math.PI / 2;
   craneLadle.add(box(2.3, 0.09, 0.09, M.steel, 0, 7, 0));
+  vestidos.push({ destino: craneLadle, nodo: "GruaCuchara", simples: craneLadle.children.slice() });
   const craneMeltMat = sm(0xff5a14, 0.55, 0, { emissive: 0xff3800, emissiveIntensity: 0 });
   const craneMelt = new THREE.Mesh(new THREE.CircleGeometry(0.86, 20), craneMeltMat);
   craneMelt.rotation.x = -Math.PI / 2; craneMelt.position.y = 6.75; craneMelt.visible = false;
   craneLadle.add(craneMelt);
   const craneGlow = new THREE.PointLight(0xff5a14, 0, 9, 1.8); craneGlow.position.y = 7.4; craneLadle.add(craneGlow);
   trolley.add(cableL, cableR, hookBlock, craneLadle);
+  vestidos.push({ destino: hookBlock, nodo: "GruaGancho", simples: [hookBlock] });
   crane.add(trolley);
   scene.add(crane);
   // La grúa sigue al proceso (COL-01.CambioCuchara): va al horno que sangra, baja la cuchara, se
@@ -657,7 +664,8 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     g.position.set(fx, 0, fz);
     const ring = new THREE.Mesh(new THREE.RingGeometry(2.7, 3.5, 40), new THREE.MeshBasicMaterial({ map: texHazard, transparent: true, opacity: 0.65, depthWrite: false }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.022; g.add(ring);
-    g.add(cyl(2.5, 2.6, 0.5, M.darkSteel, 0, 0.25, 0, 30));
+    const pedestal = cyl(2.5, 2.6, 0.5, M.darkSteel, 0, 0.25, 0, 30);
+    g.add(pedestal);
     // el cuerpo del horno bascula hacia la colada (+z) sobre el pico de sangrado
     const pivot = new THREE.Group(); pivot.position.set(0, 3.8, 2.3); g.add(pivot);
     const cuerpo = new THREE.Group(); cuerpo.position.set(0, -3.8, -2.3); pivot.add(cuerpo);
@@ -669,6 +677,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     }
     cuerpo.add(cyl(2.32, 2.32, 0.38, M.refract, 0, 3.8, 0, 30));
     cuerpo.add(box(0.7, 0.32, 0.9, M.refract, 0, 3.78, 2.35));          // pico de sangrado
+    vestidos.push({ destino: cuerpo, nodo: "HornoCuerpo", simples: cuerpo.children.slice() });
     const meltMat = sm(0xff5a12, 0.55, 0, { emissive: 0xff3800, emissiveIntensity: 2.2 });
     const melt = cyl(1.62, 1.62, 0.16, meltMat, 0, 4.02, 0, 28);
     melt.castShadow = false;
@@ -706,12 +715,15 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     g.add(mesh(new THREE.SphereGeometry(0.55, 14, 10), M.lining, 0, 10.2, 0));
     const duct = cyl(0.5, 0.5, 10.6, M.lining, 0, 10.2, -5.5); duct.rotation.x = Math.PI / 2; g.add(duct);
     // hydraulic tilt cylinders
+    const hidraulicos: THREE.Object3D[] = [pedestal];
+    vestidos.push({ destino: g, nodo: "HornoBase", simples: hidraulicos });
     [[-1.9, 0.5], [1.9, -0.5]].forEach(([px, rz]) => {
       const piston = cyl(0.13, 0.13, 2.7, M.chrome, px, 1.6, 1.35);
       piston.rotation.z = rz as number;
       const sleeve = cyl(0.2, 0.2, 1.4, M.yellow, px + (rz as number) * 0.5, 1, 1.35);
       sleeve.rotation.z = rz as number;
       g.add(piston, sleeve);
+      hidraulicos.push(piston, sleeve);
     });
     // operator platform + stairs + railing
     // (en la parte trasera: el frente queda libre para el sangrado)
@@ -988,9 +1000,12 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   shake.position.set(23, 0, 4.8);
   [[-1.8, -1.5], [1.8, -1.5], [-1.8, 1.5], [1.8, 1.5]].forEach(([sx, sz]) => shake.add(cyl(0.17, 0.2, 0.5, M.yellow, sx, 0.25, sz, 12)));
   shake.add(box(4.6, 0.9, 3.9, M.darkSteel, 0, 0.95, 0));
+  const simplesDesmoldeo = shake.children.slice();
+  vestidos.push({ destino: shake, nodo: "DesmoldeoBastidor", simples: simplesDesmoldeo });
   const grate = new THREE.Group();
   grate.add(box(4.1, 0.28, 3.4, M.lining, 0, 0, 0));
   for (let bz = -1.4; bz <= 1.4; bz += 0.35) grate.add(box(3.9, 0.08, 0.12, M.steel, 0, 0.2, bz));
+  vestidos.push({ destino: grate, nodo: "DesmoldeoRejilla", simples: grate.children.slice() });
   const hotMat = sm(0x5c4038, 0.62, 0.42, { emissive: 0x7a1c00, emissiveIntensity: 0.32 });
   [[-1, 0.55, -0.6], [0.8, 0.55, 0.5], [0.1, 0.55, -1]].forEach(([cx, cy, cz]) => {
     grate.add(box(1.1, 0.55, 0.8, hotMat, cx, cy, cz));
@@ -1016,7 +1031,9 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
       grate.position.y = 1.55;
     }
   });
-  shake.add(cyl(1.35, 0.35, 1.1, M.steel, 0, -0.1, 0, 4));
+  const tolva = cyl(1.35, 0.35, 1.1, M.steel, 0, -0.1, 0, 4);
+  shake.add(tolva);
+  simplesDesmoldeo.push(tolva);
   // dust hood + cyclone collector
   shake.add(box(4.7, 0.5, 3.9, M.lining, 0, 5, 0));
   [[-2.1, -1.7], [2.1, -1.7], [-2.1, 1.7], [2.1, 1.7]].forEach(([sx, sz]) => shake.add(box(0.12, 4.4, 0.12, M.steel, sx, 2.9, sz)));
@@ -1220,7 +1237,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     fusion: { t: [-16.5, 3, -4.5], az: -0.95, el: 0.5, d: 17 },
     moldeo: { t: [-6.3, 2.0, 8.4], az: -0.35, el: 0.28, d: 10 },
     colada: { t: [-1, 3, 1.5], az: -0.55, el: 0.42, d: 22 },
-    acabado: { t: [22, 1.8, 8], az: 0.55, el: 0.42, d: 25 },
+    acabado: { t: [23.2, 1.6, 4.8], az: 1.75, el: 0.38, d: 13 },
   };
   let anim: { t0: THREE.Vector3; t1: THREE.Vector3; a0: number; a1: number; e0: number; e1: number; d0: number; d1: number; k: number } | null = null;
   const irA = (e: Event) => {
@@ -1256,6 +1273,23 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
         r.group.children.slice().forEach(c => r.group.remove(c));
         r.group.add(m);
         Object.assign(r, { j1, j2, j3, j4, j5, j6 });
+      }
+    }, undefined, () => { /* sin modelo: se quedan los sencillos */ });
+  }
+  // equipos (hornos, grúa y cuchara, desmoldeo): modelos/equipos.mjs → public/modelos/equipos.glb
+  const equiposSimples = baja || new URLSearchParams(window.location.search).get("equipos") === "simple";
+  if (!equiposSimples) {
+    const oculto = new THREE.MeshBasicMaterial({ visible: false });
+    new GLTFLoader().load("/modelos/equipos.glb", (gltf) => {
+      for (const v of vestidos) {
+        const original = gltf.scene.getObjectByName(v.nodo);
+        if (!original) continue;
+        const m = original.clone(true);
+        m.position.set(0, 0, 0); m.rotation.set(0, 0, 0); m.scale.set(1, 1, 1);
+        m.traverse(o => { if ((o as THREE.Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        v.destino.add(m);
+        // se ocultan cambiando el material: así sus hijos (p. ej. el gancho dentro del motón) siguen visibles
+        for (const sm2 of v.simples) if ((sm2 as THREE.Mesh).isMesh) (sm2 as THREE.Mesh).material = oculto;
       }
     }, undefined, () => { /* sin modelo: se quedan los sencillos */ });
   }
