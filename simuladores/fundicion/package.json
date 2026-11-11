@@ -14,7 +14,8 @@
     "opcua:test": "node opcua/client-test.mjs",
     "test:motor": "node --test tests/motor.test.mjs",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "modelos": "node modelos/robot-6ejes.mjs"
   },
   "dependencies": {
     "@types/three": "^0.185.1",

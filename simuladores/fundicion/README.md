@@ -20,6 +20,19 @@ En la cabecera: **velocidad** de la simulación (×1–×20) y **avería** (0–
 `Simulacion.Velocidad` y `Mantenimiento.Averia` (solo esas dos variables: lista cerrada). Abajo, la tendencia de la
 última media hora y los **eventos** detectados (cambios de estado, averías y piezas rechazadas).
 
+**Robots detallados (glTF).** Los tres robots (ROB-01, ROB-02, ROB-03) usan un modelo de un robot industrial de 6
+ejes, `public/modelos/robot-6ejes.glb` (~25 000 triángulos, 1,8 MB, compartido por los tres). Es un diseño original y
+genérico, generado por código con three.js: `npm run modelos` (fuente en `modelos/robot-6ejes.mjs`). Sus
+articulaciones son nodos con nombre (`J1`…`J6`) que el gemelo mueve con el `TiempoCiclo` y el `Estado` de OPC UA, y
+lleva dos herramientas (`Pinza` y `Cuchara`). En calidad baja, o con `?robot=simple`, se usan los robots sencillos.
+La vista de cámara **MOLDEO** encuadra el robot de machos ROB-03.
+
+<img src="docs/img/robot-antes-despues.png" alt="Robot sencillo frente al modelo glTF de 6 ejes" />
+
+El mismo método sirve para el resto de máquinas: un script que construye la pieza con nombres en las partes que se
+mueven, la exporta a `.glb` y la escena la carga y la anima por nombre. Un modelo hecho en Blender u otra herramienta
+también vale si respeta los mismos nombres.
+
 **Calidad gráfica.** En la barra de la escena, el botón **CALIDAD ALTA / BAJA** (o `?calidad=baja` en la dirección)
 quita sombras, brillo (*bloom*), antialias y los focos del techo y dibuja a resolución 1:1: para los PCs del aula con
 gráfica integrada. La elección se recuerda en el navegador. Si la escena va por debajo de 25 fps en calidad alta,

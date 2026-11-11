@@ -7,6 +7,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { LiveSnapshot } from "./use-opcua-live";
 
 type AssetStatus = "RUN" | "WARN" | "IDLE" | "ALARM";
@@ -616,10 +617,12 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
       meltTop.rotation.x = -Math.PI / 2; meltTop.position.set(0.45, 0.03, 0);
       j4.add(cup, meltTop);
     }
-    return { group: g, j1, j2, j3, j4 };
+    return { group: g, j1, j2, j3, j4, j5: null as THREE.Object3D | null, j6: null as THREE.Object3D | null, tool };
   };
+  const robots: ReturnType<typeof makeRobot>[] = [];
   const spawnRobot = (id: string, x: number, z: number, ry: number, phase: number, tool: "gripper" | "cup", status: AssetStatus = "RUN", cycleNom = 20) => {
     const r = makeRobot(tool);
+    robots.push(r);
     const g = new THREE.Group();
     g.add(r.group);
     g.add(box(1.7, 0.14, 1.7, M.darkSteel, 0, 0.07, 0));
@@ -640,7 +643,10 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
       r.j2.rotation.z = -0.42 + Math.sin(p) * 0.26;
       r.j3.rotation.z = 0.9 + Math.cos(p * 0.8) * 0.34;
       r.j4.rotation.x = Math.sin(p * 1.6) * 0.7;
-      r.j4.rotation.z = Math.sin(p * 0.9) * 0.25;
+      if (r.j5) {                       // robot detallado: la muñeca tiene sus propios ejes
+        r.j5.rotation.z = Math.sin(p * 0.9) * 0.45;
+        if (r.j6) r.j6.rotation.x = Math.sin(p * 1.1) * 0.9;
+      } else r.j4.rotation.z = Math.sin(p * 0.9) * 0.25;
     });
   };
 
@@ -1212,6 +1218,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   const VISTAS: Record<string, { t: [number, number, number]; az: number; el: number; d: number }> = {
     general: { t: [0, 1.6, 0], az: 0.62, el: 0.5, d: 56 },
     fusion: { t: [-16.5, 3, -4.5], az: -0.95, el: 0.5, d: 17 },
+    moldeo: { t: [-6.3, 2.0, 8.4], az: -0.35, el: 0.28, d: 10 },
     colada: { t: [-1, 3, 1.5], az: -0.55, el: 0.42, d: 22 },
     acabado: { t: [22, 1.8, 8], az: 0.55, el: 0.42, d: 25 },
   };
@@ -1231,6 +1238,27 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     updateCamera();
     if (anim.k >= 1) anim = null;
   });
+
+  /* ---- robots detallados (glTF) ---- */
+  // modelos/robot-6ejes.mjs genera public/modelos/robot-6ejes.glb. En calidad baja (o con ?robot=simple)
+  // se quedan los robots sencillos; si el fichero no carga, también.
+  const robotSimple = baja || new URLSearchParams(window.location.search).get("robot") === "simple";
+  if (!robotSimple) {
+    new GLTFLoader().load("/modelos/robot-6ejes.glb", (gltf) => {
+      for (const r of robots) {
+        const m = gltf.scene.clone(true);
+        m.traverse(o => { if ((o as THREE.Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        const quitar = m.getObjectByName(r.tool === "gripper" ? "Cuchara" : "Pinza");
+        if (quitar) quitar.visible = false;
+        const j = (n: string) => m.getObjectByName(n) ?? null;
+        const [j1, j2, j3, j4, j5, j6] = ["J1", "J2", "J3", "J4", "J5", "J6"].map(j);
+        if (!(j1 && j2 && j3 && j4 && j5)) continue;
+        r.group.children.slice().forEach(c => r.group.remove(c));
+        r.group.add(m);
+        Object.assign(r, { j1, j2, j3, j4, j5, j6 });
+      }
+    }, undefined, () => { /* sin modelo: se quedan los sencillos */ });
+  }
 
   /* ---- main loop ---- */
   const clock = new THREE.Clock();
