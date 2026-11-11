@@ -159,6 +159,18 @@ const CAMPOS = [
   ["Defecto", "String", () => P().defecto, "Defecto que ve el escáner"],
 ];
 for (const [n, t, f, d] of CAMPOS) variable(ult, n, `Trazabilidad.UltimaPieza.${n}`, t, f, { description: d });
+const col = ns.addObject({ componentOf: traz, browseName: "UltimaColada", nodeId: "s=Trazabilidad.UltimaColada",
+  description: "Último molde colado: sus condiciones se conocen ~47 min antes de que su pieza llegue a QC-01" });
+const UC = () => planta.ultimaColada ?? {};
+const CAMPOS_COLADA = [
+  ["Molde", "String", () => UC().molde, "Molde que se acaba de colar (el mismo Molde que tendrá su pieza)"],
+  ["Prensa", "String", () => UC().prensa, "Prensa que hizo el molde"],
+  ["Lote", "String", () => UC().lote, "Colada (lote de metal)"],
+  ["TemperaturaColada", "Double", () => UC().tColada, "Temperatura del metal al colar [°C]"],
+  ["HumedadArena", "Double", () => UC().humedad, "Humedad de la arena del molde [%]"],
+  ["Inoculada", "Boolean", () => UC().inoculada, "ROB-01 inoculó el metal"],
+];
+for (const [n, t, f, d] of CAMPOS_COLADA) variable(col, n, `Trazabilidad.UltimaColada.${n}`, t, f, { description: d });
 variable(traz, "PiezasInspeccionadas", "Trazabilidad.PiezasInspeccionadas", "UInt32", () => planta.contador.inspeccionadas);
 variable(traz, "PiezasRechazadas", "Trazabilidad.PiezasRechazadas", "UInt32",
   () => planta.contador.inspeccionadas - planta.contador.conformes);

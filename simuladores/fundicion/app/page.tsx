@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useFoundryScene } from "./foundry-scene";
+import { useFoundryScene, leerCalidad, fijarCalidad, type Calidad } from "./foundry-scene";
 import { useOpcUaLive, fmt, type LiveSnapshot, type LiveValue, type Punto, type Traz } from "./use-opcua-live";
 
 /* ─────────────────────────── catálogo (los valores vienen de OPC UA) ─────────────────────────── */
@@ -227,6 +227,14 @@ export default function Home() {
   const [protocolOpen, setProtocolOpen] = useState(false);
   const [tab, setTab] = useState<"telemetry" | "tags" | "maintenance">("telemetry");
   const [camara, setCamara] = useState("general");
+  const [calidad, setCalidad] = useState<Calidad>("alta");
+  const [lenta, setLenta] = useState<number | null>(null);
+  useEffect(() => {
+    setCalidad(leerCalidad());
+    const aviso = (e: Event) => setLenta((e as CustomEvent<number>).detail);
+    window.addEventListener("fundicion:lenta", aviso);
+    return () => window.removeEventListener("fundicion:lenta", aviso);
+  }, []);
   const [eventos, setEventos] = useState<Evento[]>([]);
   const selected = useMemo(() => assets.find((a) => a.id === selectedId) ?? assets[0], [selectedId]);
   const onSelect = useCallback((id: string) => setSelectedId(id), []);
@@ -337,7 +345,8 @@ export default function Home() {
       </aside>
 
       <section className={`scene-panel panel ${vista === "3d" ? "" : "oculta"}`}>
-        <div className="scene-toolbar"><div><span className="live-dot" />ESCENA EN VIVO <small>OPC UA + S7</small></div><div className="vistas">{[["general", "GENERAL"], ["fusion", "FUSIÓN"], ["colada", "COLADA"], ["acabado", "ACABADO"]].map(([k, t]) => <button key={k} title={`Vista ${t.toLowerCase()}`} className={camara === k ? "active" : ""} onClick={() => { setCamara(k); window.dispatchEvent(new CustomEvent("fundicion:camara", { detail: k })); }}>{t}</button>)}</div></div>
+        <div className="scene-toolbar"><div><span className="live-dot" />ESCENA EN VIVO <small>OPC UA + S7</small></div><div className="vistas">{[["general", "GENERAL"], ["fusion", "FUSIÓN"], ["colada", "COLADA"], ["acabado", "ACABADO"]].map(([k, t]) => <button key={k} title={`Vista ${t.toLowerCase()}`} className={camara === k ? "active" : ""} onClick={() => { setCamara(k); window.dispatchEvent(new CustomEvent("fundicion:camara", { detail: k })); }}>{t}</button>)}<button className={`calidad ${calidad === "baja" ? "active" : ""}`} title="Calidad baja: sin sombras ni brillos, para ordenadores con poca gráfica" onClick={() => fijarCalidad(calidad === "alta" ? "baja" : "alta")}>{calidad === "alta" ? "CALIDAD ALTA" : "CALIDAD BAJA"}</button></div></div>
+        {lenta !== null && calidad === "alta" && <div className="aviso-lenta">La escena va lenta ({lenta} fps). <button onClick={() => fijarCalidad("baja")}>PASAR A CALIDAD BAJA</button><button onClick={() => setLenta(null)}>×</button></div>}
         <canvas ref={canvasRef} />
         <div className={`zone-labels ${camara === "general" ? "" : "oculta"}`}><span className="z-fusion">FUSIÓN<small>{String(val(s, "IF-01", "Fase") ?? "—")} · {String(val(s, "IF-02", "Fase") ?? "—")}</small></span><span className="z-moldeo">MOLDEO<small>{fmt(num(s, "MP-01", "HumedadArena"), 1, "%")} HUMEDAD</small></span><span className="z-colada">COLADA<small>{val(s, "COL-01", "CambioCuchara") === true ? "CAMBIO DE CUCHARA" : fmt(peso, 0, "kg")}</small></span><span className="z-cooling">ENFRIAMIENTO<small>{fmt(num(s, "ENF-01", "MoldesEnTunel"), 0)} MOLDES</small></span><span className="z-quality">CALIDAD<small>{fmt(kpi(s, "PiezasConformes"), 1, "%")} OK</small></span></div>
         <div className="scene-legend"><span><i className="run" />Operativo {cuenta("RUN")}</span><span><i className="warn" />Aviso {cuenta("WARN")}</span><span><i className="alarm" />Alarma {cuenta("ALARM")}</span><span><i className="idle" />Espera {cuenta("IDLE")}</span></div>

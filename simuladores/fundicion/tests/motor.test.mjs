@@ -81,3 +81,20 @@ test("rechaza códigos de avería fuera de rango", () => {
   assert.equal(p.setAveria(-1), false);
   assert.equal(p.setAveria(2), true);
 });
+
+test("la última colada se conoce antes que su pieza y coincide con ella", () => {
+  const p = new Planta({ semilla: 3 });
+  const coladas = new Map();
+  for (let i = 0; i < 90 * 60; i++) {
+    p.paso();
+    const c = p.ultimaColada;
+    if (c && !coladas.has(c.molde)) coladas.set(c.molde, c);
+  }
+  const piezas = p.piezas.filter((x) => coladas.has(x.molde));
+  assert.ok(piezas.length > 10, `piezas con colada vista: ${piezas.length}`);
+  for (const x of piezas) {
+    const c = coladas.get(x.molde);
+    assert.equal(c.tColada, x.tColada); assert.equal(c.humedad, x.humedad); assert.equal(c.inoculada, x.inoculada);
+    assert.ok(x.ts - c.ts > 35 * 60, `adelanto ${(x.ts - c.ts) / 60} min`);
+  }
+});

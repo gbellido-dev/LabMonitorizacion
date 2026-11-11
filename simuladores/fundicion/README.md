@@ -72,7 +72,8 @@ Objects
 │   └── Calidad  ─ QC-01
 ├── Trazabilidad            UltimaPieza (Id, Molde, Prensa, Lote, TemperaturaColada, HumedadArena, Inoculada,
 │                           TiempoEnfriamiento, TemperaturaDesmoldeo, Desviacion, Resultado, Defecto),
-│                           PiezasInspeccionadas, PiezasRechazadas
+│                           UltimaColada (Molde, Prensa, Lote, TemperaturaColada, HumedadArena, Inoculada:
+│                           el molde recién colado, ~47 min antes que su pieza), PiezasInspeccionadas, PiezasRechazadas
 ├── Mantenimiento           Averia (escribible), AveriaNombre
 └── Simulacion              Velocidad (escribible, ×1–×20), TiempoSimulado y la «verdad» que una planta real
                             no tendría: DesgasteRodamiento, DerivaEscaner, TemperaturaRealIF01, DefectoRealUltimaPieza

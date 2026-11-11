@@ -213,6 +213,30 @@ function makeSmoke(tex: THREE.Texture, n: number, tint: number, height = 4.4, ba
   return { group, update };
 }
 
+/* --------------------------------- calidad --------------------------------- */
+
+// «baja»: para PCs de aula con gráfica integrada (sin sombras, sin bloom, sin focos, resolución 1:1)
+export type Calidad = "alta" | "baja";
+const CLAVE_CALIDAD = "fundicion-calidad";
+
+export function leerCalidad(): Calidad {
+  try {
+    const q = new URLSearchParams(window.location.search).get("calidad");
+    if (q === "alta" || q === "baja") return q;
+    const g = window.localStorage.getItem(CLAVE_CALIDAD);
+    if (g === "alta" || g === "baja") return g;
+  } catch { /* sin almacenamiento: calidad por defecto */ }
+  return "alta";
+}
+
+export function fijarCalidad(c: Calidad) {
+  try { window.localStorage.setItem(CLAVE_CALIDAD, c); } catch { /* se aplica solo a esta carga */ }
+  const url = new URL(window.location.href);
+  url.searchParams.delete("calidad");
+  if (c === "baja") url.searchParams.set("calidad", "baja");
+  window.location.replace(url.toString());
+}
+
 /* ---------------------------------- scene ---------------------------------- */
 
 function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) => void, ctl: { current: { running: boolean; speed: number; live: LiveSnapshot | null } }) {
@@ -220,9 +244,10 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   scene.background = new THREE.Color(0x090e12);
   scene.fog = new THREE.FogExp2(0x0a1014, 0.0075);
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
-  renderer.shadowMap.enabled = true;
+  const baja = leerCalidad() === "baja";
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !baja, powerPreference: baja ? "low-power" : "high-performance" });
+  renderer.setPixelRatio(baja ? 1 : Math.min(window.devicePixelRatio, 1.75));
+  renderer.shadowMap.enabled = !baja;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.38;
@@ -236,10 +261,11 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
   scene.environmentIntensity = 0.58;
 
   /* ---- lights ---- */
-  scene.add(new THREE.HemisphereLight(0x9db2be, 0x1c2023, 1.15));
+  // sin los focos del techo (calidad baja) se compensa con más luz ambiente
+  scene.add(new THREE.HemisphereLight(0x9db2be, 0x1c2023, baja ? 1.9 : 1.15));
   const sun = new THREE.DirectionalLight(0xdcE8ef, 3.4);
   sun.position.set(22, 27, 9);
-  sun.castShadow = true;
+  sun.castShadow = !baja;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.left = -36; sun.shadow.camera.right = 36;
   sun.shadow.camera.top = 34; sun.shadow.camera.bottom = -30;
@@ -421,7 +447,7 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     shade.castShadow = false; scene.add(shade);
     const disk = new THREE.Mesh(new THREE.CircleGeometry(0.4, 18), sm(0xfff3d8, 0.4, 0, { emissive: 0xffe9c4, emissiveIntensity: 2.6 }));
     disk.rotation.x = -Math.PI / 2; disk.position.set(lx, 10.62, lz); scene.add(disk);
-    if (hasLight) {
+    if (hasLight && !baja) {
       const spot = new THREE.SpotLight(0xeaf2f6, 320, 32, 0.62, 0.6, 1.6);
       spot.position.set(lx, 10.6, lz);
       spot.target.position.set(lx, 0, lz);
@@ -1116,9 +1142,13 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.5, 0.55, 0.72);
-  composer.addPass(bloom);
+  if (!baja) composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.5, 0.55, 0.72));
   composer.addPass(new OutputPass());
+  const dibujar = baja ? () => renderer.render(scene, camera) : () => composer.render();
+
+  // ¿va lenta? Entre los segundos 4 y 9 se mide la velocidad de la escena; por debajo de 25 fps
+  // se avisa a la página (que propone la calidad baja). Solo una vez y solo en calidad alta.
+  let fotogramas = 0, fpsAvisado = baja;
 
   const resize = () => {
     const rect = canvas.getBoundingClientRect();
@@ -1216,7 +1246,15 @@ function createFoundryScene(canvas: HTMLCanvasElement, onSelect: (id: string) =>
     const pouring = running && (typeof liveColando === "boolean" ? liveColando : Math.sin(sim * 0.5) > -0.2);
     const frame: Frame = { wall, sim, dt, sdt, running, pouring, live };
     for (const u of updaters) u(frame);
-    composer.render();
+    dibujar();
+    if (!fpsAvisado && wall > 4) {
+      fotogramas++;
+      if (wall > 9) {
+        fpsAvisado = true;
+        const fps = fotogramas / (wall - 4);
+        if (fps < 25) window.dispatchEvent(new CustomEvent("fundicion:lenta", { detail: Math.round(fps) }));
+      }
+    }
     raf = requestAnimationFrame(loop);
   };
   loop();

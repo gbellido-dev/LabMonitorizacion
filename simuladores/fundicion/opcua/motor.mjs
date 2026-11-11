@@ -70,6 +70,7 @@ export class Planta {
     this.estados = {};                // RUN / IDLE / WARN / ALARM por activo
     this.piezas = [];                 // últimas 500 piezas inspeccionadas
     this.ultimaPieza = null;
+    this.ultimaColada = null;     // el último molde colado (se conoce ~47 min antes que su pieza)
     this.contador = { moldes: 4120, piezas: 4040, coladas: 83, conformes: 0, inspeccionadas: 0 };
     this.fecha = "261110";
 
@@ -259,6 +260,8 @@ export class Planta {
       m.tColada = c.T; m.lote = c.lote;
       // ROB-01 inocula en la colada; con la avería 6 falla ~1 de cada 3
       m.inoculada = !(this.averia.codigo === 6 && this.rnd() < 0.35);
+      this.ultimaColada = { molde: m.id, prensa: m.prensa, lote: m.lote, tColada: round(m.tColada, 1),
+                            humedad: round(m.humedad, 2), inoculada: m.inoculada, ts: this.t };
     }
     L.caudal = 0;
     if (L.estado === "FILLING") {

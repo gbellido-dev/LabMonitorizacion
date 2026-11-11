@@ -148,7 +148,7 @@
         "y": 100,
         "wires": [
             [
-                "0b58acc345a93c04"
+                "9800561312e2145f"
             ]
         ]
     },
@@ -232,5 +232,25 @@
         "x": 1340,
         "y": 160,
         "wires": []
+    },
+    {
+        "id": "9800561312e2145f",
+        "type": "function",
+        "z": "22d825188fa24430",
+        "name": "Pico de vibración en marcha",
+        "func": "// ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)\n// SALIDA:  la misma, con DES-01.VibracionMarcha = pico de vibración de la última marcha completa\n// Una marcha del desmoldeo dura 22 s de planta (4,4 s reales a ×5). El pico se mantiene hasta que\n// termina la marcha siguiente: así una regla con duración en ThingsBoard funciona a cualquier velocidad.\n\nconst d = msg.payload[\"DES-01\"];\nif (!d) return msg;\nlet pico = context.get(\"pico\") || 0;                 // pico de la marcha en curso\nlet ultimo = context.get(\"ultimo\");                  // pico de la última marcha completa\nif (d.Marcha) pico = Math.max(pico, d.Vibracion || 0);\nelse if (pico > 0) { ultimo = pico; pico = 0; }      // acaba de terminar una marcha\ncontext.set(\"pico\", pico);\ncontext.set(\"ultimo\", ultimo);\nif (ultimo !== undefined) d.VibracionMarcha = ultimo;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 160,
+        "wires": [
+            [
+                "0b58acc345a93c04"
+            ]
+        ]
     }
 ]

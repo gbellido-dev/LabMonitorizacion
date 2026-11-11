@@ -43,3 +43,6 @@ next-env.d.ts
 /.npm-cache/
 /.devserver.*.log
 *.tsbuildinfo
+
+# registros del servidor de desarrollo
+.devserver*.log

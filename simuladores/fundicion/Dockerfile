@@ -1,5 +1,5 @@
 # Imagen unica para el dashboard web y el servidor OPC UA de la fundicion.
-# Se usa desde compose.yaml, que arranca cada servicio con su comando.
+# Se usa desde el docker-compose.yml del laboratorio, que arranca cada servicio con su comando.
 #
 # Nota: imagen Debian (no Alpine) porque el build/preview usa workerd
 # (Cloudflare), que necesita glibc.
