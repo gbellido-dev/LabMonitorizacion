@@ -20,6 +20,11 @@ En la cabecera: **velocidad** de la simulación (×1–×20) y **avería** (0–
 `Simulacion.Velocidad` y `Mantenimiento.Averia` (solo esas dos variables: lista cerrada). Abajo, la tendencia de la
 última media hora y los **eventos** detectados (cambios de estado, averías y piezas rechazadas).
 
+**Calidad gráfica.** En la barra de la escena, el botón **CALIDAD ALTA / BAJA** (o `?calidad=baja` en la dirección)
+quita sombras, brillo (*bloom*), antialias y los focos del techo y dibuja a resolución 1:1: para los PCs del aula con
+gráfica integrada. La elección se recuerda en el navegador. Si la escena va por debajo de 25 fps en calidad alta,
+aparece un aviso para cambiarla.
+
 <img src="docs/img/sinoptico.png" width="49%" alt="Sinóptico de operador" /> <img src="docs/img/trazabilidad.png" width="49%" alt="Trazabilidad pieza a pieza" />
 
 ## Servicios

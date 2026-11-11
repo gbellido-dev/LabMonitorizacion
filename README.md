@@ -63,6 +63,12 @@ las fuentes de **Google Fonts** (web de la Fundición) y un paquete alojado en *
 `node-red-contrib-modbus`). Si la red del centro filtra el tráfico, hay que permitir esos servidores o construir las
 imágenes en otra red y llevarlas con `docker save` / `docker load`.
 
+**Límite de descargas de Docker Hub.** Docker Hub limita las descargas anónimas por IP; en un aula donde todos los
+equipos salen por la misma IP es fácil llegar al límite (`429 Too Many Requests`). Las mismas imágenes oficiales están
+en el espejo de Google: `docker pull mirror.gcr.io/library/node:22-bookworm-slim` y
+`docker tag mirror.gcr.io/library/node:22-bookworm-slim node:22-bookworm-slim` (igual con `python:3.12-slim`, etc.);
+después, construir de nuevo. También vale iniciar sesión (`docker login`), que sube el límite.
+
 También se puede arrancar solo una parte, por ejemplo `docker compose up -d aerolab nodered` o `docker compose up -d solarlab nodered thingsboard`.
 
 ### Servicios y puertos
