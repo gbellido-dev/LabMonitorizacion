@@ -139,3 +139,30 @@ def test_servidor_opcua_lectura_escritura_y_metodos():
             await asyncio.gather(tarea, return_exceptions=True)
 
     asyncio.run(prueba())
+
+
+# ---------------------------------------------------------------- simulación rápida (serie 4)
+def test_simulacion_lote_reproducible_y_sin_fugas():
+    from app import simulacion
+    a = simulacion.lote(6, semilla=4)
+    b = simulacion.lote(6, semilla=4)
+    assert [c["az5_pico_mwt"] for c in a["casos"]] == [c["az5_pico_mwt"] for c in b["casos"]]
+    m = a["casos"][0]["medidas"]
+    assert "reactor_orm_barras" in m and "circuito_bombas_en_marcha" in m
+    assert not any(k in m for k in simulacion.NO_ENTRADAS)      # nada que diga lo que pasó después
+
+
+def test_que_pasaria_no_toca_la_planta_y_ve_el_accidente():
+    import copy
+    from app import simulacion
+    p = Planta()
+    p.reiniciar("chernobil", emitir=False)
+    p.avanzar(5)
+    p.prueba_turbina()
+    p.avanzar(30)
+    r = simulacion.que_pasaria(copy.deepcopy(p.c))
+    assert r["az5_danado"] and r["az5_pico_rel"] > 10
+    assert not p.c.danado and not p.c.scram                       # la planta real sigue igual
+    normal = Planta()
+    normal.avanzar(5)
+    assert not simulacion.que_pasaria(copy.deepcopy(normal.c))["az5_danado"]

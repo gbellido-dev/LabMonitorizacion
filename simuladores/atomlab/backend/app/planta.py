@@ -50,17 +50,19 @@ def _r(x: float, nd: int = 2) -> float:
 class Planta:
     """Planta con su propio reloj. `avanzar(segundos_reales)` integra con subpasos adaptativos."""
 
-    def __init__(self, escala: float = 1.0) -> None:
+    def __init__(self, escala: float = 1.0, central: Central | None = None) -> None:
         self.bloqueo = threading.RLock()
         self.escala = escala
         self.oyentes: list = []          # funciones f(evento) para SSE/OPC UA
-        self.reiniciar(emitir=False)
+        self.reiniciar(emitir=False, central=central)
 
     # ------------------------------------------------------------------ ciclo de vida
-    def reiniciar(self, escenario: str = "normal", emitir: bool = True) -> None:
+    def reiniciar(self, escenario: str = "normal", emitir: bool = True, central: Central | None = None) -> None:
         with self.bloqueo:
-            self.c = Central()
-            if escenario == "chernobil":
+            self.c = central if central is not None else Central()
+            if central is not None:
+                escenario = "simulacion"     # una central ya preparada (simulación rápida)
+            elif escenario == "chernobil":
                 self.c.escenario_chernobil()
             elif escenario != "normal":
                 raise ValueError("escenario desconocido (normal, chernobil)")

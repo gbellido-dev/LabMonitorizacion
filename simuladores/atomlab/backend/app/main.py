@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import copy
+from concurrent.futures import ProcessPoolExecutor
 import os
 import time
 from pathlib import Path
@@ -17,6 +19,7 @@ from pydantic import BaseModel, Field
 from .fisica import P_NOMINAL
 from .opcua_server import NAMESPACE_URI, ServidorOpcUa
 from .planta import ALARMAS, Planta
+from . import simulacion
 
 RAIZ = Path(__file__).resolve().parents[2]
 FRONTEND = Path(os.getenv("ATOMLAB_FRONTEND", RAIZ / "frontend"))
@@ -206,6 +209,35 @@ def m_escenario(c: Escenario) -> dict:
 def m_escala(c: Escala) -> dict:
     planta().escala = c.valor
     return {"ok": True, "escala": c.valor}
+
+
+# ---------------------------------------------------------------------- simulación rápida (serie 4 · IA)
+class Lote(BaseModel):
+    casos: int = Field(200, ge=1, le=1000, description="Estados de operación al azar")
+    semilla: int | None = Field(None, description="Misma semilla = mismos casos")
+
+
+_procesos: ProcessPoolExecutor | None = None
+
+
+@app.post("/api/v1/simulacion/lote", tags=["simulación"],
+          summary="Estados al azar y qué pasa al pulsar el AZ-5 en cada uno (datos para entrenar)")
+async def s_lote(c: Lote) -> dict:
+    # No toca la planta: cada caso es una central nueva (~0,04 s de CPU por caso). Se calcula en otro
+    # proceso para que la física de la sala de control no se frene mientras tanto.
+    global _procesos
+    if _procesos is None:
+        _procesos = ProcessPoolExecutor(max_workers=1)
+    return await asyncio.get_running_loop().run_in_executor(_procesos, simulacion.lote, c.casos, c.semilla)
+
+
+@app.post("/api/v1/simulacion/que-pasaria", tags=["simulación"],
+          summary="¿Qué pasaría si se pulsa el AZ-5 ahora? (en una copia de la central)")
+def s_que_pasaria() -> dict:
+    p = planta()
+    with p.bloqueo:
+        central = copy.deepcopy(p.c)        # la copia se hace con la planta bloqueada; la simulación, fuera
+    return simulacion.que_pasaria(central)
 
 
 # ---------------------------------------------------------------------- tiempo real

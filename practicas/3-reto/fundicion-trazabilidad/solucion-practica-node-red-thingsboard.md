@@ -93,9 +93,18 @@ msg.payload = {
         t_enfriamiento: p.TiempoEnfriamiento, t_desmoldeo: p.TemperaturaDesmoldeo,
         desviacion: p.Desviacion, resultado: p.Resultado, defecto: p.Defecto,
         rechazo: p.Resultado === "RECHAZO" ? 1 : 0, causa: p.causa,
-        rechazos_ultimas_20: ult.reduce((a, b) => a + b, 0)
+        rechazos_ultimas_20: ult.reduce((a, b) => a + b, 0),
+        piezas_conformes: ((flow.get("planta") || {}).KPIs || {}).PiezasConformes
     }
 };
+// rechazos acumulados por causa (una pieza con dos causas cuenta en las dos)
+const CLAVES = { "colada fría": "rech_colada_fria", "arena húmeda": "rech_arena_humeda",
+                 "sin inocular": "rech_sin_inocular", "desmoldeo en caliente": "rech_desmoldeo",
+                 "revisar el escáner (medida)": "rech_escaner", "sin causa aparente": "rech_sin_causa" };
+const cuenta = context.get("por_causa") || Object.fromEntries(Object.values(CLAVES).map(k => [k, 0]));
+if (p.Resultado === "RECHAZO") p.causa.split(" + ").forEach(c => { if (CLAVES[c]) cuenta[CLAVES[c]]++; });
+context.set("por_causa", cuenta);
+Object.assign(msg.payload.values, cuenta);
 return msg;
 ```
 
@@ -151,6 +160,20 @@ msg.payload = {
 };
 return msg;
 ```
+
+## R6 · Panel de referencia
+
+Para importar: [thingsboard/panel-calidad-planta-norte.json](thingsboard/panel-calidad-planta-norte.json)
+(**Dashboards → + → Import dashboard**; el alias busca el dispositivo `Fundicion-Calidad`).
+
+<img src="img/panel-calidad.png" style="width:6.3in" />
+
+*Panel durante la campaña con las averías 5, 6 y 7 (captura real): historia de cada pieza, rechazos acumulados por
+causa (`rech_*`, una clave por causa: las calcula la *function* de telemetría) y la última colada en cuarentena.*
+
+> Los rechazos por causa se dibujan como líneas acumuladas con el widget estándar de series temporales. El widget
+> de barras «Bars» de ThingsBoard está obsoleto en la 4.3 y carga una librería de internet: en un aula sin
+> conexión no se muestra.
 
 ## R7 · Qué se ve con cada avería oculta
 

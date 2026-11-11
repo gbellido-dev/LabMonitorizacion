@@ -209,12 +209,40 @@ Device profiles** abre cada perfil → **Alarm rules** → **+**:
 | **Perfil** | **Regla** | **Crear** | **Borrar** | **Severidad** |
 |---|---|---|---|---|
 | `horno` | Sobrepresión en el horno | `Presion` > 0 durante 10 s | `Presion` < −3 | Critical |
-| `desmoldeo` | Vibración del desmoldeo | `Vibracion` > 12 **y** `Marcha` = true, 10 s | `Vibracion` < 10 | Major |
+| `desmoldeo` | Vibración del desmoldeo | `VibracionMarcha` > 12 durante 10 s | `VibracionMarcha` < 10 | Major |
 | `calidad` | Deriva del escáner | `DesviacionEscaneo` > 0,2 durante 20 s | < 0,12 | Warning |
 | `planta` | OEE de planta bajo | `OEEPlanta` < 75 durante 30 s | > 80 | Major |
 
 En cada regla, en sus opciones avanzadas, marca **Propagate alarm to
 related entities** con el tipo de relación `Contains`.
+
+La vibración del desmoldeo solo importa **en marcha** (parado vibra
+poco aunque el rodamiento esté mal), y cada marcha dura 22 s de planta.
+Una regla «`Vibracion` > 12 **y** `Marcha` = true durante 10 s» parece
+lo natural, pero depende de cuánto dura la marcha en tiempo **real** (ver
+la Parte 9). Por eso la pasarela calcula un valor nuevo,
+`VibracionMarcha`: el **pico de la última marcha**, que se mantiene hasta
+la siguiente. Entre **Agrupar** y el **delay**, un *function*
+`Pico de vibración en marcha`:
+
+    // ENTRADA: la planta agrupada (un mensaje por cada variable que cambia)
+    // SALIDA:  la misma, con DES-01.VibracionMarcha = pico de vibración de la última marcha completa
+    // Una marcha del desmoldeo dura 22 s de planta (4,4 s reales a ×5). El pico se mantiene hasta que
+    // termina la marcha siguiente: así una regla con duración en ThingsBoard funciona a cualquier velocidad.
+
+    const d = msg.payload["DES-01"];
+    if (!d) return msg;
+    let pico = context.get("pico") || 0;                 // pico de la marcha en curso
+    let ultimo = context.get("ultimo");                  // pico de la última marcha completa
+    if (d.Marcha) pico = Math.max(pico, d.Vibracion || 0);
+    else if (pico > 0) { ultimo = pico; pico = 0; }      // acaba de terminar una marcha
+    context.set("pico", pico);
+    context.set("ultimo", ultimo);
+    if (ultimo !== undefined) d.VibracionMarcha = ultimo;
+    return msg;
+
+> El cálculo va **antes** del delay: el delay deja pasar 1 mensaje cada
+> 2 s y se perdería el pico de una marcha corta.
 
 > Los hornos trabajan en **depresión** (≈ −10 Pa): el aire entra y los
 > humos salen por la extracción. Una presión positiva significa que la
@@ -243,9 +271,12 @@ tus reglas las detecta?
 > **Planta acelerada y reglas con duración.** El profesor puede acelerar la
 > planta (`ns=1;s=Simulacion.Velocidad`), pero las duraciones de las reglas
 > de ThingsBoard cuentan **tiempo real**. A ×5, cada marcha del desmoldeo
-> (22 s de planta) dura 4,4 s reales y la regla «vibración > 12 y en marcha
-> durante 10 s» **no salta nunca**. Prueba esa regla a ×1. ¿Cómo la
-> rediseñarías para que no dependa de la velocidad?
+> (22 s de planta) dura 4,4 s reales: una regla «`Vibracion` > 12 y
+> `Marcha` = true durante 10 s» **no saltaría nunca**. Con `VibracionMarcha`
+> la condición se mantiene entre marchas y la regla salta igual a ×1 que a
+> ×5: en el laboratorio, con la avería 1 a ×5, la alarma llegó a `Planta Norte`
+> a los 3,0 min reales (15 min de planta, como a ×1). ¿Qué otras reglas de la Parte 7 dependen de la
+> velocidad? (Pista: la del OEE, «durante 30 s».)
 
 | **Avería** | **Alarma** | **Originador** | **¿Llega a Planta Norte?** | **Tiempo** |
 |---|---|---|---|---|
